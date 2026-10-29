@@ -1,4 +1,4 @@
-name = "xyzw-web-helper"
+name = "xyzw-helper"
 main = "worker.js"
 compatibility_date = "2026-10-29"
 
