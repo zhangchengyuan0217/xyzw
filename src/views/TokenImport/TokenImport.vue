@@ -45,10 +45,10 @@
             class="import-method-tabs"
             size="small"
           >
-            <n-radio-button value="manual"> 手动输入 </n-radio-button>
-            <n-radio-button value="url"> URL获取 </n-radio-button>
             <n-radio-button value="wxQrcode"> 微信扫码获取 </n-radio-button>
             <n-radio-button value="mobile"> 手机号验证码 </n-radio-button>
+            <n-radio-button value="manual"> 手动输入 </n-radio-button>
+            <n-radio-button value="url"> URL获取 </n-radio-button>
             <n-radio-button value="bin"> BIN多角色获取 </n-radio-button>
             <n-radio-button value="singlebin"> BIN单角色获取 </n-radio-button>
           </n-radio-group>
@@ -791,7 +791,7 @@ const showEditModal = ref(false);
 
 const editFormRef = ref(null);
 const editingToken = ref(null);
-const importMethod = ref("manual");
+const importMethod = ref("wxQrcode");
 const refreshingTokens = ref(new Set());
 const connectingTokens = ref(new Set());
 // 从localStorage读取上次的视图模式，默认为列表视图

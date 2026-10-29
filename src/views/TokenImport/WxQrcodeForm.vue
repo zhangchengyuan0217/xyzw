@@ -777,7 +777,7 @@ const resetQRCode = () => {
 
 // 生命周期
 onMounted(() => {
-  // 组件挂载时的初始化逻辑
+  generateQRCode();
 });
 
 onUnmounted(() => {
