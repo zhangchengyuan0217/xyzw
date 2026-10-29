@@ -1,6 +1,12 @@
 name = "xyzw-web-helper"
-compatibility_date = "2023-12-01"
+main = "worker.js"
+compatibility_date = "2026-10-29"
 
-[pages_build_config]
-build_command = "npm run build"
-destination_dir = "dist"
+# Vite build output. Cloudflare Workers Builds runs `wrangler deploy` after
+# the dashboard build command (`pnpm run build`) produces this directory.
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+# API proxy in worker.js must run before static-asset matching.
+run_worker_first = ["/api/*"]
