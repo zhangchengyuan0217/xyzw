@@ -31,29 +31,34 @@
         :default-visible="!tokenStore.hasTokens"
       >
         <template #title>
-          <h2>
-            <NIcon>
-              <Add />
-            </NIcon>
-            添加游戏Token
-          </h2>
+          <h2>添加账号</h2>
         </template>
         <div class="card-header">
-          <!-- 导入方式选择 -->
-          <n-radio-group
-            v-model:value="importMethod"
-            class="import-method-tabs"
-            size="small"
-          >
-            <n-radio-button value="wxQrcode"> 微信扫码获取 </n-radio-button>
-            <n-radio-button value="mobile"> 手机号验证码 </n-radio-button>
-            <n-radio-button value="manual"> 手动输入 </n-radio-button>
-            <n-radio-button value="url"> URL获取 </n-radio-button>
-            <n-radio-button value="bin"> BIN多角色获取 </n-radio-button>
-            <n-radio-button value="singlebin"> BIN单角色获取 </n-radio-button>
-          </n-radio-group>
+          <!-- 导入方式选择：前两项常显，其余收进下拉 -->
+          <div class="import-method-tabs">
+            <n-radio-group v-model:value="importMethod" size="small">
+              <n-radio-button value="wxQrcode"> 微信扫码获取 </n-radio-button>
+              <n-radio-button value="mobile"> 手机号验证码 </n-radio-button>
+            </n-radio-group>
+            <n-dropdown
+              trigger="click"
+              :options="moreImportOptions"
+              @select="selectMoreImportMethod"
+            >
+              <n-button
+                size="small"
+                class="more-import-btn"
+                :type="moreImportActive ? 'primary' : 'default'"
+              >
+                {{ moreImportLabel }}
+                <NIcon size="14" class="more-import-caret">
+                  <ChevronDown />
+                </NIcon>
+              </n-button>
+            </n-dropdown>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body import-modal-body">
           <ManualTokenForm
             @cancel="() => (showImportForm = false)"
             @ok="() => (showImportForm = false)"
@@ -719,6 +724,7 @@
 <script setup>
 import {
   Add,
+  ChevronDown,
   Copy,
   Create,
   DownloadOutline,
@@ -792,6 +798,34 @@ const showEditModal = ref(false);
 const editFormRef = ref(null);
 const editingToken = ref(null);
 const importMethod = ref("wxQrcode");
+const moreImportMethods = [
+  { key: "manual", label: "手动输入" },
+  { key: "url", label: "URL获取" },
+  { key: "bin", label: "BIN多角色获取" },
+  { key: "singlebin", label: "BIN单角色获取" },
+];
+const moreImportActive = computed(() =>
+  moreImportMethods.some((item) => item.key === importMethod.value),
+);
+const moreImportLabel = computed(() => {
+  const current = moreImportMethods.find(
+    (item) => item.key === importMethod.value,
+  );
+  return current ? current.label : "更多方式";
+});
+const moreImportOptions = computed(() =>
+  moreImportMethods.map((item) => ({
+    key: item.key,
+    label: item.label,
+    props: {
+      class:
+        item.key === importMethod.value ? "import-method-option-active" : "",
+    },
+  })),
+);
+const selectMoreImportMethod = (key) => {
+  importMethod.value = key;
+};
 const refreshingTokens = ref(new Set());
 const connectingTokens = ref(new Set());
 // 从localStorage读取上次的视图模式，默认为列表视图
@@ -2073,7 +2107,7 @@ onUnmounted(() => {
 
 .card-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 12px;
 
   h2 {
     display: flex;
@@ -2098,9 +2132,21 @@ onUnmounted(() => {
   }
 
   .import-method-tabs {
-    margin-top: var(--spacing-md);
+    margin-top: 0;
     display: flex;
     justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .more-import-btn {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .more-import-caret {
+    margin-left: 4px;
   }
 }
 
@@ -2391,6 +2437,10 @@ onUnmounted(() => {
 
 .card-body {
   margin-bottom: var(--spacing-md);
+}
+
+.import-modal-body {
+  margin-bottom: 0;
 }
 
 .token-display {
@@ -2694,6 +2744,11 @@ onUnmounted(() => {
 
 .storage-upgrade {
   margin-top: var(--spacing-xs);
+}
+
+:global(.import-method-option-active) {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 :global([data-theme="dark"] .token-import-modal .arco-modal) {

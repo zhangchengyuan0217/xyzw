@@ -4,7 +4,6 @@
     <div class="login-flow-info">
       <h3>微信扫码登录流程</h3>
       <ol class="flow-steps">
-        <li>点击下方按钮获取微信登录二维码</li>
         <li>使用微信扫码并确认登录</li>
         <li>
           系统将获取<strong color="red">该微信下所有角色</strong
@@ -40,11 +39,9 @@
       <div id="qr-status" class="qr-status" :class="statusType">
         {{ statusMessage }}
       </div>
-    </div>
 
-    <!-- 操作按钮 -->
-    <div class="form-actions">
       <NButton
+        class="refresh-qr-btn"
         type="primary"
         block
         @click="generateQRCode"
@@ -59,83 +56,83 @@
       </NButton>
     </div>
 
-    <!-- 角色命名格式配置 -->
-    <NForm
-      :model="importForm"
-      label-placement="top"
-      :show-label="true"
-      style="margin-top: 16px"
-    >
-      <NFormItem label="角色命名格式" :show-label="true">
-        <NInput
-          v-model:value="importForm.nameTemplate"
-          placeholder="{name}-{index}-{id}"
-        />
-        <template #feedback>
-          支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
-        </template>
-      </NFormItem>
-    </NForm>
-
-    <!-- 服务器角色列表 -->
-    <ServerRoleList
-      :data="serverListData"
-      server-column-title="区服ID"
-      max-height="50vh"
-      @add="addSelectedRole"
-      @download="handleDownload"
-    />
-
-    <a-list>
-      <a-list-item v-for="(role, roleIndex) in roleList" :key="roleIndex">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-          "
-        >
-          <div>
-            <strong>角色名称:</strong> {{ role.name || "未命名角色" }}<br />
-            <strong>Token:</strong>
-            <span style="word-break: break-all">{{ role.token }}</span
-            ><br />
-            <strong>服务器:</strong> {{ role.server || "未指定" }}<br />
-            <strong>角色序号:</strong> {{ role.roleIndex }}
-          </div>
-          <NButton type="error" size="small" @click="removeRole(roleIndex)">
-            删除
-          </NButton>
-        </div>
-      </a-list-item>
-    </a-list>
-
-    <!-- 操作按钮 -->
-    <div class="form-actions">
-      <NButton
-        type="primary"
-        size="large"
-        block
-        :loading="isImporting"
-        @click="handleImport"
+    <!-- 扫码阶段没有角色可选，命名和添加放到拿到角色之后 -->
+    <div v-if="showRoleImportPanel">
+      <NForm
+        :model="importForm"
+        label-placement="top"
+        :show-label="true"
+        style="margin-top: 16px"
       >
-        <template #icon>
-          <NIcon>
-            <CloudUpload />
-          </NIcon>
-        </template>
-        添加Token
-      </NButton>
+        <NFormItem label="角色命名格式" :show-label="true">
+          <NInput
+            v-model:value="importForm.nameTemplate"
+            placeholder="{name}-{index}-{id}"
+          />
+          <template #feedback>
+            支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
+          </template>
+        </NFormItem>
+      </NForm>
 
-      <NButton block @click="$emit('cancel')" :disabled="isProcessing">
-        <template #icon>
-          <NIcon>
-            <Close />
-          </NIcon>
-        </template>
-        取消
-      </NButton>
+      <ServerRoleList
+        :data="serverListData"
+        server-column-title="区服ID"
+        max-height="50vh"
+        @add="addSelectedRole"
+        @download="handleDownload"
+      />
+
+      <a-list>
+        <a-list-item v-for="(role, roleIndex) in roleList" :key="roleIndex">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+            "
+          >
+            <div>
+              <strong>角色名称:</strong> {{ role.name || "未命名角色" }}<br />
+              <strong>Token:</strong>
+              <span style="word-break: break-all">{{ role.token }}</span
+              ><br />
+              <strong>服务器:</strong> {{ role.server || "未指定" }}<br />
+              <strong>角色序号:</strong> {{ role.roleIndex }}
+            </div>
+            <NButton type="error" size="small" @click="removeRole(roleIndex)">
+              删除
+            </NButton>
+          </div>
+        </a-list-item>
+      </a-list>
+
+      <div class="form-actions">
+        <NButton
+          type="primary"
+          size="large"
+          block
+          :loading="isImporting"
+          @click="handleImport"
+        >
+          <template #icon>
+            <NIcon>
+              <CloudUpload />
+            </NIcon>
+          </template>
+          添加Token
+        </NButton>
+
+        <NButton block @click="$emit('cancel')" :disabled="isProcessing">
+          <template #icon>
+            <NIcon>
+              <Close />
+            </NIcon>
+          </template>
+          取消
+        </NButton>
+      </div>
     </div>
   </div>
 </template>
@@ -151,7 +148,7 @@ import {
   NInput,
   useMessage,
 } from "naive-ui";
-import { onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
@@ -188,6 +185,7 @@ const statusType = ref("info");
 const accountName = ref<string | null>(null);
 const isScanning = ref(false);
 const scanInterval = ref<any>(null);
+const countdownInterval = ref<any>(null);
 const timeout = 120000; // 120秒超时
 const startTime = ref<number | null>(null);
 
@@ -209,6 +207,9 @@ const roleList = ref<
     combUser?: any;
   }>
 >([]);
+const showRoleImportPanel = computed(
+  () => serverListData.value.length > 0 || roleList.value.length > 0,
+);
 const currentCombUser = ref<any>(null);
 const saveCombUser = ref(false);
 
@@ -363,10 +364,7 @@ const tryGetWeixinQR = async () => {
     qrcodeUUID.value = qrUrl.split("/").pop().split("?")[0];
     qrcodeUrl.value = qrUrl;
 
-    // 更新状态
-    updateStatus("请使用微信扫码登录", "success");
-
-    // 开始轮询扫码状态
+    // 开始轮询扫码状态，倒计时从获取成功时开始每秒刷新
     startScanMonitoring();
     return true;
   } catch (err) {
@@ -384,10 +382,23 @@ const startScanMonitoring = () => {
 
   isScanning.value = true;
   startTime.value = Date.now();
+  tickCountdown();
 
   scanInterval.value = setInterval(() => {
     checkScanStatus();
   }, 1000);
+  countdownInterval.value = setInterval(tickCountdown, 1000);
+};
+
+const tickCountdown = () => {
+  if (!isScanning.value || startTime.value == null) return;
+
+  const remain = Math.ceil((timeout - (Date.now() - startTime.value)) / 1000);
+  if (remain <= 0) {
+    resetQRCode("二维码已超时，请重新获取", "error");
+    return;
+  }
+  updateStatus(`请扫码，剩余 ${remain} 秒`, "info");
 };
 
 /**
@@ -395,20 +406,17 @@ const startScanMonitoring = () => {
  */
 const checkScanStatus = async () => {
   try {
-    if (!qrcodeUUID.value) return;
+    if (!isScanning.value || !qrcodeUUID.value) return;
 
-    const elapsed = Date.now() - startTime.value;
+    const uuid = qrcodeUUID.value;
+    const elapsed = Date.now() - (startTime.value || 0);
     if (elapsed > timeout) {
-      updateStatus("二维码已超时，请重新获取", "error");
-      stopScanMonitoring();
-      resetQRCode();
+      resetQRCode("二维码已超时，请重新获取", "error");
       return;
     }
 
     // 使用微信官方推荐的扫码状态轮询路径
-    const url = `/api/weixin/connect/l/qrconnect?uuid=${
-      qrcodeUUID.value
-    }&f=url&_=${Date.now()}`;
+    const url = `/api/weixin/connect/l/qrconnect?uuid=${uuid}&f=url&_=${Date.now()}`;
 
     const res = await new Promise((resolve) => {
       const xhr = new XMLHttpRequest();
@@ -420,6 +428,8 @@ const checkScanStatus = async () => {
       xhr.ontimeout = () => resolve({ status: 0 });
       xhr.send();
     });
+
+    if (!isScanning.value || qrcodeUUID.value !== uuid) return;
 
     if (res.status === 200) {
       const text = res.responseText;
@@ -451,17 +461,8 @@ const checkScanStatus = async () => {
 
       // 408 → 已过期
       if (text.includes("window.wx_errcode=408")) {
-        updateStatus("二维码已过期，请重新生成", "error");
-        stopScanMonitoring();
-        resetQRCode();
-        return;
+        resetQRCode("二维码已过期，请重新生成", "error");
       }
-    }
-
-    // 每30秒提醒一次
-    const remain = Math.ceil((timeout - elapsed) / 1000);
-    if (remain % 30 === 0) {
-      updateStatus(`请扫码，剩余 ${remain} 秒`, "info");
     }
   } catch (err) {
     console.error("扫码状态检查失败:", err);
@@ -476,6 +477,10 @@ const stopScanMonitoring = () => {
   if (scanInterval.value) {
     clearInterval(scanInterval.value);
     scanInterval.value = null;
+  }
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value);
+    countdownInterval.value = null;
   }
 };
 
@@ -768,11 +773,11 @@ const updateStatus = (message, type = "info") => {
 /**
  * 重置二维码状态
  */
-const resetQRCode = () => {
+const resetQRCode = (message = "点击获取微信登录二维码", type = "info") => {
   stopScanMonitoring();
   qrcodeUUID.value = null;
   qrcodeUrl.value = null;
-  updateStatus("点击获取微信登录二维码", "info");
+  updateStatus(message, type);
 };
 
 // 生命周期
@@ -790,29 +795,30 @@ onUnmounted(() => {
 .wx-qrcode-import {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-lg) 0;
+  gap: 12px;
+  padding: 0;
 }
 
 .login-flow-info {
   background: var(--bg-tertiary);
   border-radius: var(--border-radius-medium);
-  padding: var(--spacing-md);
+  padding: 8px 12px;
 
   h3 {
-    margin: 0 0 var(--spacing-sm) 0;
+    margin: 0 0 4px 0;
     color: var(--text-primary);
     font-size: var(--font-size-md);
   }
 
   .flow-steps {
     margin: 0;
-    padding-left: var(--spacing-lg);
+    padding-left: 1.2em;
     color: var(--text-secondary);
 
     li {
-      margin-bottom: var(--spacing-xs);
+      margin-bottom: 2px;
       font-size: var(--font-size-sm);
+      line-height: 1.4;
     }
   }
 }
@@ -821,8 +827,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-xl) 0;
+  gap: 8px;
+  padding: 0;
+}
+
+.refresh-qr-btn {
+  width: 100%;
+  margin-top: 4px;
 }
 
 .qr-placeholder {
@@ -830,8 +841,8 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 200px;
-  height: 200px;
+  width: 176px;
+  height: 176px;
   border: 2px dashed var(--border-light);
   border-radius: var(--border-radius-medium);
   cursor: pointer;
@@ -851,8 +862,8 @@ onUnmounted(() => {
 }
 
 .qr-image {
-  width: 200px;
-  height: 200px;
+  width: 176px;
+  height: 176px;
   border: 2px solid var(--border-light);
   border-radius: var(--border-radius-medium);
   cursor: pointer;
@@ -865,7 +876,7 @@ onUnmounted(() => {
 }
 
 .qr-status {
-  margin-top: var(--spacing-xs);
+  margin-top: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-align: center;
