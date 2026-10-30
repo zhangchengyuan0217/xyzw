@@ -47,15 +47,21 @@ const spawnRipple = (event) => {
   ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
   ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
   button.appendChild(ripple);
-  ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+  ripple.addEventListener("animationend", () => ripple.remove(), {
+    once: true,
+  });
   window.setTimeout(() => ripple.remove(), 700);
 };
 
 const handleStart = () => {
   if (pressing.value) return;
 
-  const destination = authStore.isAuthenticated ? "/admin/dashboard" : "/register";
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const destination = authStore.isAuthenticated
+    ? "/admin/dashboard"
+    : "/register";
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
   if (reduceMotion) {
     router.push(destination);
     return;
