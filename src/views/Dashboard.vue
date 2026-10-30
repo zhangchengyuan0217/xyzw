@@ -1,54 +1,25 @@
 <template>
   <div class="dashboard-page">
-    <!-- 主要内容 -->
-    <main class="dashboard-main">
-      <div class="main-container">
-        <!-- 欢迎区域 -->
-        <section class="welcome-section">
-          <div class="welcome-content">
-            <div class="welcome-text">
-              <h1>
-                欢迎回来，{{ tokenStore.selectedToken?.name || "游戏玩家" }}！
-              </h1>
-              <p>今天是 {{ currentDate }}，继续您的游戏管理之旅吧</p>
-            </div>
-            <div class="welcome-actions">
-              <n-button
-                type="primary"
-                size="large"
-                @click="router.push('/admin/game-features')"
-              >
-                进入游戏功能
-              </n-button>
-              <n-button size="large" @click="handleManageTokens">
-                管理Token
-              </n-button>
-            </div>
-          </div>
-        </section>
-
-        <!-- 快速操作 -->
-        <section class="quick-actions-section">
-          <h2 class="section-title">快速操作</h2>
-          <div class="actions-grid">
-            <div
-              v-for="action in quickActions"
-              :key="action.id"
-              class="action-card"
-              @click="handleQuickAction(action)"
-            >
-              <div class="action-icon">
-                <component :is="action.icon" />
-              </div>
-              <div class="action-content">
-                <h3>{{ action.title }}</h3>
-                <p>{{ action.description }}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
+    <div class="feature-list">
+      <button
+        v-for="action in quickActions"
+        :key="action.id"
+        type="button"
+        class="feature-row"
+        @click="handleQuickAction(action)"
+      >
+        <span class="feature-icon">
+          <component :is="action.icon" />
+        </span>
+        <span class="feature-text">
+          <span class="feature-title">{{ action.title }}</span>
+          <span class="feature-desc">{{ action.description }}</span>
+        </span>
+        <span class="feature-arrow">
+          <ChevronForward />
+        </span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -56,13 +27,14 @@
 import {
   Add,
   CheckmarkCircle,
+  ChevronForward,
   Cloud,
   Cube,
   GameController,
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
 import { useMessage } from "naive-ui";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
@@ -165,19 +137,6 @@ const openGame = async () => {
   }
   router.push("/game");
 };
-
-// 响应式数据
-// const recentActivities = ref([]);
-
-// 计算属性
-const currentDate = computed(() => {
-  return new Date().toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
-});
 
 const quickActions = ref([
   {
@@ -306,302 +265,90 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .dashboard-page {
-  min-height: 100vh;
+  min-height: calc(100dvh - 64px);
+  padding: 12px;
   background: var(--bg-secondary);
 }
 
-// 主要内容
-.dashboard-main {
-  padding: var(--spacing-xl);
+@media (max-width: 768px) {
+  .dashboard-page {
+    min-height: calc(100dvh - 56px);
+  }
 }
 
-.main-container {
-  max-width: 1400px;
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
-// 欢迎区域
-.welcome-section {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
-  border-radius: var(--border-radius-xl);
-  padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-xl);
-  color: white;
-}
-
-.welcome-content {
+.feature-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-lg);
-}
-
-.welcome-text {
-  h1 {
-    font-size: var(--font-size-3xl);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: var(--spacing-sm);
-  }
-
-  p {
-    font-size: var(--font-size-lg);
-    opacity: 0.9;
-    margin: 0;
-  }
-}
-
-.welcome-actions {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-// 统计区域
-.stats-section {
-  margin-bottom: var(--spacing-xl);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.stat-card {
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px;
+  border: 0;
+  border-radius: 14px;
   background: var(--bg-primary);
-  border-radius: var(--border-radius-large);
-  padding: var(--spacing-lg);
   box-shadow: var(--shadow-light);
-  transition: all var(--transition-normal);
-
-  &:hover {
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-2px);
-  }
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: var(--spacing-md);
-
-  :deep(svg) {
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.stat-number {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.stat-label {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-xs);
-}
-
-.stat-change {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-
-  &.positive {
-    color: var(--success-color);
-  }
-
-  &.negative {
-    color: var(--error-color);
-  }
-}
-
-// 快速操作区域
-.quick-actions-section {
-  margin-bottom: var(--spacing-xl);
-}
-
-.section-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.action-card {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-large);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-light);
+  text-align: left;
+  color: inherit;
   cursor: pointer;
-  transition: all var(--transition-normal);
-
-  &:hover {
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-2px);
-  }
 }
 
-.action-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--primary-color);
-  margin-bottom: var(--spacing-md);
-
-  :deep(svg) {
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.action-content {
-  h3 {
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-  }
-
-  p {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin: 0;
-  }
-}
-
-// 最近活动区域
-.recent-activity-section {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-large);
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-light);
-}
-
-.activity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-lg);
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.activity-item {
-  display: flex;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-medium);
-  transition: background var(--transition-fast);
-
-  &:hover {
-    background: var(--bg-tertiary);
-  }
-}
-
-.activity-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.feature-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-
-  &.success {
-    background: rgba(24, 160, 88, 0.1);
-    color: var(--success-color);
-  }
-
-  &.warning {
-    background: rgba(240, 160, 32, 0.1);
-    color: var(--warning-color);
-  }
-
-  &.info {
-    background: rgba(32, 128, 240, 0.1);
-    color: var(--info-color);
-  }
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--primary-color-light);
+  color: var(--primary-color);
 
   :deep(svg) {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
   }
 }
 
-.activity-content {
+.feature-text {
   flex: 1;
+  min-width: 0;
 }
 
-.activity-text {
+.feature-title {
+  display: block;
   color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-xs);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-.activity-time {
+.feature-desc {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feature-arrow {
+  display: flex;
+  flex: none;
   color: var(--text-tertiary);
-  font-size: var(--font-size-xs);
-}
 
-.empty-activity {
-  text-align: center;
-  padding: var(--spacing-xl) 0;
-}
-
-// 响应式设计
-@media (max-width: 1024px) {
-  .welcome-content {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-main {
-    padding: var(--spacing-md);
-  }
-
-  .nav-menu {
-    display: none;
-  }
-
-  .welcome-section {
-    padding: var(--spacing-xl);
-  }
-
-  .welcome-text h1 {
-    font-size: var(--font-size-2xl);
-  }
-
-  .welcome-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .actions-grid {
-    grid-template-columns: 1fr;
+  :deep(svg) {
+    width: 18px;
+    height: 18px;
   }
 }
 </style>
