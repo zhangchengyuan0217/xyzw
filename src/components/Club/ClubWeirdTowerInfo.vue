@@ -132,7 +132,7 @@ import {
   NIcon,
   useMessage,
 } from "naive-ui";
-import { computed, h, nextTick, onMounted, ref } from "vue";
+import { computed, h, nextTick, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { gettoday } from "@/utils/clubWarrankUtils";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
@@ -351,9 +351,9 @@ const handleEvotower = (towerId) => {
 };
 
 // 获取爬塔数据
-const fetchWeirdTowerInfo = async () => {
+const fetchWeirdTowerInfo = async ({ notify = true } = {}) => {
   if (!tokenStore.selectedToken) {
-    message.warning("请先选择游戏角色");
+    if (notify) message.warning("请先选择游戏角色");
     return;
   }
 
@@ -362,7 +362,7 @@ const fetchWeirdTowerInfo = async () => {
   // 检查WebSocket连接
   const wsStatus = tokenStore.getWebSocketStatus(tokenId);
   if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询爬塔数据");
+    if (notify) message.error("WebSocket未连接，无法查询爬塔数据");
     return;
   }
 
@@ -500,12 +500,25 @@ defineExpose({
   fetchWeirdTowerInfo,
 });
 
-// Inline 模式：挂载后自动拉取
+// Inline 模式：挂载后自动拉取。未连接时不弹错误，等连接成功再查。
 onMounted(() => {
   if (props.inline) {
-    fetchWeirdTowerInfo();
+    fetchWeirdTowerInfo({ notify: false });
   }
 });
+
+watch(
+  () => {
+    const tokenId = tokenStore.selectedToken?.id;
+    if (!tokenId) return "disconnected";
+    return tokenStore.wsConnections[tokenId]?.status || "disconnected";
+  },
+  (status) => {
+    if (!props.inline || status !== "connected" || memberScores.value.length)
+      return;
+    fetchWeirdTowerInfo({ notify: false });
+  },
+);
 </script>
 
 <style scoped lang="scss">

@@ -56,7 +56,7 @@
 import { Copy, Refresh } from "@vicons/ionicons5";
 import html2canvas from "html2canvas";
 import { NButton, NDataTable, NIcon, NTag, useMessage } from "naive-ui";
-import { computed, h, nextTick, onMounted, ref } from "vue";
+import { computed, h, nextTick, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { getLastSaturday } from "@/utils/clubBattleUtils";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
@@ -398,9 +398,9 @@ const legionWarTypesw = (legionWarType) => {
 // 处理图片加载错误
 
 // 查询战绩
-const fetchBattleRecords = async () => {
+const fetchBattleRecords = async ({ notify = true } = {}) => {
   if (!tokenStore.selectedToken) {
-    message.warning("请先选择游戏角色");
+    if (notify) message.warning("请先选择游戏角色");
     return;
   }
 
@@ -409,7 +409,7 @@ const fetchBattleRecords = async () => {
   // 检查WebSocket连接
   const wsStatus = tokenStore.getWebSocketStatus(tokenId);
   if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+    if (notify) message.error("WebSocket未连接，无法查询战绩");
     return;
   }
 
@@ -460,12 +460,24 @@ defineExpose({
   fetchBattleRecords,
 });
 
-// Inline 模式：挂载后自动拉取
+// Inline 模式：挂载后自动拉取。未连接时不弹错误，等连接成功再查。
 onMounted(() => {
   if (props.inline) {
-    fetchBattleRecords();
+    fetchBattleRecords({ notify: false });
   }
 });
+
+watch(
+  () => {
+    const tokenId = tokenStore.selectedToken?.id;
+    if (!tokenId) return "disconnected";
+    return tokenStore.wsConnections[tokenId]?.status || "disconnected";
+  },
+  (status) => {
+    if (!props.inline || status !== "connected" || battleRecords.value) return;
+    fetchBattleRecords({ notify: false });
+  },
+);
 </script>
 
 <style scoped lang="scss">

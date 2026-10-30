@@ -30,7 +30,10 @@
           :close-on-esc="true"
           preset="card"
           :show-footer="false"
-          :style="{ width: 'min(700px, calc(100vw - 32px))', maxHeight: '80vh' }"
+          :style="{
+            width: 'min(700px, calc(100vw - 32px))',
+            maxHeight: '80vh',
+          }"
           :content-style="{
             padding: '0',
             maxHeight: 'calc(80vh - 60px)',
@@ -135,10 +138,7 @@
           </div>
           <div v-if="activeTab === 'overview'" class="overview-panel">
             <div class="overview-head">
-              <NAvatar
-                :size="40"
-                :src="club.logo || '/icons/xiaoyugan.png'"
-              />
+              <NAvatar :size="40" :src="club.logo || '/icons/xiaoyugan.png'" />
               <div class="overview-id">
                 <div class="overview-name">{{ club.name }}</div>
                 <div class="overview-meta">
@@ -174,47 +174,50 @@
                 <strong>{{ clubOverview.currentHP }}</strong>
               </div>
             </div>
-            <div
-              v-if="clubOverview.unfoughtBosses?.length"
-              class="boss-line"
-            >
+            <div v-if="clubOverview.unfoughtBosses?.length" class="boss-line">
               <span>
                 已击杀
                 {{ 150 - clubOverview.unfoughtBosses.length }}/150
               </span>
-              <button type="button" @click="showMissedBosses = !showMissedBosses">
+              <button
+                type="button"
+                @click="showMissedBosses = !showMissedBosses"
+              >
                 遗漏 {{ clubOverview.unfoughtBosses.length }}
               </button>
             </div>
             <div v-if="showMissedBosses" class="missed-bosses">
-              <span
-                v-for="boss in clubOverview.unfoughtBosses"
-                :key="boss"
-              >{{ boss }}</span>
+              <span v-for="boss in clubOverview.unfoughtBosses" :key="boss">{{
+                boss
+              }}</span>
             </div>
           </div>
 
-            <div v-else-if="activeTab === 'members'" class="members" ref="exportDom">
-                <NDataTable
-                  :columns="memberColumns"
-                  :data="topMembers"
-                  :bordered="false"
-                  size="small"
-                  striped
-                  :row-key="(row) => row.roleId"
-                  flex-height
-                  :scroll-x="650"
-                  style="height: 100%"
-                />
-            </div>
+          <div
+            v-else-if="activeTab === 'members'"
+            class="members"
+            ref="exportDom"
+          >
+            <NDataTable
+              :columns="memberColumns"
+              :data="topMembers"
+              :bordered="false"
+              size="small"
+              striped
+              :row-key="(row) => row.roleId"
+              flex-height
+              :scroll-x="650"
+              style="height: 100%"
+            />
+          </div>
 
-            <div v-else-if="activeTab === 'history'">
-              <ClubHistoryRecords inline />
-            </div>
+          <div v-else-if="activeTab === 'history'">
+            <ClubHistoryRecords inline />
+          </div>
 
-            <div v-else-if="activeTab === 'weirdtower'">
-              <ClubWeirdTowerInfo inline />
-            </div>
+          <div v-else-if="activeTab === 'weirdtower'">
+            <ClubWeirdTowerInfo inline />
+          </div>
         </div>
 
         <!-- 右：盐场岛屿信息（所在岛屿 + 岛屿体系 + 实时榜单） -->
