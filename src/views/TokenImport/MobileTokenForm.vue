@@ -62,64 +62,66 @@
       </NButton>
     </div>
 
-    <NForm :model="importForm" label-placement="top" class="name-form">
-      <NFormItem label="角色命名格式">
-        <NInput
-          v-model:value="importForm.nameTemplate"
-          placeholder="{name}-{index}-{id}"
-        />
-        <template #feedback>
-          支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
-        </template>
-      </NFormItem>
-    </NForm>
+    <div v-if="showRoleImportPanel">
+      <NForm :model="importForm" label-placement="top" class="name-form">
+        <NFormItem label="角色命名格式">
+          <NInput
+            v-model:value="importForm.nameTemplate"
+            placeholder="{name}-{index}-{id}"
+          />
+          <template #feedback>
+            支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
+          </template>
+        </NFormItem>
+      </NForm>
 
-    <ServerRoleList
-      :data="serverListData"
-      server-column-title="区服ID"
-      max-height="50vh"
-      @add="addSelectedRole"
-      @download="handleDownload"
-    />
+      <ServerRoleList
+        :data="serverListData"
+        server-column-title="区服ID"
+        max-height="50vh"
+        @add="addSelectedRole"
+        @download="handleDownload"
+      />
 
-    <a-list>
-      <a-list-item v-for="(role, roleIndex) in roleList" :key="role.id">
-        <div class="role-row">
-          <div>
-            <strong>角色名称:</strong> {{ role.name }}<br />
-            <strong>服务器:</strong> {{ role.server }}<br />
-            <strong>角色序号:</strong> {{ role.roleIndex }}
+      <a-list>
+        <a-list-item v-for="(role, roleIndex) in roleList" :key="role.id">
+          <div class="role-row">
+            <div>
+              <strong>角色名称:</strong> {{ role.name }}<br />
+              <strong>服务器:</strong> {{ role.server }}<br />
+              <strong>角色序号:</strong> {{ role.roleIndex }}
+            </div>
+            <NButton type="error" size="small" @click="removeRole(roleIndex)"
+              >删除</NButton
+            >
           </div>
-          <NButton type="error" size="small" @click="removeRole(roleIndex)"
-            >删除</NButton
-          >
-        </div>
-      </a-list-item>
-    </a-list>
+        </a-list-item>
+      </a-list>
 
-    <div class="form-actions">
-      <NButton
-        type="primary"
-        size="large"
-        block
-        :loading="isImporting"
-        @click="handleImport"
-      >
-        <template #icon
-          ><NIcon><CloudUpload /></NIcon
-        ></template>
-        添加Token
-      </NButton>
-      <NButton
-        block
-        :disabled="isLoggingIn || isSendingCode"
-        @click="$emit('cancel')"
-      >
-        <template #icon
-          ><NIcon><Close /></NIcon
-        ></template>
-        取消
-      </NButton>
+      <div class="form-actions">
+        <NButton
+          type="primary"
+          size="large"
+          block
+          :loading="isImporting"
+          @click="handleImport"
+        >
+          <template #icon
+            ><NIcon><CloudUpload /></NIcon
+          ></template>
+          添加Token
+        </NButton>
+        <NButton
+          block
+          :disabled="isLoggingIn || isSendingCode"
+          @click="$emit('cancel')"
+        >
+          <template #icon
+            ><NIcon><Close /></NIcon
+          ></template>
+          取消
+        </NButton>
+      </div>
     </div>
   </div>
 </template>
@@ -140,7 +142,7 @@ import {
   NInput,
   useMessage,
 } from "naive-ui";
-import { onUnmounted, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
@@ -197,6 +199,9 @@ const isImporting = ref(false);
 const cooldownSeconds = ref(0);
 const serverListData = ref<any[]>([]);
 const roleList = ref<PendingRole[]>([]);
+const showRoleImportPanel = computed(
+  () => serverListData.value.length > 0 || roleList.value.length > 0,
+);
 const originalBinData = ref<any>(null);
 const activeLoginMatchId = ref("");
 const currentCombUser = ref<Record<string, unknown> | null>(null);

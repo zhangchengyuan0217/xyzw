@@ -9,7 +9,7 @@
             <!-- 主题切换按钮 -->
             <ThemeToggle />
           </div>
-          <h1>游戏Token管理</h1>
+          <h1>账号管理</h1>
         </div>
       </div>
 
@@ -662,9 +662,9 @@
         <template #image>
           <i class="mdi:bed-empty"></i>
         </template>
-        还没有导入任何Token
+        暂无账号
         <a-button type="link" @click="openshowImportForm"
-          >打开Token管理</a-button
+          >打开账号管理</a-button
         >
       </a-empty>
     </div>
