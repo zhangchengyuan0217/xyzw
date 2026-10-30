@@ -15,24 +15,28 @@
     </div>
     <div v-else class="dashboard-page">
       <div class="feature-list">
-        <button
-          v-for="item in visibleItems"
-          :key="item.id"
-          type="button"
-          class="feature-row"
-          @click="openMenuItem(item)"
-        >
-          <span class="feature-icon">
-            <component :is="item.icon" />
-          </span>
-          <span class="feature-text">
-            <span class="feature-title">{{ item.title }}</span>
-            <span class="feature-desc">{{ item.description }}</span>
-          </span>
-          <span class="feature-arrow">
-            <ChevronForward />
-          </span>
-        </button>
+        <template v-for="item in visibleItems" :key="item.id">
+          <div v-if="item.kind === 'label'" class="feature-label">
+            {{ item.title }}
+          </div>
+          <button
+            v-else
+            type="button"
+            class="feature-row"
+            @click="openMenuItem(item)"
+          >
+            <span class="feature-icon">
+              <component :is="item.icon" />
+            </span>
+            <span class="feature-text">
+              <span class="feature-title">{{ item.title }}</span>
+              <span class="feature-desc">{{ item.description }}</span>
+            </span>
+            <span class="feature-arrow">
+              <ChevronForward />
+            </span>
+          </button>
+        </template>
       </div>
     </div>
 
@@ -218,15 +222,19 @@ const tabItems = {
     { kind: "feature", icon: Cube, ...featureById.activity },
   ],
   events: [
-    "camp",
-    "warrank",
-    "week-battle",
-    "month-battle",
-    "war-map",
-    "war-stats",
-    "peach",
-    "peach-battle",
-  ].map((id) => ({ kind: "feature", icon: Cube, ...featureById[id] })),
+    { kind: "label", id: "label-camp", title: "营地" },
+    { kind: "feature", icon: Cube, ...featureById.camp },
+    { kind: "label", id: "label-salt", title: "盐场" },
+    ...["warrank", "week-battle", "month-battle", "war-map", "war-stats"].map(
+      (id) => ({ kind: "feature", icon: Cube, ...featureById[id] }),
+    ),
+    { kind: "label", id: "label-peach", title: "蟠桃园" },
+    ...["peach", "peach-battle"].map((id) => ({
+      kind: "feature",
+      icon: Cube,
+      ...featureById[id],
+    })),
+  ],
   more: [
     {
       kind: "action",
@@ -412,6 +420,13 @@ onMounted(async () => {
   gap: 10px;
   max-width: 640px;
   margin: 0 auto;
+}
+
+.feature-label {
+  padding: 8px 4px 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .feature-row {
