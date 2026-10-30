@@ -59,7 +59,7 @@
         </n-button>
         <n-button
           type="primary"
-          size="small"
+          size="medium"
           :disabled="!battleRecords || loading"
           @click="handleExport"
           class="action-btn export-btn"
@@ -1719,11 +1719,11 @@ onMounted(() => {
   background: var(--bg-primary);
   border-radius: 0;
   box-shadow: none;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: auto;
   padding: 0;
   box-sizing: border-box;
 }
@@ -1827,13 +1827,9 @@ onMounted(() => {
     align-items: center;
     gap: var(--spacing-sm);
 
-    :deep(.n-date-picker) {
-      font-size: var(--font-size-sm);
-      width: 200px;
-
-      .n-input-wrapper {
-        font-size: var(--font-size-sm);
-      }
+    :deep(.arco-picker) {
+      width: 100%;
+      min-width: 0;
     }
 
     .action-btn {
@@ -1851,7 +1847,7 @@ onMounted(() => {
 
 .battle-records-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
   padding: var(--spacing-md);
   min-height: 200px;
 }
@@ -1910,6 +1906,7 @@ onMounted(() => {
   flex-direction: column;
   gap: var(--spacing-xs);
   flex: 1;
+  min-width: 0;
 }
 
 .club-side.own {
@@ -2077,7 +2074,8 @@ onMounted(() => {
 }
 
 .ranking-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm);
@@ -2136,9 +2134,9 @@ onMounted(() => {
 }
 
 .player-name {
+  min-width: 0;
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2172,27 +2170,19 @@ onMounted(() => {
 }
 
 .god-ranking-content {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: var(--spacing-xs);
+  overflow: visible;
 }
 
 .god-ranking-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.god-ranking-header {
-  display: flex;
+.god-ranking-header,
+.god-ranking-item {
+  display: grid;
+  grid-template-columns: 36px 32px minmax(0, 1fr) repeat(5, minmax(32px, 40px));
   align-items: center;
-  padding: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-light);
+  gap: 4px;
 }
 
 .header-avatar {
@@ -2205,13 +2195,24 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.god-ranking-header {
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-weight: var(--font-weight-semibold);
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
 .header-player {
-  width: 140px;
+  min-width: 0;
   padding-left: var(--spacing-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-shrink: 0;
 }
 
 .header-id {
@@ -2222,14 +2223,10 @@ onMounted(() => {
 }
 
 .header-stat {
-  width: 50px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .god-ranking-item {
-  display: flex;
-  align-items: center;
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-xs);
   border-radius: var(--border-radius-sm);
@@ -2252,10 +2249,11 @@ onMounted(() => {
 }
 
 .god-ranking-header > .god-rank-number {
+  width: auto;
   background: transparent !important;
   color: var(--text-secondary) !important;
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  font-size: 11px;
 }
 
 .god-ranking-item:nth-of-type(2) .god-rank-number {
@@ -2282,21 +2280,10 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-.player-name {
-  width: 140px;
-  padding-left: var(--spacing-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-}
-
 .player-stat {
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
-  width: 50px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .god-ranking-content::-webkit-scrollbar-track {
@@ -2315,63 +2302,44 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
-  .overall-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .ranking-content {
-    grid-template-columns: 1fr;
-  }
-
+  .overall-stats,
+  .ranking-content,
   .god-rankings {
     grid-template-columns: 1fr;
   }
 
   .club-info {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-
-  .club-side.own {
     align-items: center;
+    gap: 8px;
+    padding: 0;
   }
 
-  .club-side.opponent {
+  .club-side.own,
+  .club-side.opponent,
+  .club-side.own .club-logo,
+  .club-side.opponent .club-logo {
     align-items: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .inline-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
+    align-self: center;
+    text-align: center;
   }
 
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
+  .club-name,
+  .club-power {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .vs {
+    margin: 0;
+    flex-shrink: 0;
   }
 
-  .ranking-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-
-  .god-ranking-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-
-  .player-stat {
-    min-width: auto;
-    text-align: left;
+  .battle-header h2 {
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 8px;
   }
 }
 
@@ -2387,11 +2355,14 @@ onMounted(() => {
 
 .comparison-container {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
 .club-column {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
@@ -2442,11 +2413,12 @@ onMounted(() => {
 
 .style1-table-container {
   width: 100%;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .style1-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 12px;
 }
@@ -2496,6 +2468,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
+}
+
+.player-info span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .player-avatar-small {
@@ -2615,9 +2595,10 @@ onMounted(() => {
 /* Style 1 */
 .style-1-wrapper {
   background: #eef2f7;
-  padding: 20px;
+  padding: 8px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   border-radius: 8px;
+  overflow: visible;
 }
 
 .style-1-wrapper .battle-header {
@@ -2628,9 +2609,10 @@ onMounted(() => {
 /* Style 2 */
 .style-2-wrapper {
   background: #eef2f7;
-  padding: 20px;
+  padding: 8px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   border-radius: 8px;
+  overflow: visible;
 }
 
 .style-2-wrapper .battle-header {
@@ -2722,11 +2704,12 @@ onMounted(() => {
 .style2-table-wrapper {
   background: #fff;
   padding: 0;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .style2-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 
@@ -2746,9 +2729,38 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.style2-table th:nth-child(1),
+.style2-table td:nth-child(1),
+.style1-table .col-rank {
+  width: 36px;
+}
+
+.style2-table th:nth-child(n + 3),
+.style2-table td:nth-child(n + 3),
+.style1-table .col-kill,
+.style1-table .col-kill-streak,
+.style1-table .col-car,
+.style1-table .col-revive,
+.style1-table .col-kd {
+  width: 42px;
+}
+
+.style2-table .progress-bg {
+  display: none;
+}
+
+.style2-table .bar-cell {
+  justify-content: center;
+}
+
+.style2-table .bar-val {
+  width: auto;
+  text-align: center;
+}
+
 .style2-table th:nth-child(2) {
   text-align: left;
-  padding-left: 10px;
+  padding-left: 6px;
 }
 
 .style2-table td {
@@ -2777,17 +2789,18 @@ onMounted(() => {
   align-items: center;
   gap: 5px;
   justify-content: flex-start;
-  padding-left: 5px;
+  min-width: 0;
 }
 
 .player-name-s2 {
+  min-width: 0;
+  flex: 1;
   font-weight: 600;
   color: #333;
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 80px;
 }
 
 .avatar-xs {
@@ -2838,7 +2851,7 @@ onMounted(() => {
   background: #f0f0f0;
   border-radius: 2px;
   overflow: hidden;
-  min-width: 30px;
+  min-width: 0;
 }
 
 .progress-fill {
@@ -2860,11 +2873,6 @@ onMounted(() => {
   color: #4caf50;
 }
 
-@media (max-width: 768px) {
-  .comparison-container {
-    flex-direction: column;
-  }
-}
 
 .style2-rankings-row {
   display: grid;

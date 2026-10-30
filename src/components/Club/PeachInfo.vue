@@ -1,33 +1,32 @@
 <template>
   <div class="peach-info-card" ref="exportDom">
     <div class="toolbar">
-      <div class="left">
-        <span class="title">查询日期:</span>
-        <a-date-picker
-          v-model:value="queryDate"
-          @change="fetchBattleRecordsByDate"
-          value-format="YYYY/MM/DD"
-          :disabled-date="disabledDate"
-          :default-value="queryDate"
-          format="YYYY/MM/DD"
-        />
-      </div>
-      <div class="right">
+      <span class="title">日期</span>
+      <a-date-picker
+        v-model:value="queryDate"
+        class="peach-date"
+        @change="fetchBattleRecordsByDate"
+        value-format="YYYY/MM/DD"
+        :disabled-date="disabledDate"
+        :default-value="queryDate"
+        format="YYYY/MM/DD"
+      />
+      <div class="peach-actions">
         <NButton
           size="small"
-          :disabled="!opponentMembers.length"
+          type="primary"
+          :disabled="!ownMembers.length && !opponentMembers.length"
           @click="handleExportImage"
           class="action-btn export-btn"
-          style="margin-right: 8px"
         >
           <template #icon
             ><NIcon> <Copy /> </NIcon></template
-          >导出图片
+          >导出
         </NButton>
         <NButton
           size="small"
           :disabled="loading"
-          @click="fetchBattleRecordsByDate"
+          @click="fetchBattleInfo"
           class="refresh-btn"
         >
           <template #icon>
@@ -41,60 +40,34 @@
     </div>
 
     <!-- Header Section -->
-    <h2 class="main-title" v-if="battleInfo">{{ queryDate }} 蟠桃大会对战</h2>
     <div class="header-section" v-if="battleInfo">
-      <div class="club-vs-container">
-        <!-- Own Club (Left) -->
-        <div class="club-info own">
+      <div class="pk-board">
+        <div class="pk-side own">
           <NAvatar
             round
-            :size="80"
+            :size="36"
             :src="battleInfo.ownClub?.logo || '/icons/xiaoyugan.png'"
-            class="club-logo"
+            class="pk-logo"
           />
-          <div class="club-details">
-            <div class="club-name">
-              {{ battleInfo.ownClub.serverId }}服
-              {{ battleInfo.ownClub?.name || "未知" }}
-            </div>
-            <div class="club-stats">ID: {{ battleInfo.ownClub.id }}</div>
-            <div class="club-stats">
-              {{ battleInfo.ownClub.memberCount }}人 |
-              {{ battleInfo.ownClub.quenchNum }}红 |
-              {{ formatPower(battleInfo.ownClub.power) }}
-            </div>
-            <div class="club-stats announcement">
-              {{ battleInfo.ownClub.announcement }}
-            </div>
+          <div class="pk-meta">
+            <div class="pk-server">{{ battleInfo.ownClub.serverId }}服</div>
+            <div class="pk-name">{{ battleInfo.ownClub?.name || "未知" }}</div>
           </div>
         </div>
-
-        <!-- VS Badge -->
-        <div class="vs-badge">
-          <span class="vs-text">VS</span>
+        <div class="pk-mid">
+          <div class="pk-vs">VS</div>
         </div>
-
-        <!-- Opponent Club (Right) -->
-        <div class="club-info opponent">
+        <div class="pk-side opponent">
           <NAvatar
             round
-            :size="80"
+            :size="36"
             :src="battleInfo.opponentClub?.logo || '/icons/xiaoyugan.png'"
-            class="club-logo"
+            class="pk-logo"
           />
-          <div class="club-details">
-            <div class="club-name">
-              {{ battleInfo.opponentClub.serverId }}服
+          <div class="pk-meta">
+            <div class="pk-server">{{ battleInfo.opponentClub.serverId }}服</div>
+            <div class="pk-name">
               {{ battleInfo.opponentClub?.name || "未知" }}
-            </div>
-            <div class="club-stats">ID: {{ battleInfo.opponentClub.id }}</div>
-            <div class="club-stats">
-              {{ battleInfo.opponentClub.memberCount }}人 |
-              {{ battleInfo.opponentClub.quenchNum }}红 |
-              {{ formatPower(battleInfo.opponentClub.power) }}
-            </div>
-            <div class="club-stats announcement">
-              {{ battleInfo.opponentClub.announcement }}
             </div>
           </div>
         </div>
@@ -104,21 +77,57 @@
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <NSpin size="large">
-        <template #description>正在加载敌方数据...</template>
+        <template #description>正在加载对战数据...</template>
       </NSpin>
     </div>
 
     <!-- Data Table -->
-    <div v-else-if="opponentMembers.length > 0" class="members-table">
-      <div class="table-title">敌方信息</div>
-      <NDataTable
-        :columns="columns"
-        :data="opponentMembers"
-        :bordered="false"
-        size="small"
-        striped
-        flex-height
-      />
+    <div
+      v-else-if="ownMembers.length || opponentMembers.length"
+      class="score-lists"
+    >
+      <div class="side-switch">
+        <button
+          type="button"
+          class="side-btn own"
+          :class="{ active: memberSide === 'own' }"
+          @click="memberSide = 'own'"
+        >
+          己方
+        </button>
+        <button
+          type="button"
+          class="side-btn opponent"
+          :class="{ active: memberSide === 'opponent' }"
+          @click="memberSide = 'opponent'"
+        >
+          敌方
+        </button>
+      </div>
+      <section class="score-side" :class="memberSide">
+        <div class="score-row score-head">
+          <span>角色</span>
+          <span class="stat-col">胜利</span>
+          <span class="stat-col">复活</span>
+        </div>
+        <div v-if="!activeMembers.length" class="side-empty">暂无成员</div>
+        <div v-for="player in activeMembers" :key="player.id" class="score-row">
+          <span class="player-role" @click="fetchTargetInfo(player.id)">
+            <img
+              v-if="player.headImg"
+              :src="player.headImg"
+              class="role-avatar"
+              alt=""
+            />
+            <span v-else class="role-avatar role-avatar-fallback">{{
+              player.name?.charAt(0) || "?"
+            }}</span>
+            <span class="player-name">{{ player.name }}</span>
+          </span>
+          <span class="stat-col player-win">{{ player.killCnt }}</span>
+          <span class="stat-col player-revive">{{ player.reviveCnt }}</span>
+        </div>
+      </section>
     </div>
 
     <!-- Empty State -->
@@ -582,7 +591,6 @@ import html2canvas from "html2canvas";
 import {
   NAvatar,
   NButton,
-  NDataTable,
   NDescriptions,
   NDescriptionsItem,
   NEmpty,
@@ -594,17 +602,11 @@ import {
   NTag,
   useMessage,
 } from "naive-ui";
-import { computed, h, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { isSameGameValue } from "@/utils/gameValue.js";
 
-import {
-  getLineupType,
-  HERO_DICT,
-  HeroFillInfo,
-  legacycolor,
-  LINEUP_RULES,
-} from "@/utils/HeroList";
+import { HERO_DICT, HeroFillInfo, legacycolor } from "@/utils/HeroList";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
 const message = useMessage();
 const tokenStore = useTokenStore();
@@ -660,11 +662,16 @@ const disabledDate = (ts) => {
   return date.getDay() !== 0 || date > Date.now();
 };
 
+const toQueryDateText = (value) => {
+  if (typeof value !== "string") return "";
+  const matched = value.match(/^(\d{4})\/(\d{2})\/(\d{2})/);
+  return matched ? `${matched[1]}/${matched[2]}/${matched[3]}` : "";
+};
+
 const formatDateToShort = (dateStr) => {
-  if (!dateStr) return "";
-  const parts = dateStr.split("/");
-  if (parts.length !== 3) return dateStr;
-  const [year, month, day] = parts;
+  const text = toQueryDateText(dateStr);
+  if (!text) return "";
+  const [year, month, day] = text.split("/");
   return year.slice(2) + month + day;
 };
 
@@ -684,7 +691,14 @@ const isSundayBattleTime = () => {
 // State
 const loading = ref(false);
 const battleInfo = ref(null); // Opponent Club Info
+const ownMembers = ref([]);
 const opponentMembers = ref([]);
+const memberSide = ref("own");
+const activeMembers = computed(() =>
+  memberSide.value === "opponent"
+    ? opponentMembers.value
+    : ownMembers.value,
+);
 const queryDate = ref(getLastSunday());
 
 // 新增查询对手相关状态
@@ -1147,132 +1161,10 @@ const handleDuel = async () => {
   }
 };
 
-// Columns Definition
-const columns = [
-  {
-    title: "序号",
-    key: "index",
-    width: 60,
-    align: "center",
-    render: (_, index) => index + 1,
-  },
-  {
-    title: "头像",
-    key: "headImg",
-    width: 60,
-    align: "center",
-    render: (row) => {
-      if (row.headImg) {
-        return h("img", {
-          src: row.headImg,
-          class: "member-avatar-cell",
-          alt: row.name,
-        });
-      }
-      return h(
-        "div",
-        {
-          class: "member-avatar-placeholder-cell",
-        },
-        row.name?.charAt(0) || "?",
-      );
-    },
-  },
-  {
-    title: "角色名称",
-    key: "name",
-    width: 150,
-    align: "center",
-    render: (row) => {
-      return h(
-        "span",
-        {
-          style: {
-            cursor: "pointer",
-            color: "#1890ff",
-            textDecoration: "underline",
-          },
-          onClick: () => fetchTargetInfo(row.id),
-        },
-        row.name,
-      );
-    },
-  },
-  {
-    title: "战力",
-    key: "power",
-    width: 100,
-    align: "center",
-    render: (row) => formatPower(row.power),
-  },
-  {
-    title: "红淬",
-    key: "redQuench",
-    width: 80,
-    align: "center",
-    render: (row) => h("span", { style: { color: "#ff4d4f" } }, row.redQuench),
-  },
-  {
-    title: "阵容(红数)[四圣等级]",
-    key: "lineup",
-    align: "left",
-    render: (row) => {
-      const heroes = row.heroList || [];
-      const nodes = [];
-
-      heroes.forEach((hero, index) => {
-        // 英雄名字
-        nodes.push(h("span", { style: { color: "#40a9ff" } }, hero.heroName));
-
-        // 红数 (红色)
-        nodes.push(h("span", { style: { color: "#ff4d4f" } }, `(${hero.red})`));
-
-        // 四圣等级 (绿色)
-        if (hero.HolyBeast) {
-          nodes.push(
-            h("span", { style: { color: "#52c41a" } }, `[${hero.HBlevel}]`),
-          );
-        }
-
-        // 分隔符
-        if (index < heroes.length - 1) {
-          nodes.push(", ");
-        }
-      });
-
-      return h("span", { style: { fontSize: "12px" } }, nodes);
-    },
-  },
-  {
-    title: "阵容类型",
-    key: "lineupType",
-    width: 100,
-    align: "center",
-    render: (row) => {
-      const type = row.lineupType;
-      // 从配置中查找对应的颜色，默认灰色
-      const rule = LINEUP_RULES.find((r) => r.name === type);
-      const colorProps = rule?.colorProps || {
-        color: "#f5f5f5",
-        textColor: "#666",
-      };
-
-      return h(
-        NTag,
-        { color: colorProps, size: "small", bordered: false },
-        { default: () => type },
-      );
-    },
-  },
-];
-
 //日期选择时调用查询战绩方法
 const fetchBattleRecordsByDate = (val) => {
-  if (!isSameGameValue(undefined, val)) {
-    queryDate.value = val;
-  } else {
-    queryDate.value = getLastSunday();
-  }
+  const text = toQueryDateText(val);
+  queryDate.value = text || getLastSunday();
   fetchBattleInfo();
 };
 
@@ -1290,12 +1182,16 @@ const fetchBattleInfo = async () => {
     return;
   }
 
+  if (!toQueryDateText(queryDate.value)) {
+    queryDate.value = getLastSunday();
+  }
+
   loading.value = true;
+  ownMembers.value = [];
   opponentMembers.value = [];
   try {
     let opponentLegionId;
     let ownLegionId;
-    let memberIds = [];
     const shortDate = formatDateToShort(queryDate.value);
 
     // Time-based Logic
@@ -1366,11 +1262,28 @@ const fetchBattleInfo = async () => {
       10000,
     );
 
-    if (killRes && killRes.recordsMap && killRes.recordsMap[opponentLegionId]) {
-      const records = killRes.recordsMap[opponentLegionId];
-      memberIds = records.map((r) => r.roleInfo.roleId);
-    }
+    const toPlayers = (records) =>
+      (records || [])
+        .map((record) => ({
+          id: record.roleInfo?.roleId,
+          name: record.roleInfo?.name || "未知",
+          headImg: record.roleInfo?.headImg || "",
+          killCnt: record.killCnt || 0,
+          reviveCnt: record.reviveCnt || 0,
+        }))
+        .sort((a, b) => b.killCnt - a.killCnt || b.reviveCnt - a.reviveCnt);
 
+    const recordsOf = (legionId) => {
+      const map = killRes?.recordsMap || {};
+      const key = Object.keys(map).find(
+        (item) => String(item) === String(legionId),
+      );
+      return key ? map[key] : [];
+    };
+    const ownRecords = recordsOf(ownLegionId);
+    const opponentRecords = recordsOf(opponentLegionId);
+    ownMembers.value = toPlayers(ownRecords);
+    opponentMembers.value = toPlayers(opponentRecords);
     // Get Opponent Club Details (Name, Logo, etc.)
     const ownLegionIdInfo = await tokenStore.sendMessageWithPromise(
       tokenId,
@@ -1401,7 +1314,7 @@ const fetchBattleInfo = async () => {
         logo: ownLegionIdInfo?.legionData?.logo || "",
         quenchNum: ownLegionIdInfo?.legionData?.quenchNum || 0,
         announcement: ownLegionIdInfo?.legionData?.announcement || "",
-        memberCount: killRes.recordsMap[ownLegionId]?.length || 0,
+        memberCount: ownRecords.length,
       },
       opponentClub: {
         id: opponentLegionId,
@@ -1412,106 +1325,9 @@ const fetchBattleInfo = async () => {
         logo: clubInfoRes?.legionData?.logo || "",
         quenchNum: clubInfoRes?.legionData?.quenchNum || 0,
         announcement: clubInfoRes?.legionData?.announcement || "",
-        memberCount: killRes.recordsMap[opponentLegionId]?.length || 0,
+        memberCount: opponentRecords.length,
       },
     };
-
-    // Get Members List
-    // If we didn't get memberIds from killrecord (e.g. Live mode or empty kill record), fallback to club info
-    if (memberIds.length === 0) {
-      const members = clubInfoRes.legionData.members || {};
-      memberIds = Object.keys(members);
-    }
-
-    const totalMembers = memberIds.length;
-
-    // Fetch details for each member
-    // We'll process them in chunks to avoid overwhelming the server/client
-    const chunkSize = 5;
-    for (let i = 0; i < totalMembers; i += chunkSize) {
-      const chunk = memberIds.slice(i, i + chunkSize);
-      const promises = chunk.map(async (roleId) => {
-        try {
-          const roleRes = await tokenStore.sendMessageWithPromise(
-            tokenId,
-            "rank_getroleinfo",
-            {
-              roleId: Number.parseInt(roleId),
-              includeBottleTeam: false,
-              isSearch: false, // Need equipment for red count
-              bottleType: 0,
-              includeHero: true,
-              includeHeroDetail: true,
-              includePearl: true,
-            },
-            5000,
-          );
-
-          if (roleRes && roleRes.roleInfo) {
-            // Process Heroes
-            let heroList = [];
-            let totalRed = 0;
-
-            if (roleRes.roleInfo.heroes) {
-              const heroes = Object.values(roleRes.roleInfo.heroes);
-              heroList = heroes
-                .map((h) => {
-                  // Calculate Red for this hero
-                  let heroRed = 0;
-                  if (h.equipment) {
-                    Object.values(h.equipment).forEach((eq) => {
-                      if (eq.quenches) {
-                        Object.values(eq.quenches).forEach((q) => {
-                          if (q.colorId === 6) heroRed++;
-                        });
-                      }
-                    });
-                  }
-                  totalRed += heroRed;
-
-                  return {
-                    heroId: h.heroId,
-                    heroName: HERO_DICT[h.heroId]?.name || "未知",
-                    red: heroRed,
-                    power: h.power,
-                    battleTeamSlot: h.battleTeamSlot,
-                    HolyBeast: h.hB?.active === true,
-                    HBlevel: h.hB?.order || 0,
-                  };
-                })
-                .sort((a, b) => a.battleTeamSlot - b.battleTeamSlot);
-            }
-
-            return {
-              id: roleRes.roleInfo.roleId,
-              name: roleRes.roleInfo.name,
-              headImg: roleRes.roleInfo.headImg,
-              power: roleRes.roleInfo.power,
-              legacy: roleRes.roleInfo.legacy?.color || 0,
-              redQuench: totalRed,
-              heroList,
-              lineupType: getLineupType(heroList),
-            };
-          }
-        } catch (e) {
-          console.error(`Failed to fetch info for ${roleId}`, e);
-          return null;
-        }
-      });
-
-      const results = await Promise.all(promises);
-      results.forEach((r) => {
-        if (r) opponentMembers.value.push(r);
-      });
-    }
-
-    // Sort by redQuench Descending, then Power Descending
-    opponentMembers.value.sort((a, b) => {
-      if (b.redQuench !== a.redQuench) {
-        return b.redQuench - a.redQuench;
-      }
-      return b.power - a.power;
-    });
   } catch (error) {
     message.error(`获取数据失败: ${error.message}`);
     console.error(error);
@@ -1553,9 +1369,10 @@ const handleExportImage = async () => {
       }
     }
 
-    // 调整外层容器
+    // 调整外层容器，并展开仅导出时显示的 ID / 公告
     exportDom.value.style.height = "auto";
     exportDom.value.style.overflow = "visible";
+    exportDom.value.classList.add("exporting-image");
 
     // 等待DOM更新
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -1579,6 +1396,7 @@ const handleExportImage = async () => {
     message.error("导出图片失败，请重试");
   } finally {
     // 恢复原始样式
+    exportDom.value.classList.remove("exporting-image");
     exportDom.value.style.height = "";
     exportDom.value.style.overflow = "";
 
@@ -1627,23 +1445,29 @@ onMounted(() => {
 }
 
 .toolbar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 0 8px;
+  gap: 8px;
+  margin-bottom: 12px;
   flex-shrink: 0;
 
-  .left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .title {
-      font-size: 14px;
-      color: #666;
-    }
+  .title {
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
   }
+}
+
+.peach-date {
+  width: 100%;
+  min-width: 0;
+}
+
+.peach-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .main-title {
@@ -1655,37 +1479,77 @@ onMounted(() => {
 }
 
 .header-section {
-  text-align: center;
-  margin-bottom: 20px;
-  background: linear-gradient(to bottom, #fff5f5, #fff);
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #ffccc7;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #ffd6d4;
+  background: linear-gradient(90deg, #e8f3ff 0%, #fff 46%, #fff 54%, #fff1f0 100%);
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
-.club-vs-container {
+.pk-board {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 20px;
-  margin-bottom: 10px;
-  width: 100%;
+  gap: 8px 6px;
 }
 
-.club-info {
+.pk-side {
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
-.club-info.own {
-  justify-self: end;
+.pk-side.opponent {
+  flex-direction: row-reverse;
+  text-align: right;
 }
 
-.club-info.opponent {
-  justify-self: start;
+.pk-logo {
+  flex: 0 0 auto;
+}
+
+.pk-meta {
+  min-width: 0;
+}
+
+.pk-server {
+  color: #8c8c8c;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.pk-name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pk-side.own .pk-name {
+  color: #1677ff;
+}
+
+.pk-side.opponent .pk-name {
+  color: #f5222d;
+}
+
+.pk-mid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pk-vs {
+  color: #ff7875;
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 800;
 }
 
 .club-logo {
@@ -1703,32 +1567,85 @@ onMounted(() => {
 
 .club-details {
   text-align: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .club-name {
-  font-size: 18px;
-  font-weight: bold;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 700;
   color: #333;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-score {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.club-info.own .club-score {
+  color: #1890ff;
+}
+
+.club-info.opponent .club-score {
+  color: #ff4d4f;
+}
+
+.club-score-label {
+  font-size: 12px;
+  color: #999;
 }
 
 .club-stats {
-  font-size: 14px;
+  font-size: 12px;
   color: #ff4d4f;
+  max-width: 100%;
+  line-height: 1.4;
+  word-break: break-all;
 
   &.announcement {
     white-space: pre-wrap;
     word-break: break-all;
-    max-width: 300px;
+    overflow: visible;
+    max-width: 100%;
     line-height: 1.5;
   }
 }
 
+/* 页面上只留服名、人数和战力；ID 和公告导出图片时再展开 */
+.export-only {
+  display: none;
+}
+
+.peach-info-card.exporting-image {
+  .export-only {
+    display: block;
+  }
+
+  .club-name,
+  .club-stats {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .header-section,
+  .club-info {
+    overflow: visible;
+  }
+}
+
 .vs-badge {
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 900;
   color: #ff7875;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   font-style: italic;
+  flex-shrink: 0;
 }
 
 .battle-title {
@@ -1746,11 +1663,124 @@ onMounted(() => {
   height: 300px;
 }
 
+.score-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  margin-top: 12px;
+  overflow: auto;
+}
+
+.side-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.side-btn {
+  height: 34px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #595959;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.side-btn.own.active {
+  border-color: #1677ff;
+  background: #e6f4ff;
+  color: #1677ff;
+}
+
+.side-btn.opponent.active {
+  border-color: #ff4d4f;
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.side-empty {
+  padding: 24px 0;
+  color: #999;
+  text-align: center;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px 48px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+}
+
+.score-head {
+  color: #999;
+  font-size: 12px;
+}
+
+.player-role {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.role-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+}
+
+.role-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #1890ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.player-name {
+  overflow: hidden;
+  color: #1890ff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-col {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.player-win,
+.player-revive {
+  font-weight: 700;
+}
+
+.player-win {
+  color: #ff4d4f;
+}
+
+.player-revive {
+  color: #52c41a;
+}
+
 .members-table {
   margin-top: 20px;
   flex: 1;
   overflow: hidden;
-  /* Use NDataTable's scroll or auto here */
   display: flex;
   flex-direction: column;
 }

@@ -58,6 +58,7 @@
         </NButton>
         <NButton
           size="small"
+          type="primary"
           :disabled="!opponentMembers.length"
           @click="handleExportImage"
           class="action-btn export-btn"
@@ -70,7 +71,7 @@
         <NButton
           size="small"
           :disabled="loading"
-          @click="fetchBattleRecordsByDate"
+          @click="fetchBattleInfo"
           class="refresh-btn"
         >
           <template #icon>
@@ -90,7 +91,7 @@
         <!-- Own Club (Left) — right edge slants right -->
         <div class="club-info own">
           <div class="club-details">
-            <div class="club-stats club-id-text">
+            <div class="club-stats club-id-text export-only">
               ID: {{ battleInfo.ownClub.id }}
             </div>
             <div class="club-name-row">
@@ -112,7 +113,7 @@
               {{ battleInfo.ownClub.quenchNum }}红 |
               {{ formatPower(battleInfo.ownClub.power) }}
             </div>
-            <div class="club-stats announcement club-announce-text">
+            <div class="club-stats announcement club-announce-text export-only">
               {{ battleInfo.ownClub.announcement }}
             </div>
           </div>
@@ -126,7 +127,7 @@
         <!-- Opponent Club (Right) — left edge slants right -->
         <div class="club-info opponent">
           <div class="club-details">
-            <div class="club-stats club-id-text">
+            <div class="club-stats club-id-text export-only">
               ID: {{ battleInfo.opponentClub.id }}
             </div>
             <div class="club-name-row">
@@ -148,7 +149,7 @@
               {{ battleInfo.opponentClub.quenchNum }}红 |
               {{ formatPower(battleInfo.opponentClub.power) }}
             </div>
-            <div class="club-stats announcement club-announce-text">
+            <div class="club-stats announcement club-announce-text export-only">
               {{ battleInfo.opponentClub.announcement }}
             </div>
           </div>
@@ -779,11 +780,16 @@ const selectPeachCalendarDate = (value) => {
   fetchBattleRecordsByDate(value);
 };
 
+const toQueryDateText = (value) => {
+  if (typeof value !== "string") return "";
+  const matched = value.match(/^(\d{4})\/(\d{2})\/(\d{2})/);
+  return matched ? `${matched[1]}/${matched[2]}/${matched[3]}` : "";
+};
+
 const formatDateToShort = (dateStr) => {
-  if (!dateStr) return "";
-  const parts = dateStr.split("/");
-  if (parts.length !== 3) return dateStr;
-  const [year, month, day] = parts;
+  const text = toQueryDateText(dateStr);
+  if (!text) return "";
+  const [year, month, day] = text.split("/");
   return year.slice(2) + month + day;
 };
 
@@ -1774,11 +1780,8 @@ const columns = [
 
 //日期选择时调用查询战绩方法
 const fetchBattleRecordsByDate = (val) => {
-  if (!isSameGameValue(undefined, val)) {
-    queryDate.value = val;
-  } else {
-    queryDate.value = getLastSunday();
-  }
+  const text = toQueryDateText(val);
+  queryDate.value = text || getLastSunday();
   battleInfo.value = null;
   opponentMembers.value = [];
   fetchBattleInfo();
@@ -1796,6 +1799,10 @@ const fetchBattleInfo = async () => {
   if (wsStatus !== "connected") {
     message.error("WebSocket未连接，无法查询");
     return;
+  }
+
+  if (!toQueryDateText(queryDate.value)) {
+    queryDate.value = getLastSunday();
   }
 
   loading.value = true;
@@ -2187,6 +2194,16 @@ watch(selectedTokenId, (newTokenId, oldTokenId) => {
   max-width: none;
   overflow: visible;
 
+  .export-only {
+    display: block;
+  }
+
+  .club-name,
+  .club-stats {
+    overflow: visible;
+    white-space: normal;
+  }
+
   .members-table {
     max-width: none;
     overflow: visible;
@@ -2323,19 +2340,23 @@ watch(selectedTokenId, (newTokenId, oldTokenId) => {
   text-align: center;
   margin-bottom: 20px;
   background: linear-gradient(to bottom, #f0f7ff, #fff);
-  padding: 16px;
+  padding: 12px 8px;
   border-radius: 12px;
   border: 1px solid #d6e8f7;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .club-vs-container {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 0;
   margin-bottom: 10px;
   width: 100%;
+  min-width: 0;
 }
 
 .club-info {
@@ -2427,19 +2448,26 @@ watch(selectedTokenId, (newTokenId, oldTokenId) => {
 
 .club-details {
   text-align: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .club-name-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .club-name {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: bold;
   color: #2c3e50;
+  min-width: 0;
+  line-height: 1.3;
+  word-break: break-all;
 }
 
 .club-server {
@@ -2449,15 +2477,24 @@ watch(selectedTokenId, (newTokenId, oldTokenId) => {
 }
 
 .club-stats {
-  font-size: 14px;
+  font-size: 12px;
   color: #5a7a9a;
+  max-width: 100%;
+  line-height: 1.4;
+  word-break: break-all;
 
   &.announcement {
     white-space: pre-wrap;
     word-break: break-all;
-    max-width: 300px;
+    overflow: visible;
+    max-width: 100%;
     line-height: 1.5;
   }
+}
+
+/* 页面上只留服名、人数和战力；ID 和公告导出图片时再展开 */
+.export-only {
+  display: none;
 }
 
 /* 分色：ID 和人数/战力行 */

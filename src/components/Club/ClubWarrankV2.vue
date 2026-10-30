@@ -109,7 +109,7 @@
           >
           <n-button
             type="primary"
-            size="small"
+            size="medium"
             :disabled="!battleRecords1 || loading1"
             @click="handleExport1"
             class="action-btn export-btn"

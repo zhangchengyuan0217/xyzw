@@ -62,7 +62,6 @@
               </n-button>
               <n-button
                 size="small"
-                type="primary"
                 :disabled="!isConnected && !isEntireBattlefield"
                 @click="refreshData"
                 style="margin-right: 8px"
@@ -76,7 +75,8 @@
               </n-button>
               <n-button
                 size="small"
-                type="info"
+                type="primary"
+                class="export-btn"
                 :loading="exporting"
                 @click="exportImage"
                 :disabled="!validData"

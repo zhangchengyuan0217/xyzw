@@ -176,7 +176,10 @@
         </n-radio-group>
       </div>
 
-      <div class="warrank-full-container" v-if="peachSubTab === 'peachBattle'">
+      <div
+        class="warrank-full-container peach-battle-page"
+        v-if="peachSubTab === 'peachBattle'"
+      >
         <PeachBattleRecords />
       </div>
 
@@ -509,9 +512,225 @@ onUnmounted(() => {
   }
 }
 
-.game-status-container.camp-mode {
-  padding: 0;
+.game-status-container.camp-mode,
+.game-status-container.full-page-mode {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 8px;
   gap: 0;
+  overflow-x: hidden;
+}
+
+.game-status-container.full-page-mode,
+.game-status-container.camp-mode {
+  :deep(.header-left),
+  :deep(.header-title p),
+  :deep(.announcement-section),
+  :deep(.export-options),
+  :deep(.style-switch-bar),
+  :deep(.main-title) {
+    display: none;
+  }
+
+  :deep(.header-section) {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  :deep(.function-section),
+  :deep(.toolbar),
+  :deep(.header-actions) {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--bg-primary);
+  }
+
+  :deep(.function-right),
+  :deep(.toolbar .right),
+  :deep(.header-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  :deep(.peach-info-card .toolbar) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  :deep(.peach-info-card .peach-actions) {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: auto;
+  }
+
+  :deep(.records-container .export-options) {
+    display: flex;
+    width: 100%;
+  }
+
+  :deep(.records-container .function-section) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  :deep(.records-container .function-left) {
+    width: 100%;
+  }
+
+  :deep(.records-container .function-right) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+  }
+
+  :deep(.records-container .records-wrapper) {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  :deep(.records-container .style1-table-container),
+  :deep(.records-container .style2-table-wrapper) {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  :deep(.records-container table) {
+    table-layout: fixed !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :deep(.records-container th),
+  :deep(.records-container td) {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+  }
+
+  :deep(.export-btn) {
+    min-height: 36px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(24, 160, 88, 0.35);
+  }
+
+  :deep(.records-container .header-section .stats-section),
+  :deep(.club-warrank-card .header-section .stats-section) {
+    display: none;
+  }
+
+  :deep(.legion-war-map-card .stat-item:not(:last-child)) {
+    display: none;
+  }
+
+  :deep(.legion-war-statistics-container .stat-item) {
+    display: none;
+  }
+
+  :deep(.monthly-stats-overview) {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  :deep(.monthly-stats-overview .stats-header h3),
+  :deep(.members-list h3) {
+    display: none;
+  }
+
+  :deep(table) {
+    font-size: 12px;
+  }
+
+  :deep(thead th) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-primary);
+  }
+
+  :deep(.records-list),
+  :deep(.records-wrapper),
+  :deep(.members-table-wrapper),
+  :deep(.style1-table-container),
+  :deep(.table-content),
+  :deep(.n-data-table),
+  :deep(.n-data-table-wrapper),
+  :deep(.n-data-table-base-table),
+  :deep(.n-data-table-base-table-body),
+  :deep(.n-scrollbar-container) {
+    max-width: 100%;
+    min-width: 0 !important;
+    max-height: calc(100dvh - 210px);
+    overflow-x: hidden !important;
+    overflow-y: auto;
+  }
+
+  :deep(.n-scrollbar-rail--horizontal),
+  :deep(.n-tabs-nav__prefix),
+  :deep(.n-tabs-nav__suffix) {
+    display: none !important;
+  }
+
+  :deep(.n-tabs-nav),
+  :deep(.n-tabs-nav-scroll-wrapper),
+  :deep(.n-tabs-nav-scroll-content),
+  :deep(.n-radio-group) {
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  :deep(table),
+  :deep(.n-data-table-table) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+  }
+
+  :deep(th),
+  :deep(td),
+  :deep(.n-data-table-th),
+  :deep(.n-data-table-td),
+  :deep(.n-data-table-th__title) {
+    min-width: 0 !important;
+    max-width: 100%;
+    white-space: normal !important;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  :deep(.main-content-layout) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  :deep(.map-container),
+  :deep(.mapCanvas) {
+    width: 100%;
+    max-height: 62vh;
+  }
+
+  :deep(.side-info-panel) {
+    max-height: 28vh;
+    overflow: auto;
+  }
 }
 
 .game-status-container.pvp-mode {
@@ -561,6 +780,12 @@ onUnmounted(() => {
 .style-switch-bar :deep(.n-radio-button) {
   width: 100%;
   text-align: center;
+}
+
+.warrank-full-container.peach-battle-page {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
 }
 
 .warrank-full-container {

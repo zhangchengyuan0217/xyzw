@@ -11,6 +11,14 @@
         </NTag>
         <NButton
           size="small"
+          type="primary"
+          :disabled="!battleInfo || loading"
+          @click="handleExportImage"
+        >
+          导出
+        </NButton>
+        <NButton
+          size="small"
           :disabled="loading"
           :loading="loading"
           @click="fetchCampChallengeData"
@@ -75,12 +83,6 @@
           <div class="tab-item-content">
             <n-icon><TrophyOutline /></n-icon>
             <span>本周战绩</span>
-          </div>
-        </n-tab>
-        <n-tab name="lineupTable">
-          <div class="tab-item-content">
-            <n-icon><StatsChartOutline /></n-icon>
-            <span>武将布阵</span>
           </div>
         </n-tab>
       </n-tabs>
@@ -218,30 +220,18 @@
             </div>
             <div class="att-actions">
               <NButton
-                type="error"
                 size="small"
-                round
-                @click="copyUnattackedList"
                 :disabled="attendanceStats.unattackedCount === 0"
-                style="margin-right: 8px"
+                @click="copyUnattackedList"
               >
-                <template #icon>
-                  <n-icon><CopyOutline /></n-icon>
-                </template>
-                复制未动刀名单 (0/3次 · {{ attendanceStats.unattackedCount }}人)
+                复制未动刀
               </NButton>
               <NButton
-                type="warning"
                 size="small"
-                round
-                @click="copyIncompleteList"
                 :disabled="attendanceStats.incompleteCount === 0"
+                @click="copyIncompleteList"
               >
-                <template #icon>
-                  <n-icon><CopyOutline /></n-icon>
-                </template>
-                复制未打满名单 (1~2/3次 ·
-                {{ attendanceStats.incompleteCount }}人)
+                复制未打满
               </NButton>
             </div>
           </div>
@@ -317,40 +307,29 @@
         </div>
 
         <!-- 30人今日出战详细大宽表 -->
-        <div class="table-card">
-          <div class="table-header-title">
-            <div class="header-left">
-              <span>我方俱乐部 30 人今日战绩详表</span>
-              <span class="sub-hint"
-                >点击角色名称或操作按钮可查看被挑战战报</span
-              >
-            </div>
-            <div class="header-right-sort">
-              <span class="sort-label">排序维度：</span>
-              <n-radio-group v-model:value="todaySortBy" size="small">
-                <n-radio-button value="score">🏆 贡献排名</n-radio-button>
-                <n-radio-button value="attackWinRate"
-                  >🎯 出手胜率排名</n-radio-button
-                >
-                <n-radio-button value="defWinRate"
-                  >🛡️ 防守胜率排名</n-radio-button
-                >
-              </n-radio-group>
-            </div>
-          </div>
-          <n-data-table
-            :columns="todayTableColumns"
-            :data="sortedTodayMembers"
-            :row-key="
-              (row: any) =>
-                `slot_${row.slot || ''}_${row.id}_${row.mirror ? 'mirror' : 'real'}`
-            "
-            :bordered="false"
-            size="small"
-            striped
-            :scroll-x="900"
-            class="camp-data-table"
-          />
+        <NSelect
+          v-model:value="todaySortBy"
+          size="small"
+          class="sort-select"
+          :options="[
+            { label: '按贡献', value: 'score' },
+            { label: '按出手胜率', value: 'attackWinRate' },
+            { label: '按防守胜率', value: 'defWinRate' },
+          ]"
+        />
+        <div class="plain-list">
+          <button
+            v-for="row in sortedTodayMembers"
+            :key="`today_${row.id}_${row.slot}`"
+            type="button"
+            class="plain-row"
+            @click="openDuelModal(row)"
+          >
+            <b>{{ row.rankIndex }}</b>
+            <span class="plain-name">{{ row.name }}</span>
+            <span>{{ formatPower(row.power) }}</span>
+            <span>{{ row.todayScore > 0 ? `+${row.todayScore}` : "0" }}</span>
+          </button>
         </div>
       </div>
 
@@ -415,77 +394,31 @@
         </div>
 
         <!-- 30人当周战功排行榜与防守胜率考核大宽表 -->
-        <div class="table-card">
-          <div class="table-header-title">
-            <div class="header-left">
-              <span>我方 30 人当周总战功与防守胜率考核大宽表</span>
-              <span class="sub-hint"
-                >统计本周累计战功、受击交战次数、防守守住次数与防守胜率</span
-              >
-            </div>
-            <div class="header-right-sort">
-              <span class="sort-label">排序维度：</span>
-              <n-radio-group v-model:value="weeklySortBy" size="small">
-                <n-radio-button value="score">🏆 贡献排名</n-radio-button>
-                <n-radio-button value="defWinRate"
-                  >🛡️ 防守胜率排名</n-radio-button
-                >
-              </n-radio-group>
-            </div>
-          </div>
-          <n-data-table
-            :columns="weeklyRosterColumns"
-            :data="sortedWeeklyRoster"
-            :row-key="
-              (row: any) =>
-                `slot_${row.slot || ''}_${row.id}_${row.mirror ? 'mirror' : 'real'}`
-            "
-            :bordered="false"
-            size="small"
-            striped
-            :scroll-x="1000"
-            class="camp-data-table"
-          />
-        </div>
-      </div>
-
-      <!-- ================= 视图 4：详细武将布阵大表 ================= -->
-      <div
-        v-else-if="activeViewTab === 'lineupTable'"
-        class="members-table-section"
-      >
-        <!-- 阵容流派统计条 (参考蟠桃园) -->
-        <div class="lineup-summary-bar" v-if="lineupStats.length">
-          <span class="lineup-stats-label">
-            {{ selectedSide === "opponent" ? "敌方" : "我方" }}阵容流派分布：
-          </span>
-          <NTag
-            v-for="item in lineupStats"
-            :key="item.name"
-            :color="item.colorProps"
-            size="small"
-            :bordered="false"
-            class="lineup-stats-tag"
-          >
-            {{ item.name }} ({{ item.count }}人)
-          </NTag>
-        </div>
-
-        <!-- 30人真实布阵大宽表 -->
-        <n-data-table
-          :columns="columns"
-          :data="currentMemberList"
-          :row-key="
-            (row: any) =>
-              `slot_${row.slot || ''}_${row.id}_${row.mirror ? 'mirror' : 'real'}`
-          "
-          :bordered="false"
+        <NSelect
+          v-model:value="weeklySortBy"
           size="small"
-          striped
-          :scroll-x="1500"
-          class="camp-data-table"
+          class="sort-select"
+          :options="[
+            { label: '按贡献', value: 'score' },
+            { label: '按防守胜率', value: 'defWinRate' },
+          ]"
         />
+        <div class="plain-list">
+          <button
+            v-for="row in sortedWeeklyRoster"
+            :key="`week_${row.id}_${row.slot}`"
+            type="button"
+            class="plain-row"
+            @click="openDuelModal(row)"
+          >
+            <b>{{ row.currentRank }}</b>
+            <span class="plain-name">{{ row.name }}</span>
+            <span>{{ row.score || 0 }}分</span>
+            <span>{{ row.defWinRate || "—" }}</span>
+          </button>
+        </div>
       </div>
+
     </div>
 
     <!-- 空数据展示 -->
@@ -790,10 +723,8 @@
  */
 
 import {
-  CopyOutline,
   FlameOutline,
   ShieldOutline,
-  StatsChartOutline,
   TrophyOutline,
 } from "@vicons/ionicons5";
 import html2canvas from "html2canvas";
@@ -3399,13 +3330,14 @@ onMounted(() => {
 
 .schedule-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
+  max-width: 100%;
 }
 
 .schedule-chip {
-  flex: 1;
-  min-width: 64px;
+  flex: 1 1 30%;
+  min-width: 0;
   padding: 6px 8px;
   font: inherit;
   color: inherit;
@@ -4391,6 +4323,37 @@ onMounted(() => {
   margin-left: 8px;
 }
 
+.sort-select {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.plain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plain-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: inherit;
+  text-align: left;
+}
+
+.plain-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .camp-challenge-container {
     padding: 12px;
@@ -4469,7 +4432,71 @@ onMounted(() => {
 
   .tab-item-content {
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .camp-main-tabs :deep(.n-tabs-nav),
+  .camp-main-tabs :deep(.n-tabs-nav-scroll-wrapper),
+  .camp-main-tabs :deep(.n-tabs-nav-scroll-content),
+  .camp-main-tabs :deep(.n-tabs-rail) {
+    width: 100% !important;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .camp-main-tabs :deep(.n-tabs-rail) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: auto;
+  }
+
+  .att-actions,
+  .unattacked-tags,
+  .attendance-header,
+  .att-title-group {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .att-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .att-actions :deep(.n-button) {
+    flex: 1;
+  }
+
+  .sort-select {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .plain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .plain-row {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--bg-primary);
+    color: inherit;
+    text-align: left;
+  }
+
+  .plain-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -4505,8 +4532,13 @@ onMounted(() => {
     transform: none;
   }
 
-  .camp-data-table {
-    overflow-x: auto;
+  .camp-challenge-container,
+  .views-content-wrapper,
+  .today-details-section,
+  .week-roster-section,
+  .battle-map-section {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 </style>

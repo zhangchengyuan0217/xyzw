@@ -40,6 +40,21 @@
       </div>
     </div>
 
+    <button
+      v-if="showReconnect"
+      type="button"
+      class="reconnect-fab"
+      :disabled="isConnecting"
+      @click="reconnectSocket"
+    >
+      <span class="reconnect-title">{{
+        isConnecting ? "正在连接" : "连接已断开"
+      }}</span>
+      <span class="reconnect-action">{{
+        isConnecting ? "请稍候" : "点击重连"
+      }}</span>
+    </button>
+
     <nav class="tabbar">
       <button
         v-for="tab in tabs"
@@ -71,7 +86,7 @@ import {
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
 import { useMessage } from "naive-ui";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
@@ -85,7 +100,39 @@ const tokenStore = useTokenStore();
 const { getArrayBuffer } = useIndexedDB();
 
 const currentFeature = computed(() => findGameFeature(route.params.feature));
-useGameConnection(computed(() => Boolean(currentFeature.value)));
+const { reconnect } = useGameConnection(
+  computed(() => Boolean(currentFeature.value)),
+);
+const reconnecting = ref(false);
+
+const wsStatus = computed(() => {
+  const token = tokenStore.selectedToken;
+  if (!token) return "disconnected";
+  return tokenStore.getWebSocketStatus(token.id);
+});
+
+const isConnecting = computed(
+  () => reconnecting.value || wsStatus.value === "connecting",
+);
+
+const showReconnect = computed(
+  () => Boolean(tokenStore.selectedToken) && wsStatus.value !== "connected",
+);
+
+const reconnectSocket = async () => {
+  if (!tokenStore.selectedToken || isConnecting.value) return;
+  reconnecting.value = true;
+  try {
+    const ready = await reconnect();
+    if (ready) {
+      message.success("已重新连接");
+    } else {
+      message.error("重连失败，请稍后再试");
+    }
+  } finally {
+    reconnecting.value = false;
+  }
+};
 
 // ============ BIN 格式转换 ============
 
@@ -370,6 +417,44 @@ onMounted(async () => {
   background: var(--bg-secondary);
 }
 
+.reconnect-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 96px;
+  height: 72px;
+  padding: 8px;
+  border: 0;
+  border-radius: 14px;
+  background: #ff4d4f;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(255, 77, 79, 0.35);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: wait;
+  }
+}
+
+.reconnect-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.reconnect-action {
+  font-size: 12px;
+  line-height: 1.2;
+  opacity: 0.92;
+}
+
 .tabbar {
   position: fixed;
   right: 0;
@@ -499,7 +584,9 @@ onMounted(async () => {
 
 .feature-page {
   min-height: calc(100dvh - 64px);
+  max-width: 100%;
   padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
   background: var(--bg-secondary);
 }
 

@@ -32,7 +32,8 @@
           </n-button>
           <n-button
             type="primary"
-            size="small"
+            size="medium"
+            class="export-btn"
             :disabled="!monthlyBattleRecords || loading"
             @click="handleExport"
           >

@@ -34,6 +34,14 @@ export function useGameConnection(isActive) {
     await initializeGameData();
   };
 
+  const reconnect = async () => {
+    if (!tokenStore.selectedToken) return false;
+    const tokenId = tokenStore.selectedToken.id;
+    const ready = await tokenStore.ensureSocket(tokenId);
+    if (ready && isActive.value) await initializeGameData();
+    return ready;
+  };
+
   watch(isActive, ensureConnection, { immediate: true });
 
   watch(
@@ -65,4 +73,6 @@ export function useGameConnection(isActive) {
     },
     { deep: true },
   );
+
+  return { reconnect };
 }
