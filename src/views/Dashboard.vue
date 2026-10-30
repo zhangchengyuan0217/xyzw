@@ -1,26 +1,23 @@
 <template>
-  <div v-if="currentFeature" class="feature-page">
-    <button
-      type="button"
-      class="feature-back"
-      @click="router.push('/admin/dashboard')"
-    >
-      <ChevronBack />
-      <span>{{ currentFeature.title }}</span>
-    </button>
-    <GameStatus
-      :section="currentFeature.section"
-      :sub="currentFeature.sub || ''"
-    />
-  </div>
-  <div v-else class="dashboard-page">
-    <div class="feature-list">
-      <template v-for="item in menuItems" :key="item.id">
-        <div v-if="item.kind === 'label'" class="feature-label">
-          {{ item.title }}
-        </div>
+  <div class="app-shell">
+    <div v-if="currentFeature && activeTab !== 'pvp'" class="feature-page">
+      <button type="button" class="feature-back" @click="backToTab">
+        <ChevronBack />
+        <span>{{ currentFeature.title }}</span>
+      </button>
+      <GameStatus
+        :section="currentFeature.section"
+        :sub="currentFeature.sub || ''"
+      />
+    </div>
+    <div v-else-if="activeTab === 'pvp'" class="feature-page">
+      <GameStatus section="fightPvp" />
+    </div>
+    <div v-else class="dashboard-page">
+      <div class="feature-list">
         <button
-          v-else
+          v-for="item in visibleItems"
+          :key="item.id"
           type="button"
           class="feature-row"
           @click="openMenuItem(item)"
@@ -36,8 +33,22 @@
             <ChevronForward />
           </span>
         </button>
-      </template>
+      </div>
     </div>
+
+    <nav class="tabbar">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        type="button"
+        class="tabbar-item"
+        :class="{ active: activeTab === tab.id }"
+        @click="selectTab(tab.id)"
+      >
+        <component :is="tab.icon" />
+        <span>{{ tab.title }}</span>
+      </button>
+    </nav>
   </div>
 </template>
 
@@ -49,7 +60,10 @@ import {
   ChevronForward,
   Cloud,
   Cube,
+  EllipsisHorizontal,
   GameController,
+  Person,
+  Trophy,
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
 import { useMessage } from "naive-ui";
@@ -163,47 +177,109 @@ const openGame = async () => {
   router.push("/game");
 };
 
-const menuItems = computed(() => [
-  {
-    kind: "action",
-    id: "open-game",
-    icon: GameController,
-    title: "打开游戏",
-    description: "使用当前Token直接进入游戏",
-    action: "open-game",
-  },
-  { kind: "label", id: "label-game", title: "游戏功能" },
-  ...gameFeatures.map((feature) => ({
-    kind: "feature",
-    icon: Cube,
-    ...feature,
-  })),
-  { kind: "label", id: "label-more", title: "其他" },
-  {
-    kind: "action",
-    id: "add-token",
-    icon: Add,
-    title: "添加账号",
-    description: "快速添加新的游戏账号",
-    action: "add-token",
-  },
-  {
-    kind: "action",
-    id: "batch-daily-tasks",
-    icon: CheckmarkCircle,
-    title: "批量任务",
-    description: "批量执行任务",
-    action: "batch-daily-tasks",
-  },
-  {
-    kind: "action",
-    id: "websocket-test",
-    icon: Cloud,
-    title: "WebSocket测试",
-    description: "测试WebSocket连接和游戏命令",
-    action: "websocket-test",
-  },
-]);
+const tabs = [
+  { id: "mine", title: "我的", icon: Person },
+  { id: "events", title: "活动", icon: Trophy },
+  { id: "pvp", title: "切磋", icon: GameController },
+  { id: "more", title: "其他", icon: EllipsisHorizontal },
+];
+
+const featureTab = {
+  daily: "mine",
+  club: "mine",
+  activity: "mine",
+  camp: "events",
+  warrank: "events",
+  "week-battle": "events",
+  "month-battle": "events",
+  "war-map": "events",
+  "war-stats": "events",
+  peach: "events",
+  "peach-battle": "events",
+  pvp: "pvp",
+};
+
+const featureById = Object.fromEntries(
+  gameFeatures.map((feature) => [feature.id, feature]),
+);
+
+const tabItems = {
+  mine: [
+    {
+      kind: "action",
+      id: "open-game",
+      icon: GameController,
+      title: "打开游戏",
+      description: "使用当前Token直接进入游戏",
+      action: "open-game",
+    },
+    { kind: "feature", icon: Cube, ...featureById.daily },
+    { kind: "feature", icon: Cube, ...featureById.club },
+    { kind: "feature", icon: Cube, ...featureById.activity },
+  ],
+  events: [
+    "camp",
+    "warrank",
+    "week-battle",
+    "month-battle",
+    "war-map",
+    "war-stats",
+    "peach",
+    "peach-battle",
+  ].map((id) => ({ kind: "feature", icon: Cube, ...featureById[id] })),
+  more: [
+    {
+      kind: "action",
+      id: "add-token",
+      icon: Add,
+      title: "添加账号",
+      description: "快速添加新的游戏账号",
+      action: "add-token",
+    },
+    {
+      kind: "action",
+      id: "batch-daily-tasks",
+      icon: CheckmarkCircle,
+      title: "批量任务",
+      description: "批量执行任务",
+      action: "batch-daily-tasks",
+    },
+    {
+      kind: "action",
+      id: "websocket-test",
+      icon: Cloud,
+      title: "WebSocket测试",
+      description: "测试WebSocket连接和游戏命令",
+      action: "websocket-test",
+    },
+  ],
+};
+
+const activeTab = computed(() => {
+  const featureId = currentFeature.value?.id;
+  if (featureId && featureTab[featureId]) return featureTab[featureId];
+  if (route.query.tab === "events" || route.query.tab === "more") {
+    return route.query.tab;
+  }
+  return "mine";
+});
+
+const visibleItems = computed(() => tabItems[activeTab.value] || tabItems.mine);
+
+const selectTab = (id) => {
+  if (id === "pvp") {
+    router.push("/admin/dashboard/pvp");
+    return;
+  }
+  router.push({
+    path: "/admin/dashboard",
+    query: id === "mine" ? {} : { tab: id },
+  });
+};
+
+const backToTab = () => {
+  selectTab(featureTab[currentFeature.value?.id] || "mine");
+};
 
 const openMenuItem = (item) => {
   if (item.kind === "feature") {
@@ -276,10 +352,52 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+.app-shell {
+  min-height: calc(100dvh - 64px);
+}
+
 .dashboard-page {
   min-height: calc(100dvh - 64px);
-  padding: 12px;
+  padding: 12px 12px calc(76px + env(safe-area-inset-bottom));
   background: var(--bg-secondary);
+}
+
+.tabbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: calc(56px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-primary);
+}
+
+.tabbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+
+  :deep(svg) {
+    width: 22px;
+    height: 22px;
+  }
+
+  &.active {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
 }
 
 @media (max-width: 768px) {
@@ -364,15 +482,9 @@ onMounted(async () => {
   }
 }
 
-.feature-label {
-  padding: 8px 4px 0;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  font-weight: 600;
-}
-
 .feature-page {
   min-height: calc(100dvh - 64px);
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
   background: var(--bg-secondary);
 }
 
