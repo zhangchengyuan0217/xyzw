@@ -9,7 +9,7 @@
             <n-icon>
               <Menu />
             </n-icon>
-            <span class="brand-text">XYZW 控制台</span>
+            <span class="brand-text">XYZW</span>
           </div>
         </div>
 

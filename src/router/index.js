@@ -188,9 +188,7 @@ router.beforeEach((to, from, next) => {
   const tokenStore = useTokenStore();
 
   // 设置页面标题
-  document.title = to.meta.title
-    ? `${to.meta.title} - XYZW 助手`
-    : "XYZW 助手";
+  document.title = to.meta.title ? `${to.meta.title} - XYZW 助手` : "XYZW 助手";
   if (to.name === "LegionWar" && !isNowInLegionWarTime()) {
     next("/admin/dashboard");
     return;
