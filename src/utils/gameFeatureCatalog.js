@@ -18,12 +18,6 @@ export const gameFeatures = [
     section: "activity",
   },
   {
-    id: "tools",
-    title: "工具",
-    description: "宝箱、钓鱼、招募等助手",
-    section: "tools",
-  },
-  {
     id: "apex",
     title: "逐鹿盐山",
     description: "逐鹿盐山挑战",

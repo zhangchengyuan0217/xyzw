@@ -37,37 +37,6 @@
     <!-- 挂机状态（提取组件） -->
     <HangUpStatusCard v-show="activeSection === 'daily'" />
 
-    <!-- 无限阵容助手（提取组件） -->
-    <Unlimitedlineup v-show="activeSection === 'tools'" />
-
-    <!-- 宝箱助手（提取组件） -->
-    <BoxHelperCard v-show="activeSection === 'tools'" />
-
-    <!-- 钓鱼助手（提取组件） -->
-    <FishHelperCard v-show="activeSection === 'tools'" />
-
-    <!-- 招募助手（提取组件） -->
-    <RecruitHelperCard v-show="activeSection === 'tools'" />
-
-    <!-- 升星助手（提取组件） -->
-    <StarUpgradeCard v-if="activeSection === 'tools'" />
-
-    <!-- 竞技场助手（提取组件） -->
-    <FightHelperCard v-if="activeSection === 'tools'" />
-
-    <!-- 梦境助手（提取组件） -->
-    <DreamHelperCard v-if="activeSection === 'tools'" />
-
-    <!-- 武将升级助手（提取组件） -->
-    <HeroUpgradeCard v-if="activeSection === 'tools'" />
-
-    <!-- 洗练助手（提取组件） -->
-    <RefineHelperCard v-if="activeSection === 'tools'" />
-
-    <!-- 消耗活动进度（提取组件） -->
-    <ConsumptionProgressCard v-if="activeSection === 'tools'" />
-    <!-- 咸王宝库（提取组件） -->
-    <BossTower v-if="activeSection === 'tools'" />
     <!-- 俱乐部排位（暂时隐藏） -->
     <div
       class="status-card legion-match"
@@ -272,24 +241,14 @@ import { useTokenStore } from "@/stores/tokenStore";
 
 import ApexChallenge from "./Apex/ApexChallenge.vue";
 import BottleHelperCard from "./cards/BottleHelperCard.vue";
-import BoxHelperCard from "./cards/BoxHelperCard.vue";
-import ConsumptionProgressCard from "./cards/ConsumptionProgressCard.vue";
-import DreamHelperCard from "./cards/DreamHelperCard.vue";
-import FightHelperCard from "./cards/FightHelperCard.vue";
 import FightPvp from "./cards/FightPvp.vue";
-import FishHelperCard from "./cards/FishHelperCard.vue";
 import GoldClubList from "./cards/GoldRankListPageCard.vue";
 import HangUpStatusCard from "./cards/HangUpStatusCard.vue";
-import HeroUpgradeCard from "./cards/HeroUpgradeCard.vue";
 import MonthlyTasksCard from "./cards/MonthlyTasksCard.vue";
-import RecruitHelperCard from "./cards/RecruitHelperCard.vue";
-import RefineHelperCard from "./cards/RefineHelperCard.vue";
 import ServerRankList from "./cards/ServerRankListPageCard.vue";
-import StarUpgradeCard from "./cards/StarUpgradeCard.vue";
 import StudyChallengeCard from "./cards/StudyChallengeCard.vue";
 import TopClubList from "./cards/TopClubListPageCard.vue";
 import TopRankList from "./cards/TopRankListPageCard.vue";
-import Unlimitedlineup from "./cards/Unlimitedlineup.vue";
 import CampChallenge from "./Club/CampChallenge.vue";
 import ClubBattleRecords from "./Club/ClubBattleRecords.vue";
 import ClubMonthBattleRecords from "./Club/ClubMonthBattleRecords.vue";
@@ -301,7 +260,6 @@ import LegionWarStatistics from "./Club/LegionWarStatistics.vue";
 import PeachBattleRecords from "./Club/PeachBattleRecords.vue";
 import PeachInfo from "./Club/PeachInfo.vue";
 import PeachInfoV2 from "./Club/PeachInfoV2.vue";
-import BossTower from "./Tower/BossTower.vue";
 import TowerStatus from "./Tower/TowerStatus.vue";
 import WeirdTowerStatus from "./Tower/WeirdTowerStatus.vue";
 
