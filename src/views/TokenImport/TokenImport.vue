@@ -33,7 +33,7 @@
         <template #title>
           <h2>添加账号</h2>
         </template>
-        <div class="card-header">
+        <div v-show="!rolePicking" class="card-header">
           <!-- 导入方式选择：前两项常显，其余收进下拉 -->
           <div class="import-method-tabs">
             <n-radio-group v-model:value="importMethod" size="small">
@@ -72,11 +72,13 @@
           <WxQrcodeForm
             @cancel="() => (showImportForm = false)"
             @ok="() => (showImportForm = false)"
+            @picking="rolePicking = $event"
             v-if="importMethod === 'wxQrcode'"
           />
           <MobileTokenForm
             @cancel="() => (showImportForm = false)"
             @ok="() => (showImportForm = false)"
+            @picking="rolePicking = $event"
             v-if="importMethod === 'mobile'"
           />
           <BinTokenForm
@@ -97,38 +99,8 @@
         <div class="section-header">
           <div class="section-main">
             <div class="section-title-row">
-              <h2>我的Token列表 ({{ tokenStore.gameTokens.length }}个)</h2>
-              <n-radio-group v-model:value="viewMode" size="small">
-                <n-radio-button value="list">列表</n-radio-button>
-                <n-radio-button value="card">卡片</n-radio-button>
-              </n-radio-group>
+              <h2>我的账号列表 ({{ tokenStore.gameTokens.length }}个)</h2>
             </div>
-            <n-button-group size="small" class="sort-buttons">
-              <n-button
-                @click="toggleSort('name')"
-                :type="sortConfig.field === 'name' ? 'primary' : 'default'"
-              >
-                名称 {{ getSortIcon("name") }}
-              </n-button>
-              <n-button
-                @click="toggleSort('server')"
-                :type="sortConfig.field === 'server' ? 'primary' : 'default'"
-              >
-                服务器 {{ getSortIcon("server") }}
-              </n-button>
-              <n-button
-                @click="toggleSort('createdAt')"
-                :type="sortConfig.field === 'createdAt' ? 'primary' : 'default'"
-              >
-                创建时间 {{ getSortIcon("createdAt") }}
-              </n-button>
-              <n-button
-                @click="toggleSort('lastUsed')"
-                :type="sortConfig.field === 'lastUsed' ? 'primary' : 'default'"
-              >
-                最后使用 {{ getSortIcon("lastUsed") }}
-              </n-button>
-            </n-button-group>
           </div>
           <div class="header-actions">
             <span class="multi-game-selection-count">
@@ -217,226 +189,7 @@
           </div>
         </div>
 
-        <div class="tokens-grid" v-if="viewMode === 'card'">
-          <a-card
-            v-for="(gameToken, tokenIndex) in sortedTokens"
-            :key="gameToken.id"
-            draggable="true"
-            @dragstart="handleDragStart(tokenIndex, $event)"
-            @dragover="handleDragOver($event)"
-            @drop="handleDrop(tokenIndex, $event)"
-            class="token-card"
-            :class="{
-              active: selectedTokenId === gameToken.id,
-            }"
-            @click="selectToken(gameToken)"
-          >
-            <template #title>
-              <a-space class="token-name" align="center">
-                <span
-                  class="multi-game-token-checkbox"
-                  @click.stop
-                  @mousedown.stop
-                  @dragstart.stop.prevent
-                >
-                  <n-checkbox
-                    :checked="multiGameSelectedTokenIds.has(gameToken.id)"
-                    :disabled="isOpeningMultiGame"
-                    :aria-label="`选择 ${gameToken.name} 批量进入游戏`"
-                    @click.stop
-                    @update:checked="
-                      (checked) =>
-                        setMultiGameTokenSelected(gameToken.id, checked)
-                    "
-                  />
-                </span>
-                <n-avatar
-                  v-if="gameToken.avatar"
-                  :src="gameToken.avatar"
-                  round
-                  size="small"
-                  fallback-src="/icons/xiaoyugan.png"
-                />
-                {{ gameToken.name }}
-                <a-tag
-                  :color="getServerTagColor(gameToken.id)"
-                  v-if="gameToken.server"
-                  >{{ gameToken.server }}</a-tag
-                >
-                <!-- 连接状态指示器 -->
-                <a-badge
-                  :status="getTokenStyle(gameToken.id)"
-                  :text="getConnectionStatusText(gameToken.id)"
-                />
-                <!-- 连接状态文字 -->
-                <!-- <a-tag color="green">
-                  {{ getConnectionStatusText(token.id) }}
-                </a-tag> -->
-              </a-space>
-            </template>
-            <template #extra>
-              <n-dropdown
-                :options="getTokenActions(gameToken)"
-                @select="(key) => handleTokenAction(key, gameToken)"
-              >
-                <n-button text>
-                  <template #icon>
-                    <NIcon>
-                      <EllipsisHorizontal />
-                    </NIcon>
-                  </template>
-                </n-button>
-              </n-dropdown>
-            </template>
-
-            <template #default>
-              <div class="token-display">
-                <span class="token-label">Token:</span>
-                <code class="token-value">{{
-                  maskToken(gameToken.token)
-                }}</code>
-              </div>
-
-              <!-- 备注信息 -->
-              <div
-                v-if="editingRemark === gameToken.id"
-                class="token-remark token-remark-edit"
-                @click.stop
-              >
-                <span class="remark-label">备注：</span>
-                <n-input
-                  v-model:value="tempRemarks[gameToken.id]"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="添加备注信息..."
-                  @blur="saveRemark(gameToken)"
-                  @keyup.enter="saveRemark(gameToken)"
-                  @keyup.esc="cancelEditRemark()"
-                  autofocus
-                />
-              </div>
-              <div
-                v-else
-                class="token-remark"
-                @click.stop="startEditRemark(gameToken)"
-              >
-                <span class="remark-label">备注：</span>
-                <span class="remark-value">{{
-                  gameToken.remark || "点击添加备注"
-                }}</span>
-                <NIcon style="margin-left: 4px; color: var(--text-tertiary)">
-                  <Create />
-                </NIcon>
-              </div>
-
-              <a-button
-                :loading="refreshingTokens.has(gameToken.id)"
-                @click.stop="refreshToken(gameToken)"
-              >
-                <template #icon>
-                  <NIcon>
-                    <Refresh />
-                  </NIcon>
-                </template>
-                {{ gameToken.sourceUrl ? "刷新" : "重新获取" }}
-              </a-button>
-
-              <div class="token-timestamps">
-                <div class="timestamp-item">
-                  <span class="timestamp-label">创建：</span>
-                  <span class="timestamp-value">{{
-                    formatTime(gameToken.createdAt)
-                  }}</span>
-                </div>
-                <div class="timestamp-item">
-                  <span class="timestamp-label">使用：</span>
-                  <span class="timestamp-value">{{
-                    formatTime(gameToken.lastUsed)
-                  }}</span>
-                </div>
-              </div>
-
-              <!-- 存储类型信息 -->
-              <div class="storage-info">
-                <div class="storage-item">
-                  <span class="storage-label">存储类型：</span>
-                  <n-tag
-                    size="small"
-                    :type="
-                      gameToken.importMethod === 'url' ||
-                      gameToken.importMethod === 'bin' ||
-                      gameToken.importMethod === 'wxQrcode' ||
-                      gameToken.importMethod === 'mobile' ||
-                      gameToken.importMethod === 'wxForceLogout' ||
-                      gameToken.upgradedToPermanent
-                        ? 'success'
-                        : 'warning'
-                    "
-                  >
-                    {{
-                      gameToken.importMethod === "url" ||
-                      gameToken.importMethod === "bin" ||
-                      gameToken.importMethod === "wxQrcode" ||
-                      gameToken.importMethod === "mobile" ||
-                      gameToken.importMethod === "wxForceLogout" ||
-                      gameToken.upgradedToPermanent
-                        ? "长期有效"
-                        : "临时存储"
-                    }}
-                  </n-tag>
-                </div>
-
-                <!-- 升级选项（仅对临时存储的token显示） -->
-                <div
-                  v-if="
-                    !(
-                      gameToken.importMethod === 'url' ||
-                      gameToken.importMethod === 'bin' ||
-                      gameToken.importMethod === 'wxQrcode' ||
-                      gameToken.importMethod === 'mobile' ||
-                      gameToken.importMethod === 'wxForceLogout' ||
-                      gameToken.upgradedToPermanent
-                    )
-                  "
-                  class="storage-upgrade"
-                >
-                  <n-button
-                    size="tiny"
-                    type="success"
-                    ghost
-                    @click.stop="upgradeTokenToPermanent(gameToken)"
-                  >
-                    <template #icon>
-                      <NIcon>
-                        <Star />
-                      </NIcon>
-                    </template>
-                    升级为长期有效
-                  </n-button>
-                </div>
-              </div>
-            </template>
-            <template #actions>
-              <n-button
-                type="primary"
-                size="large"
-                block
-                :loading="connectingTokens.has(gameToken.id)"
-                @click="startTaskManagement(gameToken)"
-              >
-                <template #icon>
-                  <NIcon>
-                    <Home />
-                  </NIcon>
-                </template>
-                进入控制台
-              </n-button>
-            </template>
-          </a-card>
-        </div>
-
-        <!-- List View -->
-        <div class="tokens-list" v-else>
+        <div class="tokens-list">
           <n-card
             v-for="(gameToken, tokenIndex) in sortedTokens"
             :key="gameToken.id"
@@ -798,6 +551,10 @@ const showEditModal = ref(false);
 const editFormRef = ref(null);
 const editingToken = ref(null);
 const importMethod = ref("wxQrcode");
+const rolePicking = ref(false);
+watch(importMethod, () => {
+  rolePicking.value = false;
+});
 const moreImportMethods = [
   { key: "manual", label: "手动输入" },
   { key: "url", label: "URL获取" },
@@ -828,8 +585,6 @@ const selectMoreImportMethod = (key) => {
 };
 const refreshingTokens = ref(new Set());
 const connectingTokens = ref(new Set());
-// 从localStorage读取上次的视图模式，默认为列表视图
-const viewMode = ref(localStorage.getItem("tokenViewMode") || "list");
 const dragIndex = ref(null);
 const multiGameSelectedTokenIds = ref(new Set());
 const isOpeningMultiGame = ref(false);
@@ -838,63 +593,10 @@ const isOpeningMultiGame = ref(false);
 const editingRemark = ref(null); // 当前正在编辑备注的tokenId
 const tempRemarks = ref({}); // 临时保存编辑中的备注内容
 
-// 监听视图模式变化，保存到localStorage
-watch(viewMode, (newViewMode) => {
-  localStorage.setItem("tokenViewMode", newViewMode);
-});
-
-// 排序状态管理 - 从localStorage读取上次的排序设置
-const savedSortConfig = localStorage.getItem("tokenSortConfig");
-const sortConfig = ref(
-  savedSortConfig
-    ? JSON.parse(savedSortConfig)
-    : {
-        field: "createdAt", // 排序字段：name, server, createdAt, lastUsed
-        direction: "asc", // 排序方向：asc, desc
-      },
-);
-
-// 排序后的游戏角色Token列表
 const sortedTokens = computed(() => {
-  if (sortConfig.value.field === "manual") {
-    return tokenStore.gameTokens;
-  }
-
-  return [...tokenStore.gameTokens].sort((tokenA, tokenB) => {
-    let valueA, valueB;
-
-    // 根据排序字段获取比较值
-    switch (sortConfig.value.field) {
-      case "name":
-        valueA = tokenA.name?.toLowerCase() || "";
-        valueB = tokenB.name?.toLowerCase() || "";
-        break;
-      case "server":
-        valueA = tokenA.server?.toLowerCase() || "";
-        valueB = tokenB.server?.toLowerCase() || "";
-        break;
-      case "createdAt":
-        valueA = new Date(tokenA.createdAt || 0).getTime();
-        valueB = new Date(tokenB.createdAt || 0).getTime();
-        break;
-      case "lastUsed":
-        valueA = new Date(tokenA.lastUsed || 0).getTime();
-        valueB = new Date(tokenB.lastUsed || 0).getTime();
-        break;
-      default:
-        valueA = tokenA.name?.toLowerCase() || "";
-        valueB = tokenB.name?.toLowerCase() || "";
-    }
-
-    // 根据排序方向比较值
-    if (valueA < valueB) {
-      return sortConfig.value.direction === "asc" ? -1 : 1;
-    }
-    if (valueA > valueB) {
-      return sortConfig.value.direction === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+  return [...tokenStore.gameTokens].sort((tokenA, tokenB) =>
+    (tokenA.name || "").localeCompare(tokenB.name || "", "zh"),
+  );
 });
 
 const selectedMultiGameTokens = computed(() =>
@@ -934,28 +636,6 @@ watch(
   },
 );
 
-// 切换排序
-const toggleSort = (field) => {
-  if (sortConfig.value.field === field) {
-    // 如果点击的是当前排序字段，则切换排序方向
-    sortConfig.value.direction =
-      sortConfig.value.direction === "asc" ? "desc" : "asc";
-  } else {
-    // 如果点击的是新的排序字段，则默认升序
-    sortConfig.value.field = field;
-    sortConfig.value.direction = "asc";
-  }
-
-  // 保存排序设置到localStorage
-  localStorage.setItem("tokenSortConfig", JSON.stringify(sortConfig.value));
-};
-
-// 获取排序图标
-const getSortIcon = (field) => {
-  if (sortConfig.value.field !== field) return null;
-  return sortConfig.value.direction === "asc" ? "↑" : "↓";
-};
-
 const handleDragStart = (index, event) => {
   dragIndex.value = index;
   event.dataTransfer.effectAllowed = "move";
@@ -983,13 +663,7 @@ const handleDrop = (index, event) => {
   // 更新 store
   tokenStore.gameTokens = currentTokens;
 
-  // 切换到手动排序模式，防止自动排序打乱顺序
-  sortConfig.value.field = "manual";
-  // 保存排序设置
-  localStorage.setItem("tokenSortConfig", JSON.stringify(sortConfig.value));
-
   dragIndex.value = null;
-  message.success("Token 顺序已更新");
 };
 
 // 编辑表单

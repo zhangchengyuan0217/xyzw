@@ -1,138 +1,104 @@
 <template>
   <div class="mobile-login-import">
-    <div class="login-flow-info">
-      <h3>手机号验证码登录</h3>
-      <ol class="flow-steps">
-        <li>输入已绑定游戏账号的手机号并获取验证码</li>
-        <li>输入短信验证码后登录</li>
-        <li>选择需要添加的游戏角色</li>
-      </ol>
-      <NCheckbox v-model:checked="saveCombUser">强制下线账号请勾选</NCheckbox>
-    </div>
+    <template v-if="!showRoleImportPanel">
+      <div class="login-flow-info">
+        <h3>手机号验证码登录</h3>
+        <ol class="flow-steps">
+          <li>输入已绑定游戏账号的手机号并获取验证码</li>
+          <li>输入短信验证码后登录</li>
+          <li>选择需要添加的游戏角色</li>
+        </ol>
+        <NCheckbox v-model:checked="saveCombUser">强制下线账号请勾选</NCheckbox>
+      </div>
 
-    <NForm :model="mobileForm" label-placement="top" class="login-form">
-      <NFormItem label="手机号">
-        <NInput
-          v-model:value="mobileForm.phone"
-          inputmode="numeric"
-          maxlength="11"
-          placeholder="请输入手机号"
-          :disabled="isLoggingIn"
-        />
-      </NFormItem>
-      <NFormItem label="短信验证码">
-        <NInput
-          v-model:value="mobileForm.code"
-          inputmode="numeric"
-          maxlength="6"
-          placeholder="请输入验证码"
-          :disabled="isLoggingIn"
-          @keyup.enter="loginWithVerificationCode"
-        >
-          <template #suffix>
-            <NButton
-              text
-              type="primary"
-              :loading="isSendingCode"
-              :disabled="isLoggingIn || cooldownSeconds > 0"
-              @click="sendVerificationCode"
-            >
-              <template #icon
-                ><NIcon><SendOutline /></NIcon
-              ></template>
-              {{ cooldownSeconds > 0 ? `${cooldownSeconds}s` : "获取验证码" }}
-            </NButton>
-          </template>
-        </NInput>
-      </NFormItem>
-    </NForm>
-
-    <div class="form-actions login-actions">
-      <NButton
-        type="primary"
-        block
-        :loading="isLoggingIn"
-        :disabled="!activeLoginMatchId"
-        @click="loginWithVerificationCode"
-      >
-        <template #icon
-          ><NIcon><LogInOutline /></NIcon
-        ></template>
-        登录并获取角色
-      </NButton>
-    </div>
-
-    <div v-if="showRoleImportPanel">
-      <NForm :model="importForm" label-placement="top" class="name-form">
-        <NFormItem label="角色命名格式">
+      <NForm :model="mobileForm" label-placement="top" class="login-form">
+        <NFormItem label="手机号">
           <NInput
-            v-model:value="importForm.nameTemplate"
-            placeholder="{name}-{index}-{id}"
+            v-model:value="mobileForm.phone"
+            inputmode="numeric"
+            maxlength="11"
+            placeholder="请输入手机号"
+            :disabled="isLoggingIn"
           />
-          <template #feedback>
-            支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
-          </template>
+        </NFormItem>
+        <NFormItem label="短信验证码">
+          <NInput
+            v-model:value="mobileForm.code"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="请输入验证码"
+            :disabled="isLoggingIn"
+            @keyup.enter="loginWithVerificationCode"
+          >
+            <template #suffix>
+              <NButton
+                text
+                type="primary"
+                :loading="isSendingCode"
+                :disabled="isLoggingIn || cooldownSeconds > 0"
+                @click="sendVerificationCode"
+              >
+                <template #icon
+                  ><NIcon><SendOutline /></NIcon
+                ></template>
+                {{ cooldownSeconds > 0 ? `${cooldownSeconds}s` : "获取验证码" }}
+              </NButton>
+            </template>
+          </NInput>
         </NFormItem>
       </NForm>
 
-      <ServerRoleList
-        :data="serverListData"
-        server-column-title="区服ID"
-        max-height="50vh"
-        @add="addSelectedRole"
-        @download="handleDownload"
-      />
-
-      <a-list>
-        <a-list-item v-for="(role, roleIndex) in roleList" :key="role.id">
-          <div class="role-row">
-            <div>
-              <strong>角色名称:</strong> {{ role.name }}<br />
-              <strong>服务器:</strong> {{ role.server }}<br />
-              <strong>角色序号:</strong> {{ role.roleIndex }}
-            </div>
-            <NButton type="error" size="small" @click="removeRole(roleIndex)"
-              >删除</NButton
-            >
-          </div>
-        </a-list-item>
-      </a-list>
-
-      <div class="form-actions">
+      <div class="form-actions login-actions">
         <NButton
           type="primary"
-          size="large"
           block
-          :loading="isImporting"
-          @click="handleImport"
+          :loading="isLoggingIn"
+          :disabled="!activeLoginMatchId"
+          @click="loginWithVerificationCode"
         >
           <template #icon
-            ><NIcon><CloudUpload /></NIcon
+            ><NIcon><LogInOutline /></NIcon
           ></template>
-          添加Token
-        </NButton>
-        <NButton
-          block
-          :disabled="isLoggingIn || isSendingCode"
-          @click="$emit('cancel')"
-        >
-          <template #icon
-            ><NIcon><Close /></NIcon
-          ></template>
-          取消
+          登录并获取角色
         </NButton>
       </div>
-    </div>
+    </template>
+
+    <template v-else>
+      <div class="role-pick-header">
+        <h3>选择角色</h3>
+        <NButton text type="primary" @click="backToLogin">重新登录</NButton>
+      </div>
+
+      <ServerRoleList
+        selectable
+        :data="serverListData"
+        :selected-keys="selectedKeys"
+        server-column-title="区服ID"
+        @toggle="toggleRole"
+      />
+
+      <NButton
+        class="confirm-roles-btn"
+        type="primary"
+        size="large"
+        block
+        :loading="isImporting"
+        :disabled="selectedKeys.length === 0"
+        @click="importSelected"
+      >
+        {{
+          selectedKeys.length
+            ? `添加选中账号（${selectedKeys.length}）`
+            : "添加选中账号"
+        }}
+      </NButton>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  Close,
-  CloudUpload,
-  LogInOutline,
-  SendOutline,
-} from "@vicons/ionicons5";
+import { LogInOutline, SendOutline } from "@vicons/ionicons5";
 import {
   NButton,
   NCheckbox,
@@ -142,7 +108,7 @@ import {
   NInput,
   useMessage,
 } from "naive-ui";
-import { computed, onUnmounted, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
@@ -154,7 +120,7 @@ import { g_utils } from "@/utils/bonProtocol";
 import { encodeHortorLoginPayload } from "@/utils/hortorMobileLogin";
 import { getServerList, getTokenId, transformToken } from "@/utils/token";
 
-const emit = defineEmits(["cancel", "ok"]);
+const emit = defineEmits(["cancel", "ok", "picking"]);
 const message = useMessage();
 const tokenStore = useTokenStore();
 const { storeArrayBuffer } = useIndexedDB();
@@ -199,10 +165,25 @@ const isImporting = ref(false);
 const cooldownSeconds = ref(0);
 const serverListData = ref<any[]>([]);
 const roleList = ref<PendingRole[]>([]);
-const showRoleImportPanel = computed(
-  () => serverListData.value.length > 0 || roleList.value.length > 0,
-);
+const showRoleImportPanel = computed(() => serverListData.value.length > 0);
+const selectedKeys = ref<string[]>([]);
+const roleSelectionKey = (row: any) => `${row.serverId}-${row.roleId}`;
+const toggleRole = (row: any) => {
+  const key = roleSelectionKey(row);
+  selectedKeys.value = selectedKeys.value.includes(key)
+    ? selectedKeys.value.filter((item) => item !== key)
+    : [...selectedKeys.value, key];
+};
+watch(showRoleImportPanel, (picking) => emit("picking", picking), {
+  immediate: true,
+});
 const originalBinData = ref<any>(null);
+const backToLogin = () => {
+  serverListData.value = [];
+  roleList.value = [];
+  selectedKeys.value = [];
+  originalBinData.value = null;
+};
 const activeLoginMatchId = ref("");
 const currentCombUser = ref<Record<string, unknown> | null>(null);
 const saveCombUser = ref(false);
@@ -452,7 +433,7 @@ const getServerInfo = (serverId: string | number) => {
   return { roleIndex, serverNumber: serverNumber - 27 };
 };
 
-const addSelectedRole = async (roleInfo: any) => {
+const addSelectedRole = async (roleInfo: any, quiet = false) => {
   if (!originalBinData.value) {
     message.error("请先完成手机号登录");
     return;
@@ -473,7 +454,7 @@ const addSelectedRole = async (roleInfo: any) => {
         (role) => role.roleId === roleInfo.roleId && role.name === name,
       )
     ) {
-      message.warning(`角色 ${name} 已在待添加列表中`);
+      if (!quiet) message.warning(`角色 ${name} 已在待添加列表中`);
       return;
     }
     if (!saveCombUser.value) {
@@ -493,7 +474,7 @@ const addSelectedRole = async (roleInfo: any) => {
         ? { combUser: currentCombUser.value }
         : {}),
     });
-    message.success(`已添加角色：${name}`);
+    if (!quiet) message.success(`已添加角色：${name}`);
   } catch (error: any) {
     console.error("Failed to add selected role", error);
     message.error(`添加角色失败：${error.message || error}`);
@@ -530,12 +511,25 @@ const handleImport = () => {
       if (existing) tokenStore.updateToken(existing.id, role);
       else tokenStore.addToken(role);
     }
+    const addedCount = roleList.value.length;
     roleList.value = [];
-    message.success("Token添加成功");
+    message.success(`已添加 ${addedCount} 个账号`);
     emit("ok");
   } finally {
     isImporting.value = false;
   }
+};
+
+const importSelected = async () => {
+  const rows = serverListData.value.filter((row) =>
+    selectedKeys.value.includes(roleSelectionKey(row)),
+  );
+  if (!rows.length) return;
+  roleList.value = [];
+  for (const row of rows) {
+    await addSelectedRole(row, true);
+  }
+  if (roleList.value.length) handleImport();
 };
 
 onUnmounted(clearCooldown);
@@ -566,8 +560,7 @@ onUnmounted(clearCooldown);
   margin-bottom: var(--spacing-xs);
   font-size: var(--font-size-sm);
 }
-.login-form,
-.name-form {
+.login-form {
   margin-top: var(--spacing-xs);
 }
 .form-actions {
@@ -584,6 +577,24 @@ onUnmounted(clearCooldown);
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
+}
+
+.role-pick-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.role-pick-header h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.role-pick-header p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 </style>
 

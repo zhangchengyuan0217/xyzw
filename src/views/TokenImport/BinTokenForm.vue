@@ -22,16 +22,6 @@
       </a-upload>
     </NFormItem>
 
-    <NFormItem label="角色命名格式" :show-label="true">
-      <NInput
-        v-model:value="importForm.nameTemplate"
-        placeholder="{name}-{index}-{id}"
-      />
-      <template #feedback>
-        支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
-      </template>
-    </NFormItem>
-
     <ServerRoleList
       :data="serverListData"
       max-height="50vh"
@@ -39,30 +29,7 @@
       @download="handleDownload"
     />
 
-    <a-list>
-      <a-list-item v-for="(role, roleIndex) in roleList" :key="roleIndex">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-          "
-        >
-          <div>
-            <strong>角色名称:</strong> {{ role.name || "未命名角色" }}<br />
-            <strong>Token:</strong>
-            <span style="word-break: break-all">{{ role.token }}</span
-            ><br />
-            <strong>服务器:</strong> {{ role.server || "未指定" }}<br />
-            <strong>角色序号:</strong> {{ role.roleIndex }}
-          </div>
-          <NButton type="error" size="small" @click="removeRole(roleIndex)">
-            删除
-          </NButton>
-        </div>
-      </a-list-item>
-    </a-list>
+    <PendingRoleList :roles="roleList" @remove="removeRole" />
 
     <div class="form-actions">
       <NButton
@@ -77,7 +44,7 @@
             <CloudUpload />
           </NIcon>
         </template>
-        添加Token
+        添加选中账号
       </NButton>
 
       <NButton v-if="tokenStore.hasTokens" size="large" block @click="cancel">
@@ -89,7 +56,7 @@
 
 <script lang="ts" setup>
 import { CloudUpload } from "@vicons/ionicons5";
-import { NButton, NForm, NFormItem, NIcon, NInput, useMessage } from "naive-ui";
+import { NButton, NForm, NFormItem, NIcon, useMessage } from "naive-ui";
 import PQueue from "p-queue";
 
 import { reactive, ref } from "vue";
@@ -103,6 +70,7 @@ import {
 } from "@/utils/binFile";
 import { g_utils } from "@/utils/bonProtocol";
 import { getServerList, getTokenId, transformToken } from "@/utils/token";
+import PendingRoleList from "./PendingRoleList.vue";
 
 const $emit = defineEmits(["cancel", "ok"]);
 

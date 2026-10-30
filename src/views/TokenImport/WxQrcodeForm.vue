@@ -1,154 +1,98 @@
 <template>
   <div class="wx-qrcode-import">
-    <!-- 微信登录流程说明 -->
-    <div class="login-flow-info">
-      <h3>微信扫码登录流程</h3>
-      <ol class="flow-steps">
-        <li>使用微信扫码并确认登录</li>
-        <li>
-          系统将获取<strong color="red">该微信下所有角色</strong
-          >的Token信息，并保存可用于刷新Token的登录凭据
-        </li>
-      </ol>
-      <NCheckbox v-model:checked="saveCombUser">强制下线账号请勾选</NCheckbox>
-    </div>
-
-    <!-- 二维码显示区域 -->
-    <div class="qrcode-container">
-      <div
-        v-if="!qrcodeUrl"
-        id="qr-placeholder"
-        class="qr-placeholder"
-        @click="generateQRCode"
-      >
-        <NIcon size="48" color="var(--text-tertiary)">
-          <Scan />
-          <!-- 使用扫码图标 -->
-        </NIcon>
-        <p>点击获取微信登录二维码</p>
-      </div>
-      <img
-        v-else
-        id="qr-image"
-        :src="qrcodeUrl"
-        alt="微信登录二维码"
-        class="qr-image"
-      />
-
-      <!-- 状态信息 -->
-      <div id="qr-status" class="qr-status" :class="statusType">
-        {{ statusMessage }}
+    <template v-if="!showRoleImportPanel">
+      <div class="login-flow-info">
+        <h3>微信扫码登录流程</h3>
+        <ol class="flow-steps">
+          <li>使用微信扫码并确认登录</li>
+          <li>
+            系统将获取<strong color="red">该微信下所有角色</strong
+            >的Token信息，并保存可用于刷新Token的登录凭据
+          </li>
+        </ol>
+        <NCheckbox v-model:checked="saveCombUser">强制下线账号请勾选</NCheckbox>
       </div>
 
-      <NButton
-        class="refresh-qr-btn"
-        type="primary"
-        block
-        @click="generateQRCode"
-        :loading="isProcessing"
-      >
-        <template #icon>
-          <NIcon>
-            <Refresh />
+      <div class="qrcode-container">
+        <div
+          v-if="!qrcodeUrl"
+          id="qr-placeholder"
+          class="qr-placeholder"
+          @click="generateQRCode"
+        >
+          <NIcon size="48" color="var(--text-tertiary)">
+            <Scan />
           </NIcon>
-        </template>
-        {{ qrcodeUrl ? "刷新二维码" : "获取二维码" }}
-      </NButton>
-    </div>
+          <p>点击获取微信登录二维码</p>
+        </div>
+        <img
+          v-else
+          id="qr-image"
+          :src="qrcodeUrl"
+          alt="微信登录二维码"
+          class="qr-image"
+        />
 
-    <!-- 扫码阶段没有角色可选，命名和添加放到拿到角色之后 -->
-    <div v-if="showRoleImportPanel">
-      <NForm
-        :model="importForm"
-        label-placement="top"
-        :show-label="true"
-        style="margin-top: 16px"
-      >
-        <NFormItem label="角色命名格式" :show-label="true">
-          <NInput
-            v-model:value="importForm.nameTemplate"
-            placeholder="{name}-{index}-{id}"
-          />
-          <template #feedback>
-            支持变量: {name}角色名, {id}角色ID, {index}角色序号, {server}区服
-          </template>
-        </NFormItem>
-      </NForm>
+        <div id="qr-status" class="qr-status" :class="statusType">
+          {{ statusMessage }}
+        </div>
 
-      <ServerRoleList
-        :data="serverListData"
-        server-column-title="区服ID"
-        max-height="50vh"
-        @add="addSelectedRole"
-        @download="handleDownload"
-      />
-
-      <a-list>
-        <a-list-item v-for="(role, roleIndex) in roleList" :key="roleIndex">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              width: 100%;
-            "
-          >
-            <div>
-              <strong>角色名称:</strong> {{ role.name || "未命名角色" }}<br />
-              <strong>Token:</strong>
-              <span style="word-break: break-all">{{ role.token }}</span
-              ><br />
-              <strong>服务器:</strong> {{ role.server || "未指定" }}<br />
-              <strong>角色序号:</strong> {{ role.roleIndex }}
-            </div>
-            <NButton type="error" size="small" @click="removeRole(roleIndex)">
-              删除
-            </NButton>
-          </div>
-        </a-list-item>
-      </a-list>
-
-      <div class="form-actions">
         <NButton
+          class="refresh-qr-btn"
           type="primary"
-          size="large"
           block
-          :loading="isImporting"
-          @click="handleImport"
+          @click="generateQRCode"
+          :loading="isProcessing"
         >
           <template #icon>
             <NIcon>
-              <CloudUpload />
+              <Refresh />
             </NIcon>
           </template>
-          添加Token
-        </NButton>
-
-        <NButton block @click="$emit('cancel')" :disabled="isProcessing">
-          <template #icon>
-            <NIcon>
-              <Close />
-            </NIcon>
-          </template>
-          取消
+          {{ qrcodeUrl ? "刷新二维码" : "获取二维码" }}
         </NButton>
       </div>
-    </div>
+    </template>
+
+    <template v-else>
+      <div class="role-pick-header">
+        <h3>选择角色</h3>
+        <NButton text type="primary" :disabled="isProcessing" @click="backToScan">
+          重新扫码
+        </NButton>
+      </div>
+
+      <ServerRoleList
+        selectable
+        :data="serverListData"
+        :selected-keys="selectedKeys"
+        server-column-title="区服ID"
+        @toggle="toggleRole"
+      />
+
+      <NButton
+        class="confirm-roles-btn"
+        type="primary"
+        size="large"
+        block
+        :loading="isImporting"
+        :disabled="selectedKeys.length === 0"
+        @click="importSelected"
+      >
+        {{
+          selectedKeys.length
+            ? `添加选中账号（${selectedKeys.length}）`
+            : "添加选中账号"
+        }}
+      </NButton>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Close, CloudUpload, Refresh, Scan } from "@vicons/ionicons5";
-import {
-  NButton,
-  NCheckbox,
-  NForm,
-  NFormItem,
-  NIcon,
-  NInput,
-  useMessage,
-} from "naive-ui";
-import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { Refresh, Scan } from "@vicons/ionicons5";
+import { NButton, NCheckbox, NIcon, useMessage } from "naive-ui";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
@@ -159,7 +103,7 @@ import {
 import { g_utils } from "@/utils/bonProtocol";
 import { getServerList, getTokenId, transformToken } from "@/utils/token";
 // 定义事件
-const emit = defineEmits(["cancel", "ok"]);
+const emit = defineEmits(["cancel", "ok", "picking"]);
 const tokenStore = useTokenStore();
 const { storeArrayBuffer } = useIndexedDB();
 
@@ -208,8 +152,19 @@ const roleList = ref<
   }>
 >([]);
 const showRoleImportPanel = computed(
-  () => serverListData.value.length > 0 || roleList.value.length > 0,
+  () => serverListData.value.length > 0,
 );
+const selectedKeys = ref<string[]>([]);
+const roleSelectionKey = (row: any) => `${row.serverId}-${row.roleId}`;
+const toggleRole = (row: any) => {
+  const key = roleSelectionKey(row);
+  selectedKeys.value = selectedKeys.value.includes(key)
+    ? selectedKeys.value.filter((item) => item !== key)
+    : [...selectedKeys.value, key];
+};
+watch(showRoleImportPanel, (picking) => emit("picking", picking), {
+  immediate: true,
+});
 const currentCombUser = ref<any>(null);
 const saveCombUser = ref(false);
 
@@ -229,7 +184,7 @@ const handleDownload = (roleInfo: any) => {
   }
 };
 
-const addSelectedRole = async (roleInfo: any) => {
+const addSelectedRole = async (roleInfo: any, quiet = false) => {
   if (!originalBinData.value) {
     message.error("Bin数据丢失，请重新上传");
     return;
@@ -270,7 +225,7 @@ const addSelectedRole = async (roleInfo: any) => {
     );
 
     if (exists) {
-      message.warning(`角色 ${finalName} 已在待添加列表中`);
+      if (!quiet) message.warning(`角色 ${finalName} 已在待添加列表中`);
       return;
     }
 
@@ -287,10 +242,39 @@ const addSelectedRole = async (roleInfo: any) => {
       ...(saveCombUser.value ? { combUser: currentCombUser.value } : {}),
     });
 
-    message.success(`已添加角色: ${finalName}`);
+    if (!quiet) message.success(`已添加角色: ${finalName}`);
   } catch (e: any) {
     console.error("添加角色失败", e);
     message.error(`添加角色失败: ${e.message}`);
+  }
+};
+
+/**
+ * 返回扫码，清空本次已选角色
+ */
+const backToScan = () => {
+  serverListData.value = [];
+  roleList.value = [];
+  selectedKeys.value = [];
+  originalBinData.value = null;
+  currentBinData.value = null;
+  generateQRCode();
+};
+
+const importSelected = async () => {
+  const rows = serverListData.value.filter((row) =>
+    selectedKeys.value.includes(roleSelectionKey(row)),
+  );
+  if (!rows.length) return;
+  roleList.value = [];
+  isImporting.value = true;
+  try {
+    for (const row of rows) {
+      await addSelectedRole(row, true);
+    }
+    if (roleList.value.length) handleImport();
+  } finally {
+    isImporting.value = false;
   }
 };
 
@@ -757,7 +741,7 @@ const handleImport = async () => {
     }
   });
   console.log("当前Token列表:", tokenStore.gameTokens);
-  message.success("Token添加成功");
+  message.success(`已添加 ${roleList.value.length} 个账号`);
   roleList.value = [];
   emit("ok");
 };
@@ -907,7 +891,24 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
+  margin-top: 4px;
+}
+
+.role-pick-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+  }
+}
+
+.confirm-roles-btn {
+  margin-top: 4px;
 }
 </style>
 

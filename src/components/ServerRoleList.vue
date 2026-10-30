@@ -2,13 +2,14 @@
   <div ref="listRootRef">
     <NCard
       v-if="data && data.length > 0"
-      :title="title"
+      :title="selectable ? undefined : title"
       class="server-role-list-card"
+      :class="{ 'is-selectable': selectable }"
     >
       <div class="server-role-list-search">
         <NInput
           v-model:value="serverSearchKeyword"
-          placeholder="搜索区服（输入区服号，如 1）"
+          :placeholder="selectable ? '搜索区服或角色' : '搜索区服（输入区服号，如 1）'"
           clearable
           size="small"
           class="server-role-list-search__input"
@@ -18,12 +19,16 @@
           </template>
         </NInput>
       </div>
-      <!-- 移动端：卡片列表 -->
       <div class="server-role-list server-role-list--mobile">
         <div
           v-for="(row, idx) in filteredData"
           :key="`${row.serverId}-${row.roleId}-${idx}`"
           class="server-role-card"
+          :class="{
+            'is-choice': selectable,
+            'is-selected': selectable && isSelected(row),
+          }"
+          @click="selectable ? emit('toggle', row) : undefined"
         >
           <div class="server-role-card__main">
             <div class="server-role-card__title">
@@ -35,7 +40,8 @@
               <span>战力 {{ formatPower(row.power) }}</span>
             </div>
           </div>
-          <div class="server-role-card__actions">
+          <span v-if="selectable" class="server-role-card__check" />
+          <div v-else class="server-role-card__actions">
             <NButton
               type="primary"
               size="small"
@@ -82,16 +88,21 @@ const props = withDefaults(
     title?: string;
     serverColumnTitle?: string;
     maxHeight?: string;
+    selectable?: boolean;
+    selectedKeys?: string[];
   }>(),
   {
     title: "服务器角色列表",
     serverColumnTitle: "区服",
     maxHeight: "",
+    selectable: false,
+    selectedKeys: () => [],
   },
 );
 const emit = defineEmits<{
   add: [row: any];
   download: [row: any];
+  toggle: [row: any];
 }>();
 const SearchIcon = Search;
 const serverSearchKeyword = ref("");
@@ -109,6 +120,14 @@ function getRoleIndexDisplay(row: any) {
   if (sid >= 2000000) return 2;
   if (sid >= 1000000) return 1;
   return 0;
+}
+
+function roleKey(row: any) {
+  return `${row.serverId}-${row.roleId}`;
+}
+
+function isSelected(row: any) {
+  return props.selectedKeys.includes(roleKey(row));
 }
 
 const filteredData = computed(() => {
@@ -320,6 +339,58 @@ const columns = computed(() => [
 
 .server-role-card__actions .n-button {
   flex: 1;
+}
+
+.server-role-list-card.is-selectable {
+  margin-top: 0;
+  background: transparent;
+
+  :deep(.n-card-header) {
+    display: none;
+  }
+
+  :deep(.n-card__content) {
+    padding: 0;
+  }
+}
+
+.server-role-list-card.is-selectable .server-role-list-search__input {
+  max-width: none;
+}
+
+.server-role-list-card.is-selectable .server-role-list--mobile {
+  display: flex;
+  max-height: 46vh;
+}
+
+.server-role-list-card.is-selectable .server-role-list--desktop {
+  display: none;
+}
+
+.server-role-card.is-choice {
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.server-role-card.is-selected {
+  border-color: var(--primary-color, #18a058);
+  background: rgba(24, 160, 88, 0.08);
+}
+
+.server-role-card__check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-medium, #c0c4cc);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.server-role-card.is-selected .server-role-card__check {
+  border-color: var(--primary-color, #18a058);
+  background: var(--primary-color, #18a058);
+  box-shadow: inset 0 0 0 3px #fff;
 }
 
 .server-role-list-scroll {

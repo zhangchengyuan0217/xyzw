@@ -29,17 +29,7 @@
         </div> -->
       </a-upload>
     </NFormItem>
-    <a-list>
-      <a-list-item v-for="(role, roleIndex) in roleList" :key="roleIndex">
-        <div>
-          <strong>角色名称:</strong> {{ role.name || "未命名角色" }}<br />
-          <strong>Token:</strong>
-          <span style="word-break: break-all">{{ role.token }}</span
-          ><br />
-          <strong>服务器:</strong> {{ role.server || "未指定" }}
-        </div>
-      </a-list-item>
-    </a-list>
+    <PendingRoleList :roles="roleList" :removable="false" />
 
     <!-- 角色详情 -->
     <NCollapse>
@@ -104,6 +94,7 @@ import { reactive, ref } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import { getTokenId, transformToken } from "@/utils/token";
+import PendingRoleList from "./PendingRoleList.vue";
 
 const $emit = defineEmits(["cancel", "ok"]);
 
