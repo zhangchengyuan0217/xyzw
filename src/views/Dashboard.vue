@@ -1,6 +1,10 @@
 <template>
   <div v-if="currentFeature" class="feature-page">
-    <button type="button" class="feature-back" @click="router.push('/admin/dashboard')">
+    <button
+      type="button"
+      class="feature-back"
+      @click="router.push('/admin/dashboard')"
+    >
       <ChevronBack />
       <span>{{ currentFeature.title }}</span>
     </button>
@@ -62,9 +66,7 @@ const message = useMessage();
 const tokenStore = useTokenStore();
 const { getArrayBuffer } = useIndexedDB();
 
-const currentFeature = computed(() =>
-  findGameFeature(route.params.feature),
-);
+const currentFeature = computed(() => findGameFeature(route.params.feature));
 useGameConnection(computed(() => Boolean(currentFeature.value)));
 
 // ============ BIN 格式转换 ============
@@ -181,8 +183,8 @@ const menuItems = computed(() => [
     kind: "action",
     id: "add-token",
     icon: Add,
-    title: "添加Token",
-    description: "快速添加新的游戏Token",
+    title: "添加账号",
+    description: "快速添加新的游戏账号",
     action: "add-token",
   },
   {

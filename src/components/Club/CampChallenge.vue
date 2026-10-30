@@ -1,303 +1,53 @@
 <template>
   <div class="camp-challenge-container" ref="exportDom">
-    <!-- 顶部操作工具栏 -->
-    <div class="toolbar">
-      <div class="left">
+    <div class="toolbar" v-if="battleInfo">
+      <n-radio-group v-model:value="selectedSide" size="small" class="side-switch">
+        <n-radio-button value="own">我方</n-radio-button>
+        <n-radio-button value="opponent">敌方</n-radio-button>
+      </n-radio-group>
+      <div class="toolbar-meta">
         <NTag :type="isMatchDay ? 'success' : 'info'" round size="small">
           {{ scheduleText }}
         </NTag>
-        <span class="match-title">营地挑战（30人俱乐部对决）</span>
-        <n-radio-group
-          v-model:value="selectedSide"
-          size="small"
-          style="margin-left: 12px"
-        >
-          <n-radio-button value="own">我方阵营阵容</n-radio-button>
-          <n-radio-button value="opponent">敌方阵营阵容</n-radio-button>
-        </n-radio-group>
-      </div>
-      <div class="right">
-        <NButton
-          size="small"
-          :disabled="currentMemberList.length === 0 || exporting"
-          :loading="exporting"
-          @click="handleExportImage"
-          class="action-btn"
-        >
-          <template #icon>
-            <n-icon><CopyOutline /></n-icon>
-          </template>
-          导出长图
-        </NButton>
-
         <NButton
           size="small"
           :disabled="loading"
           :loading="loading"
           @click="fetchCampChallengeData"
-          class="action-btn refresh-btn"
         >
-          <template #icon>
-            <n-icon><RefreshOutline /></n-icon>
-          </template>
-          刷新战况
+          刷新
         </NButton>
       </div>
     </div>
 
-    <!-- 双方俱乐部 VS 对决卡片 (参考蟠桃园科技倾角风) -->
-    <div class="header-section" v-if="battleInfo">
-      <div class="club-vs-container">
-        <!-- 我方俱乐部 (左) -->
-        <div
-          class="club-info own"
-          :class="{ 'highlight-side': selectedSide === 'own' }"
-        >
-          <div class="club-details">
-            <div class="club-stats club-id-text">
-              ID: {{ battleInfo.ownClub.id || "未知" }}
-            </div>
-            <div class="club-name-row">
-              <span class="club-server own-server">{{
-                battleInfo.ownClub.serverId
-                  ? `${battleInfo.ownClub.serverId}服`
-                  : "本服"
-              }}</span>
-              <NAvatar
-                round
-                :size="36"
-                :src="battleInfo.ownClub.logo || '/icons/xiaoyugan.png'"
-                class="club-logo-inline"
-              />
-              <span class="club-name own-name">{{
-                battleInfo.ownClub.name || "我方俱乐部"
-              }}</span>
-            </div>
-            <div class="club-stats club-power-text">
-              {{ ownMembers.length }} 人 | {{ battleInfo.ownClub.quenchNum }} 红
-              | {{ formatPower(battleInfo.ownClub.power) }} 战力
-            </div>
-            <div class="club-stats announcement club-announce-text">
-              {{ battleInfo.ownClub.announcement || "暂无公会公告" }}
-            </div>
-          </div>
-        </div>
-
-        <!-- VS 徽章与排位赛况 -->
-        <div class="vs-badge-container">
-          <div class="vs-badge">
-            <span class="vs-v">V</span><span class="vs-s">S</span>
-          </div>
-          <div class="rank-badge-text">
-            <NTag type="warning" size="small" round :bordered="false">
-              {{ rankText }}
-            </NTag>
-          </div>
-        </div>
-
-        <!-- 敌方俱乐部 (右) -->
-        <div
-          class="club-info opponent"
-          :class="{ 'highlight-side': selectedSide === 'opponent' }"
-        >
-          <div class="club-details">
-            <div class="club-stats club-id-text">
-              ID: {{ battleInfo.opponentClub.id || "未知" }}
-            </div>
-            <div class="club-name-row">
-              <span class="club-server opp-server">{{
-                battleInfo.opponentClub.serverId
-                  ? `${battleInfo.opponentClub.serverId}服`
-                  : "跨服"
-              }}</span>
-              <NAvatar
-                round
-                :size="36"
-                :src="battleInfo.opponentClub.logo || '/icons/xiaoyugan.png'"
-                class="club-logo-inline"
-              />
-              <span class="club-name opp-name">{{
-                battleInfo.opponentClub.name || "敌方对阵公会"
-              }}</span>
-            </div>
-            <div class="club-stats club-power-text">
-              {{ opponentMembers.length }} 人 |
-              {{ battleInfo.opponentClub.quenchNum }} 红 |
-              {{ formatPower(battleInfo.opponentClub.power) }} 战力
-            </div>
-            <div class="club-stats announcement club-announce-text">
-              {{ battleInfo.opponentClub.announcement || "暂无对手公告" }}
-            </div>
-          </div>
-        </div>
+    <div class="matchup" v-if="battleInfo">
+      <div class="matchup-side">
+        <strong>{{ battleInfo.ownClub.name || "我方" }}</strong>
+        <span>{{ formatPower(battleInfo.ownClub.power) }}</span>
+      </div>
+      <div class="matchup-mid">
+        <b>{{ weeklyStats.dayScore }} : {{ currentOppoDayScore }}</b>
+        <span>{{ rankText }}</span>
+      </div>
+      <div class="matchup-side">
+        <strong>{{ battleInfo.opponentClub.name || "敌方" }}</strong>
+        <span>{{ formatPower(battleInfo.opponentClub.power) }}</span>
       </div>
     </div>
 
-    <!-- 营地挑战周期与双维度统计面板（当周对战信息周更新与当天对战信息） -->
-    <div class="camp-statistics-section" v-if="battleInfo && rawClubData">
-      <div class="stats-panels-grid">
-        <!-- 左侧卡片：当周对战信息 (周更新机制，参考盐场月更新) -->
-        <div class="stats-panel weekly-panel">
-          <div class="panel-header">
-            <div class="panel-title-group">
-              <n-icon class="panel-icon"><CalendarOutline /></n-icon>
-              <span class="panel-title">当周对战信息</span>
-              <NTag
-                size="tiny"
-                type="info"
-                round
-                :bordered="false"
-                class="cycle-tag"
-              >
-                周更新制 · 第 {{ weeklyStats.phase }} 期
-              </NTag>
-            </div>
-            <div class="panel-subtitle">
-              周期: {{ weeklyStats.cycleRange }} (每周一刷新重置)
-            </div>
-          </div>
-
-          <div class="stat-metrics-grid">
-            <div class="metric-card">
-              <div class="metric-label">公会本周总积分</div>
-              <div class="metric-value highlight">
-                {{ weeklyStats.weekScore }}<span class="metric-unit">分</span>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">公会排位段位</div>
-              <div class="metric-value dan-value">
-                {{ weeklyStats.danText }}
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">个人本周战功</div>
-              <div class="metric-value personal-score">
-                {{ weeklyStats.personalScore
-                }}<span class="metric-unit">分</span>
-                <NTag
-                  size="tiny"
-                  type="warning"
-                  :bordered="false"
-                  class="level-tag"
-                  >Lv.{{ weeklyStats.personalLevel }}</NTag
-                >
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">个人本周战绩</div>
-              <div class="metric-value win-stat">
-                {{ weeklyStats.weekAttackCnt }}战{{ weeklyStats.weekWinCnt }}胜
-                <span class="sub-rate">({{ weeklyStats.weekWinRate }}%)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 本周赛程全景（周二/周三/周四对决公会与战力） -->
-          <div class="weekly-schedule-bar" v-if="matchDayList.length > 0">
-            <div class="schedule-title">本周排位赛程速览：</div>
-            <div class="schedule-chips">
-              <div
-                v-for="item in matchDayList"
-                :key="item.day"
-                class="schedule-chip"
-                :class="{ active: selectedMatchDay === item.day }"
-                @click="handleMatchDayChange(item.day)"
-              >
-                <div class="chip-day">{{ item.label }}</div>
-                <div class="chip-opp-name" :title="item.name">
-                  {{ item.name }}
-                </div>
-                <div class="chip-power">{{ formatPower(item.power) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 右侧卡片：当天对战信息 (今日对决战况统计) -->
-        <div class="stats-panel daily-panel">
-          <div class="panel-header">
-            <div class="panel-title-group">
-              <n-icon class="panel-icon flame"><FlameOutline /></n-icon>
-              <span class="panel-title">当天公会对战信息</span>
-              <NTag
-                size="tiny"
-                :type="isMatchDay ? 'success' : 'default'"
-                round
-                :bordered="false"
-              >
-                {{ isMatchDay ? "今日交战中" : "非排位日" }}
-              </NTag>
-            </div>
-            <div class="panel-subtitle">
-              今日对决对手:
-              <span class="opp-highlight">{{
-                weeklyStats.todayOpponentName
-              }}</span>
-            </div>
-          </div>
-
-          <div class="stat-metrics-grid">
-            <div class="metric-card">
-              <div class="metric-label">我方总体出手胜率</div>
-              <div class="metric-value win-stat">
-                {{ todayCombatStats.ourClub.winRate }}%
-                <span class="sub-rate"
-                  >({{ todayCombatStats.ourClub.wins }}胜/{{
-                    todayCombatStats.ourClub.totalAttacks
-                  }}刀)</span
-                >
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">对手总体出手胜率</div>
-              <div class="metric-value opp-stat">
-                {{ todayCombatStats.oppClub.winRate }}%
-                <span class="sub-rate"
-                  >({{ todayCombatStats.oppClub.wins }}胜/{{
-                    todayCombatStats.oppClub.totalAttacks
-                  }}刀)</span
-                >
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">今日公会比分</div>
-              <div class="metric-value highlight">
-                {{ weeklyStats.dayScore }}
-                <span class="sub-rate">vs {{ currentOppoDayScore }}</span>
-              </div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">据点攻防态势</div>
-              <div class="metric-value progress-value">
-                攻破敌方{{ weeklyStats.defeatedCount }} / 敌方攻破我方{{
-                  ownDefendDefeatedCount
-                }}
-                <span class="sub-rate">({{ weeklyStats.defeatedRate }}%)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 敌方击破进度条 -->
-          <div class="defense-progress-box">
-            <div class="progress-info">
-              <span>{{ weeklyStats.todayOpponentName }} 阵型击破进度</span>
-              <span
-                >已攻破敌方 {{ weeklyStats.defeatedCount }} /
-                {{ weeklyStats.totalDefenders }} 据点 ({{
-                  weeklyStats.defeatedRate
-                }}%)</span
-              >
-            </div>
-            <n-progress
-              type="line"
-              :percentage="Number(weeklyStats.defeatedRate) || 0"
-              :show-indicator="false"
-              :stroke-width="8"
-              status="error"
-            />
-          </div>
-        </div>
+    <div class="match-brief" v-if="battleInfo && rawClubData">
+      <span>攻破 {{ weeklyStats.defeatedCount }}/{{ weeklyStats.totalDefenders }}</span>
+      <div class="schedule-chips" v-if="matchDayList.length > 0">
+        <button
+          v-for="item in matchDayList"
+          :key="item.day"
+          type="button"
+          class="schedule-chip"
+          :class="{ active: selectedMatchDay === item.day }"
+          @click="handleMatchDayChange(item.day)"
+        >
+          {{ item.label }}
+        </button>
       </div>
     </div>
 
@@ -312,25 +62,25 @@
         <n-tab name="battleMap">
           <div class="tab-item-content">
             <n-icon><ShieldOutline /></n-icon>
-            <span>⚔️ 今日据点沙盘 (击破图表)</span>
+            <span>据点沙盘</span>
           </div>
         </n-tab>
         <n-tab name="todayDetails">
           <div class="tab-item-content">
             <n-icon><FlameOutline /></n-icon>
-            <span>🎯 今日公会对战详细 (催刀督战)</span>
+            <span>今日对战</span>
           </div>
         </n-tab>
         <n-tab name="weekRoster">
           <div class="tab-item-content">
             <n-icon><TrophyOutline /></n-icon>
-            <span>📊 当周全员战绩 & 排位天梯</span>
+            <span>本周战绩</span>
           </div>
         </n-tab>
         <n-tab name="lineupTable">
           <div class="tab-item-content">
             <n-icon><StatsChartOutline /></n-icon>
-            <span>🥋 详细武将布阵大表</span>
+            <span>武将布阵</span>
           </div>
         </n-tab>
       </n-tabs>
@@ -338,13 +88,8 @@
 
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-state">
-      <n-spin size="large">
-        <template #description
-          >正在加载{{
-            selectedSide === "opponent" ? "敌方" : "我方"
-          }}真实营地布阵数据 ({{ progressText }})...</template
-        >
-      </n-spin>
+      <n-spin size="medium" />
+      <p>正在加载阵容<span v-if="progressText"> {{ progressText }}</span></p>
     </div>
 
     <!-- 视图内容区域 -->
@@ -353,52 +98,17 @@
       <div v-if="activeViewTab === 'battleMap'" class="battle-map-section">
         <!-- 控制栏与筛选器 -->
         <div class="map-control-bar">
-          <div class="map-side-indicator">
-            <span class="indicator-title">
-              {{
-                selectedSide === "opponent"
-                  ? "💥 敌方防守据点沙盘"
-                  : "🛡️ 我方防守据点沙盘"
-              }}
-            </span>
-            <span class="indicator-sub">
-              ({{
-                selectedSide === "opponent"
-                  ? "点击对手可查看其被攻击防守战报"
-                  : "点击我方成员可查看其主动进攻与防守战报"
-              }})
-            </span>
-          </div>
-          <div class="map-metrics-summary">
-            <NTag type="info" size="small" round :bordered="false">
-              总据点: {{ mapStats.total }}
-            </NTag>
-            <NTag type="success" size="small" round :bordered="false">
-              坚守存活: {{ mapStats.aliveCount }} 人
-            </NTag>
-            <NTag type="error" size="small" round :bordered="false">
-              已被击破: {{ mapStats.defeatedCount }} 人 ({{
-                mapStats.defeatedRate
-              }}%)
-            </NTag>
-          </div>
           <div class="map-filters-group">
             <n-radio-group v-model:value="mapFilter" size="small">
-              <n-radio-button value="all"
-                >全部 ({{ mapStats.total }})</n-radio-button
-              >
-              <n-radio-button value="alive"
-                >🛡️ 仅坚守 ({{ mapStats.aliveCount }})</n-radio-button
-              >
-              <n-radio-button value="defeated"
-                >💥 仅击破 ({{ mapStats.defeatedCount }})</n-radio-button
-              >
+              <n-radio-button value="all">全部</n-radio-button>
+              <n-radio-button value="alive">坚守</n-radio-button>
+              <n-radio-button value="defeated">已破</n-radio-button>
             </n-radio-group>
             <NSelect
               v-model:value="mapSort"
               :options="mapSortOptions"
               size="small"
-              style="width: 175px; margin-left: 8px"
+              class="map-sort"
             />
           </div>
         </div>
@@ -473,24 +183,6 @@
                   >
                 </div>
                 <div class="member-power">{{ formatPower(item.power) }}</div>
-                <div class="member-lineup">
-                  <NTag size="tiny" :bordered="false" type="info">
-                    {{ item.lineupType || "常规阵容" }}
-                  </NTag>
-                </div>
-              </div>
-            </div>
-
-            <!-- 卡片底部：交战统计与操作引导 -->
-            <div class="card-footer-bar">
-              <div class="combat-stat-text">
-                遭遇 <span class="num">{{ item.challengeCnt || 0 }}</span> 次 |
-                防守成功
-                <span class="num error">{{ item.failCnt || 0 }}</span>
-                次
-              </div>
-              <div class="card-action-hint">
-                <span>战报流水</span>
               </div>
             </div>
           </div>
@@ -502,180 +194,12 @@
         v-else-if="activeViewTab === 'todayDetails'"
         class="today-details-section"
       >
-        <!-- 双方公会今日比分与总体出手胜率对决横幅 -->
-        <div class="today-versus-score-banner">
-          <div class="banner-sides-row">
-            <!-- 我方公会 -->
-            <div class="side-score-box own-score-box">
-              <div class="club-title">
-                <NAvatar
-                  round
-                  :size="28"
-                  :src="battleInfo.ownClub.logo || '/icons/xiaoyugan.png'"
-                />
-                <span>{{ battleInfo.ownClub.name }} (我方)</span>
-              </div>
-              <div class="score-display">
-                <span class="score-num own-text">{{
-                  weeklyStats.dayScore
-                }}</span>
-                <span class="score-label">今日积分</span>
-              </div>
-              <div class="combat-rate-display">
-                <span class="rate-num"
-                  >{{ todayCombatStats.ourClub.winRate }}% /
-                  {{ todayCombatStats.ourClub.defWinRate }}%</span
-                >
-                <span class="rate-label">出手 / 防守胜率</span>
-                <span class="rate-detail"
-                  >(出{{ todayCombatStats.ourClub.wins }}胜{{
-                    todayCombatStats.ourClub.losses
-                  }}负·共{{ todayCombatStats.ourClub.totalAttacks }}刀 / 守{{
-                    todayCombatStats.ourClub.defWins
-                  }}胜{{ todayCombatStats.ourClub.defLosses }}负·共{{
-                    todayCombatStats.ourClub.defTotal
-                  }}次)</span
-                >
-              </div>
-              <div class="sub-stat">
-                攻破敌方: {{ weeklyStats.defeatedCount }} /
-                {{ weeklyStats.totalDefenders }} 据点 ({{
-                  weeklyStats.defeatedRate
-                }}%)
-              </div>
-            </div>
-
-            <!-- VS 分割线 -->
-            <div class="vs-divider">
-              <div class="vs-text-styled">VS</div>
-              <div
-                class="score-gap-badge"
-                :class="{
-                  lead:
-                    Number(weeklyStats.dayScore) >= Number(currentOppoDayScore),
-                  lag:
-                    Number(weeklyStats.dayScore) < Number(currentOppoDayScore),
-                }"
-              >
-                {{
-                  Number(weeklyStats.dayScore) >= Number(currentOppoDayScore)
-                    ? `领先 ${
-                        Number(weeklyStats.dayScore) -
-                        Number(currentOppoDayScore)
-                      } 分`
-                    : `落后 ${
-                        Number(currentOppoDayScore) -
-                        Number(weeklyStats.dayScore)
-                      } 分`
-                }}
-              </div>
-            </div>
-
-            <!-- 对手公会 -->
-            <div class="side-score-box oppo-score-box">
-              <div class="club-title">
-                <NAvatar
-                  round
-                  :size="28"
-                  :src="battleInfo.opponentClub.logo || '/icons/xiaoyugan.png'"
-                />
-                <span>{{ battleInfo.opponentClub.name }} (对手)</span>
-              </div>
-              <div class="score-display">
-                <span class="score-num oppo-text">{{
-                  currentOppoDayScore
-                }}</span>
-                <span class="score-label">今日积分</span>
-              </div>
-              <div class="combat-rate-display oppo-rate">
-                <span class="rate-num"
-                  >{{ todayCombatStats.oppClub.winRate }}% /
-                  {{ todayCombatStats.oppClub.defWinRate }}%</span
-                >
-                <span class="rate-label">出手 / 防守胜率</span>
-                <span class="rate-detail"
-                  >(出{{ todayCombatStats.oppClub.wins }}胜{{
-                    todayCombatStats.oppClub.losses
-                  }}负·共{{ todayCombatStats.oppClub.totalAttacks }}刀 / 守{{
-                    todayCombatStats.oppClub.defWins
-                  }}胜{{ todayCombatStats.oppClub.defLosses }}负·共{{
-                    todayCombatStats.oppClub.defTotal
-                  }}次)</span
-                >
-              </div>
-              <div class="sub-stat">
-                敌方攻破我方: {{ ownDefendDefeatedCount }} /
-                {{ ownMembers.length }} 据点
-              </div>
-            </div>
-          </div>
-
-          <!-- 双方出手胜率对比对决条 -->
-          <div class="combat-comparison-bar-container">
-            <div class="comparison-bar-header">
-              <span class="bar-left-text"
-                >我方出手胜率 {{ todayCombatStats.ourClub.winRate }}% ({{
-                  todayCombatStats.ourClub.totalAttacks
-                }}刀)</span
-              >
-              <span class="bar-center-title">⚔️ 双方出刀总体胜率对比</span>
-              <span class="bar-right-text"
-                >对手出手胜率 {{ todayCombatStats.oppClub.winRate }}% ({{
-                  todayCombatStats.oppClub.totalAttacks
-                }}刀)</span
-              >
-            </div>
-            <div class="comparison-progress-track">
-              <div
-                class="comparison-fill-left"
-                :style="{
-                  width: `${Number(todayCombatStats.ourClub.winRate) || 0}%`,
-                }"
-              ></div>
-              <div
-                class="comparison-fill-right"
-                :style="{
-                  width: `${Number(todayCombatStats.oppClub.winRate) || 0}%`,
-                }"
-              ></div>
-            </div>
-            <!-- 防守维度对比：复用现有对比条样式，不新增 CSS 类 -->
-            <div class="comparison-bar-header">
-              <span class="bar-left-text"
-                >我方防守胜率 {{ todayCombatStats.ourClub.defWinRate }}% ({{
-                  todayCombatStats.ourClub.defTotal
-                }}次)</span
-              >
-              <span class="bar-center-title">🛡️ 双方防守总体胜率对比</span>
-              <span class="bar-right-text"
-                >对手防守胜率 {{ todayCombatStats.oppClub.defWinRate }}% ({{
-                  todayCombatStats.oppClub.defTotal
-                }}次)</span
-              >
-            </div>
-            <div class="comparison-progress-track">
-              <div
-                class="comparison-fill-left"
-                :style="{
-                  width: `${Number(todayCombatStats.ourClub.defWinRate) || 0}%`,
-                }"
-              ></div>
-              <div
-                class="comparison-fill-right"
-                :style="{
-                  width: `${Number(todayCombatStats.oppClub.defWinRate) || 0}%`,
-                }"
-              ></div>
-            </div>
-          </div>
-        </div>
-
         <!-- 督战催刀大卡片 (真实 0/3次未动刀 与 1~2/3次未打满 精确统计) -->
         <div class="attendance-control-panel">
           <div class="attendance-header">
             <div class="att-title-group">
               <n-icon class="att-icon"><FlameOutline /></n-icon>
-              <span class="att-title">公会今日出刀督促台</span>
+              <span class="att-title">今日出刀</span>
               <NTag
                 size="small"
                 :type="
@@ -786,7 +310,7 @@
               "
             >
               <NTag size="medium" type="success" :bordered="false">
-                🎉 太强了！我方 30 名成员今日免费挑战次数已全部出战打满！
+                今日已全部出战
               </NTag>
             </div>
           </div>
@@ -839,7 +363,7 @@
         <div class="group-rank-section" v-if="groupRankData.length > 0">
           <div class="section-title">
             <n-icon><TrophyOutline /></n-icon>
-            <span>本组 4 俱乐部排位天梯榜 (周总积分天梯)</span>
+            <span>本组排名</span>
           </div>
           <div class="group-rank-grid">
             <div
@@ -966,13 +490,13 @@
 
     <!-- 空数据展示 -->
     <div v-else class="empty-state">
-      <n-empty :description="emptyHint" size="large">
-        <template #extra>
-          <NButton size="small" type="primary" @click="fetchCampChallengeData">
-            点击重新查询
-          </NButton>
-        </template>
-      </n-empty>
+      <div class="query-fail">
+        <p class="query-fail-title">{{ failTitle }}</p>
+        <p class="query-fail-desc">{{ failDesc }}</p>
+        <NButton type="primary" block @click="fetchCampChallengeData">
+          重新查询
+        </NButton>
+      </div>
     </div>
 
     <!-- 成员攻防战况流水面板 -->
@@ -1266,10 +790,8 @@
  */
 
 import {
-  CalendarOutline,
   CopyOutline,
   FlameOutline,
-  RefreshOutline,
   ShieldOutline,
   StatsChartOutline,
   TrophyOutline,
@@ -1358,7 +880,20 @@ const battleInfo = ref<any>(null);
 const ownMembers = ref<any[]>([]);
 const opponentMembers = ref<any[]>([]);
 const rankText = ref("营地挑战排位赛");
-const emptyHint = ref("暂无营地挑战对阵数据");
+const emptyHint = ref("");
+const failTitle = computed(() => {
+  if (emptyHint.value.includes("未连接")) return "账号未连接";
+  if (emptyHint.value) return "查询失败";
+  return "还没有对阵";
+});
+const failDesc = computed(() => {
+  if (emptyHint.value.includes("未连接")) return "当前账号没连上，连上后再查营地";
+  const text = emptyHint.value
+    .replace(/^查询失败[:：]\s*/, "")
+    .replace(/\s*\[[^\]]+\]/g, "")
+    .trim();
+  return text || "连上账号后点下面重新查";
+});
 
 // 对战详情模态框与状态
 const showDuelModal = ref(false);
@@ -2417,7 +1952,7 @@ const fetchCampChallengeData = async () => {
   }
   const tokenId = tokenStore.selectedToken.id;
   loading.value = true;
-  emptyHint.value = "正在加载营地对阵信息...";
+  emptyHint.value = "";
 
   try {
     // 1. 查询当前我方公会基础信息
@@ -2636,8 +2171,7 @@ const fetchCampChallengeData = async () => {
 
     message.success(`营地挑战(${displayOppName})数据加载完成`);
   } catch (err: any) {
-    emptyHint.value = `查询失败: ${err.message || "网络异常"}`;
-    message.error(emptyHint.value);
+    emptyHint.value = String(err?.message || "网络异常");
   } finally {
     loading.value = false;
   }
@@ -3513,9 +3047,70 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  margin-bottom: 12px;
   gap: 8px;
+}
+
+.toolbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #fff;
+}
+
+.matchup-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.matchup-side strong,
+.matchup-side span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.matchup-side span,
+.matchup-mid span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.matchup-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.matchup-mid b {
+  font-size: 18px;
+}
+
+.match-brief {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+.match-brief .schedule-chips {
+  flex: 1;
 }
 
 .toolbar .left {
@@ -3810,8 +3405,10 @@ onMounted(() => {
 
 .schedule-chip {
   flex: 1;
-  min-width: 100px;
+  min-width: 64px;
   padding: 6px 8px;
+  font: inherit;
+  color: inherit;
   border-radius: 6px;
   border: 1px solid var(--n-border-color, #e2e8f0);
   background: var(--n-card-color, #ffffff);
@@ -3954,10 +3551,50 @@ onMounted(() => {
 
 .loading-state,
 .empty-state {
-  padding: 60px 0;
+  padding: 48px 4px 16px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.query-fail {
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 20px 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.query-fail-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.query-fail-desc {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+:global(html.dark) .query-fail,
+:global(.dark) .query-fail {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:global(html.dark) .query-fail-title,
+:global(.dark) .query-fail-title {
+  color: #f8fafc;
 }
 
 /* 成员对战战报流水模态框 */
@@ -4747,5 +4384,129 @@ onMounted(() => {
 .club-rank-score .score-unit {
   font-size: 12px;
   color: #94a3b8;
+}
+
+.map-sort {
+  width: 175px;
+  margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+  .camp-challenge-container {
+    padding: 12px;
+    min-height: 0;
+  }
+
+  .toolbar,
+  .toolbar .left,
+  .toolbar .right {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .side-switch {
+    width: 100%;
+  }
+
+  .side-switch {
+    display: flex;
+  }
+
+  .side-switch :deep(.n-radio-button) {
+    flex: 1;
+    text-align: center;
+  }
+
+  .toolbar .right :deep(.n-button) {
+    width: 100%;
+  }
+
+  .club-vs-container {
+    flex-direction: column;
+  }
+
+  .club-info {
+    padding: 12px;
+  }
+
+  .club-name {
+    font-size: 15px;
+  }
+
+  .club-announce-text {
+    white-space: normal;
+  }
+
+  .vs-badge-container {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .panel-title-group,
+  .map-metrics-summary {
+    flex-wrap: wrap;
+  }
+
+  .stats-panel {
+    padding: 12px;
+  }
+
+  .stat-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .camp-main-tabs :deep(.n-tabs-rail) {
+    width: 100%;
+  }
+
+  .camp-main-tabs :deep(.n-tabs-tab) {
+    flex: 1;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  .tab-item-content {
+    justify-content: center;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .tab-item-content :deep(.n-icon) {
+    display: none;
+  }
+
+  .map-control-bar,
+  .map-filters-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .indicator-sub {
+    display: none;
+  }
+
+  .map-sort {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .fortress-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .fortress-card {
+    padding: 8px;
+  }
+
+  .fortress-card:hover {
+    transform: none;
+  }
+
+  .camp-data-table {
+    overflow-x: auto;
+  }
 }
 </style>

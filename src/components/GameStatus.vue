@@ -6,19 +6,12 @@
       'full-page-mode':
         activeSection === 'saltFieldGroup' ||
         activeSection === 'campChallengeGroup' ||
-        activeSection === 'apexChallengeGroup' ||
-        activeSection === 'peachGroup' ||
-        activeSection === 'rankGroup',
+        activeSection === 'peachGroup',
       'club-mode': activeSection === 'club',
       'activity-mode': activeSection === 'activity',
+      'camp-mode': activeSection === 'campChallengeGroup',
     }"
   >
-    <!-- 身份牌常驻（嵌入式，Tabs 上方） -->
-    <IdentityCard
-      v-if="activeSection !== 'club' && activeSection !== 'activity'"
-      embedded
-    />
-
     <!-- 阵容（仅日常） -->
     <TeamFormation v-show="activeSection === 'daily'" />
 
@@ -119,14 +112,6 @@
     <!-- 咸鱼大冲关（提取组件） -->
     <StudyChallengeCard v-show="activeSection === 'activity'" />
 
-    <!-- 逐鹿盐山分组 -->
-    <div
-      class="apex-challenge-group"
-      v-if="activeSection === 'apexChallengeGroup'"
-    >
-      <ApexChallenge />
-    </div>
-
     <!-- 营地挑战分组 -->
     <div
       class="camp-challenge-group"
@@ -204,31 +189,6 @@
       </div>
     </div>
 
-    <!-- 排行榜分组 -->
-    <div class="rank-group" v-if="activeSection === 'rankGroup'">
-      <div class="warrank-full-container" v-if="rankSubTab === 'serverrank'">
-        <ServerRankList />
-      </div>
-
-      <div class="warrank-full-container" v-if="rankSubTab === 'toprank'">
-        <TopRankList />
-      </div>
-
-      <div class="warrank-full-container" v-if="rankSubTab === 'topclubrank'">
-        <TopClubList />
-      </div>
-
-      <div class="warrank-full-container" v-if="rankSubTab === 'goldclubrank'">
-        <GoldClubList />
-      </div>
-
-      <div
-        class="warrank-full-container"
-        v-if="rankSubTab === 'greatRouteRank'"
-      >
-        <GreatRouteRankList />
-      </div>
-    </div>
     <!-- 切磋（提取组件） -->
     <FightPvp v-if="activeSection === 'fightPvp'" />
   </div>
@@ -239,22 +199,16 @@ import { useMessage } from "naive-ui";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 
-import ApexChallenge from "./Apex/ApexChallenge.vue";
 import BottleHelperCard from "./cards/BottleHelperCard.vue";
 import FightPvp from "./cards/FightPvp.vue";
-import GoldClubList from "./cards/GoldRankListPageCard.vue";
 import HangUpStatusCard from "./cards/HangUpStatusCard.vue";
 import MonthlyTasksCard from "./cards/MonthlyTasksCard.vue";
-import ServerRankList from "./cards/ServerRankListPageCard.vue";
 import StudyChallengeCard from "./cards/StudyChallengeCard.vue";
-import TopClubList from "./cards/TopClubListPageCard.vue";
-import TopRankList from "./cards/TopRankListPageCard.vue";
 import CampChallenge from "./Club/CampChallenge.vue";
 import ClubBattleRecords from "./Club/ClubBattleRecords.vue";
 import ClubMonthBattleRecords from "./Club/ClubMonthBattleRecords.vue";
 import ClubWarrank from "./Club/ClubWarrank.vue";
 import ClubWarrankV2 from "./Club/ClubWarrankV2.vue";
-import GreatRouteRankList from "./Club/GreatRouteRankListPageCard.vue";
 import LegionWarMap from "./Club/LegionWarMap.vue";
 import LegionWarStatistics from "./Club/LegionWarStatistics.vue";
 import PeachBattleRecords from "./Club/PeachBattleRecords.vue";
@@ -286,7 +240,6 @@ const legionMatch = ref({
 const activeSection = computed(() => props.section);
 const saltFieldSubTab = computed(() => props.sub || "warrank");
 const peachSubTab = computed(() => props.sub || "peach");
-const rankSubTab = computed(() => props.sub || "serverrank");
 
 // 盐场匹配信息详情 / 蟠桃园信息 界面样式选择（style1=原有样式，style2=移植样式）
 const warrankStyle = ref(
@@ -555,6 +508,11 @@ onUnmounted(() => {
   }
 }
 
+.game-status-container.camp-mode {
+  padding: 0;
+  gap: 0;
+}
+
 .game-status-container.activity-mode {
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
@@ -625,8 +583,7 @@ onUnmounted(() => {
 }
 
 .salt-field-group,
-.peach-group,
-.rank-group {
+.peach-group {
   grid-column: 1 / -1;
   width: 100%;
   display: flex;
