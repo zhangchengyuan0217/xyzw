@@ -454,7 +454,7 @@ export const useTokenStore = defineStore("tokens", () => {
       const shouldReconnect =
         forceReconnect ||
         currentPath === "/tokens" ||
-        currentPath === "/admin/game-features";
+        currentPath.startsWith("/admin/dashboard/");
 
       if (shouldReconnect) {
         wsLogger.info(`触发自动重连 [${tokenId}]`);

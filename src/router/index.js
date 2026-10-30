@@ -59,7 +59,7 @@ const my_routes = [
     component: () => import("@/layout/DefaultLayout.vue"),
     children: [
       {
-        path: "dashboard",
+        path: "dashboard/:feature?",
         name: "Dashboard",
         component: () => import("@/views/Dashboard.vue"),
         meta: {
@@ -69,12 +69,7 @@ const my_routes = [
       },
       {
         path: "game-features",
-        name: "GameFeatures",
-        component: () => import("@/views/GameFeatures.vue"),
-        meta: {
-          title: "游戏功能",
-          requiresToken: true,
-        },
+        redirect: "/admin/dashboard",
       },
       {
         path: "message-test",

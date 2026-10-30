@@ -1,24 +1,38 @@
 <template>
-  <div class="dashboard-page">
+  <div v-if="currentFeature" class="feature-page">
+    <button type="button" class="feature-back" @click="router.push('/admin/dashboard')">
+      <ChevronBack />
+      <span>{{ currentFeature.title }}</span>
+    </button>
+    <GameStatus
+      :section="currentFeature.section"
+      :sub="currentFeature.sub || ''"
+    />
+  </div>
+  <div v-else class="dashboard-page">
     <div class="feature-list">
-      <button
-        v-for="action in quickActions"
-        :key="action.id"
-        type="button"
-        class="feature-row"
-        @click="handleQuickAction(action)"
-      >
-        <span class="feature-icon">
-          <component :is="action.icon" />
-        </span>
-        <span class="feature-text">
-          <span class="feature-title">{{ action.title }}</span>
-          <span class="feature-desc">{{ action.description }}</span>
-        </span>
-        <span class="feature-arrow">
-          <ChevronForward />
-        </span>
-      </button>
+      <template v-for="item in menuItems" :key="item.id">
+        <div v-if="item.kind === 'label'" class="feature-label">
+          {{ item.title }}
+        </div>
+        <button
+          v-else
+          type="button"
+          class="feature-row"
+          @click="openMenuItem(item)"
+        >
+          <span class="feature-icon">
+            <component :is="item.icon" />
+          </span>
+          <span class="feature-text">
+            <span class="feature-title">{{ item.title }}</span>
+            <span class="feature-desc">{{ item.description }}</span>
+          </span>
+          <span class="feature-arrow">
+            <ChevronForward />
+          </span>
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -27,6 +41,7 @@
 import {
   Add,
   CheckmarkCircle,
+  ChevronBack,
   ChevronForward,
   Cloud,
   Cube,
@@ -34,15 +49,23 @@ import {
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
 import { useMessage } from "naive-ui";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
+import { findGameFeature, gameFeatures } from "@/utils/gameFeatureCatalog";
 
 const router = useRouter();
+const route = useRoute();
 const message = useMessage();
 const tokenStore = useTokenStore();
 const { getArrayBuffer } = useIndexedDB();
+
+const currentFeature = computed(() =>
+  findGameFeature(route.params.feature),
+);
+useGameConnection(computed(() => Boolean(currentFeature.value)));
 
 // ============ BIN 格式转换 ============
 
@@ -138,37 +161,41 @@ const openGame = async () => {
   router.push("/game");
 };
 
-const quickActions = ref([
+const menuItems = computed(() => [
   {
-    id: 1,
+    kind: "action",
+    id: "open-game",
     icon: GameController,
     title: "打开游戏",
     description: "使用当前Token直接进入游戏",
     action: "open-game",
   },
-  {
-    id: 2,
+  { kind: "label", id: "label-game", title: "游戏功能" },
+  ...gameFeatures.map((feature) => ({
+    kind: "feature",
     icon: Cube,
-    title: "游戏功能",
-    description: "访问所有游戏功能模块",
-    action: "game-features",
-  },
+    ...feature,
+  })),
+  { kind: "label", id: "label-more", title: "其他" },
   {
-    id: 3,
+    kind: "action",
+    id: "add-token",
     icon: Add,
     title: "添加Token",
     description: "快速添加新的游戏Token",
     action: "add-token",
   },
   {
-    id: 4,
+    kind: "action",
+    id: "batch-daily-tasks",
     icon: CheckmarkCircle,
     title: "批量任务",
     description: "批量执行任务",
     action: "batch-daily-tasks",
   },
   {
-    id: 5,
+    kind: "action",
+    id: "websocket-test",
     icon: Cloud,
     title: "WebSocket测试",
     description: "测试WebSocket连接和游戏命令",
@@ -176,47 +203,30 @@ const quickActions = ref([
   },
 ]);
 
-const handleManageTokens = () => {
-  // 降噪
-  /* 当前Token状态:
-    hasTokens: tokenStore.hasTokens,
-    selectedToken: tokenStore.selectedToken?.name,
-    tokenCount: tokenStore.gameTokens.length
-  */
-
-  try {
-    router.push("/tokens");
-    // 降噪
-  } catch (error) {
-    console.error("❌ 导航失败:", error);
-    message.error("导航到Token管理页面失败");
+const openMenuItem = (item) => {
+  if (item.kind === "feature") {
+    router.push(`/admin/dashboard/${item.id}`);
+    return;
+  }
+  if (item.action === "open-game") {
+    openGame();
+    return;
+  }
+  if (item.action === "add-token") {
+    handleManageTokens();
+    return;
+  }
+  if (item.action === "batch-daily-tasks") {
+    router.push("/admin/batch-daily-tasks");
+    return;
+  }
+  if (item.action === "websocket-test") {
+    router.push("/websocket-test");
   }
 };
 
-const handleQuickAction = (action) => {
-  switch (action.action) {
-    case "open-game":
-      openGame();
-      break;
-    case "game-features":
-      router.push("/admin/game-features");
-      break;
-    case "add-token":
-      handleManageTokens();
-      break;
-    case "execute-tasks":
-      router.push("/admin/game-features");
-      break;
-    case "websocket-test":
-      router.push("/websocket-test");
-      break;
-    case "open-settings":
-      router.push("/admin/profile");
-      break;
-    case "batch-daily-tasks":
-      router.push("/admin/batch-daily-tasks");
-      break;
-  }
+const handleManageTokens = () => {
+  router.push("/tokens");
 };
 
 /*
@@ -349,6 +359,44 @@ onMounted(async () => {
   :deep(svg) {
     width: 18px;
     height: 18px;
+  }
+}
+
+.feature-label {
+  padding: 8px 4px 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.feature-page {
+  min-height: calc(100dvh - 64px);
+  background: var(--bg-secondary);
+}
+
+.feature-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  :deep(svg) {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-page {
+    min-height: calc(100dvh - 56px);
   }
 }
 </style>

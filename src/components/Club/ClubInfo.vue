@@ -5,27 +5,20 @@
     </template>
     <template #title>
       <h3>俱乐部信息</h3>
-      <p>军团/俱乐部概览与成员</p>
     </template>
     <template #badge>
       <span>{{ club ? "已加入" : "暂无俱乐部" }}</span>
     </template>
+    <template #extra>
+      <NButton size="small" @click="refreshClub">刷新</NButton>
+    </template>
     <template #default>
       <div v-if="!club" class="empty-club">
         <n-empty description="暂无俱乐部" />
-        <div class="actions">
-          <NButton size="small" @click="refreshClub">刷新</NButton>
-        </div>
       </div>
       <div v-else class="club-layout">
-        <div class="toolbar">
-          <NSpace size="small">
-            <!-- 申请列表按钮 -->
-            <NButton v-if="canKick" size="small" @click="getApplyList"
-              >申请列表</NButton
-            >
-            <NButton size="small" @click="refreshClub">刷新</NButton>
-          </NSpace>
+        <div v-if="canKick" class="toolbar">
+          <NButton size="small" @click="getApplyList">申请列表</NButton>
         </div>
 
         <!-- 申请列表悬浮界面 -->
@@ -37,7 +30,7 @@
           :close-on-esc="true"
           preset="card"
           :show-footer="false"
-          :style="{ width: '700px', maxHeight: '80vh' }"
+          :style="{ width: 'min(700px, calc(100vw - 32px))', maxHeight: '80vh' }"
           :content-style="{
             padding: '0',
             maxHeight: 'calc(80vh - 60px)',
@@ -128,237 +121,80 @@
 
         <!-- 左：俱乐部信息 -->
         <div class="club-main">
-          <div class="section-head">
-            <span class="section-title">俱乐部资料</span>
-          </div>
-          <n-tabs v-model:value="activeTab" type="line" animated>
-            <n-tab-pane
-              name="overview"
-              tab="概览"
-              display-directive="show:lazy"
+          <div class="club-sections">
+            <button
+              v-for="section in clubSections"
+              :key="section.name"
+              type="button"
+              class="club-section"
+              :class="{ active: activeTab === section.name }"
+              @click="activeTab = section.name"
             >
-              <div class="overview">
-                <NGrid x-gap="12" y-gap="12" cols="2" item-responsive>
-                  <!-- 头部信息 -->
-                  <NGi span="2">
-                    <NCard
-                      embedded
-                      :bordered="false"
-                      content-style="padding: 16px;"
-                    >
-                      <NThing>
-                        <template #avatar>
-                          <NAvatar
-                            :size="64"
-                            :src="club.logo || '/icons/xiaoyugan.png'"
-                            style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)"
-                          />
-                        </template>
-                        <template #header>
-                          <span style="font-size: 18px; font-weight: bold">{{
-                            club.name
-                          }}</span>
-                        </template>
-                        <template #description>
-                          <NSpace size="small" style="margin-top: 4px">
-                            <NTag size="small" :bordered="false" type="warning"
-                              >ID: {{ club.id }}</NTag
-                            >
-                            <NTag size="small" :bordered="false" type="info"
-                              >服务器: {{ club.serverId - 27 }}</NTag
-                            >
-                            <NTag size="small" :bordered="false" type="success"
-                              >成员: {{ memberCount }}</NTag
-                            >
-                          </NSpace>
-                        </template>
-                        <template #header-extra>
-                          <NButton
-                            size="small"
-                            :type="legionSignedIn ? 'success' : 'primary'"
-                            :secondary="legionSignedIn"
-                            @click="signInLegion"
-                            :disabled="legionSignedIn"
-                          >
-                            <template #icon>
-                              <NIcon><ShieldCheckmark /></NIcon>
-                            </template>
-                            {{ legionSignedIn ? "已签到" : "俱乐部签到" }}
-                          </NButton>
-                        </template>
-                      </NThing>
-                    </NCard>
-                  </NGi>
-
-                  <!-- 统计数据 -->
-                  <NGi>
-                    <NCard
-                      size="small"
-                      embedded
-                      :bordered="false"
-                      style="height: 100%"
-                    >
-                      <NStatistic label="战力">
-                        <template #prefix>
-                          <NIcon color="#18a058"><BarChart /></NIcon>
-                        </template>
-                        {{ formatNumber(clubOverview.power) }}
-                      </NStatistic>
-                    </NCard>
-                  </NGi>
-                  <NGi>
-                    <NCard
-                      size="small"
-                      embedded
-                      :bordered="false"
-                      style="height: 100%"
-                    >
-                      <NStatistic label="红粹">
-                        <template #prefix>
-                          <NIcon color="#d03050"><Flame /></NIcon>
-                        </template>
-                        {{ clubOverview.redQuench }}
-                      </NStatistic>
-                    </NCard>
-                  </NGi>
-                  <NGi>
-                    <NCard
-                      size="small"
-                      embedded
-                      :bordered="false"
-                      style="height: 100%"
-                    >
-                      <NStatistic label="当前BossId">
-                        <template #prefix>
-                          <NIcon color="#8a2be2"><Skull /></NIcon>
-                        </template>
-                        {{ clubOverview.currentBossId }}
-                      </NStatistic>
-                    </NCard>
-                  </NGi>
-                  <NGi>
-                    <NCard
-                      size="small"
-                      embedded
-                      :bordered="false"
-                      style="height: 100%"
-                    >
-                      <NStatistic label="Boss剩余血量">
-                        <template #prefix>
-                          <NIcon color="#f0a020"><Skull /></NIcon>
-                        </template>
-                        {{ clubOverview.currentHP }}
-                      </NStatistic>
-                    </NCard>
-                  </NGi>
-
-                  <!-- Boss 击杀情况 -->
-                  <NGi
-                    span="2"
-                    v-if="
-                      clubOverview.unfoughtBosses &&
-                      clubOverview.unfoughtBosses.length > 0
-                    "
-                  >
-                    <NAlert type="warning" :bordered="false">
-                      <template #icon>
-                        <NIcon><Skull /></NIcon>
-                      </template>
-                      <div
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          width: 100%;
-                        "
-                      >
-                        <div>
-                          <span style="font-weight: bold">Boss 击杀情况</span>
-                          <div style="margin-top: 4px; font-size: 12px">
-                            已击杀:
-                            {{ 150 - clubOverview.unfoughtBosses.length }} / 150
-                            <span style="margin-left: 12px; color: #d03050"
-                              >遗漏:
-                              {{ clubOverview.unfoughtBosses.length }}</span
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <NCollapse
-                        arrow-placement="right"
-                        style="margin-top: 8px"
-                      >
-                        <NCollapseItem title="展开查看遗漏Boss列表" name="1">
-                          <NSpace size="small" style="margin-top: 8px">
-                            <NTag
-                              v-for="boss in clubOverview.unfoughtBosses"
-                              :key="boss"
-                              type="error"
-                              size="small"
-                              :bordered="false"
-                            >
-                              {{ boss }}
-                            </NTag>
-                          </NSpace>
-                        </NCollapseItem>
-                      </NCollapse>
-                    </NAlert>
-                  </NGi>
-
-                  <!-- 公告 -->
-                  <NGi span="2" v-if="club.announcement">
-                    <NCard size="small" title="公告" embedded :bordered="false">
-                      <template #header-extra>
-                        <NIcon size="18" color="#f0a020"><Megaphone /></NIcon>
-                      </template>
-                      <div
-                        style="
-                          white-space: pre-wrap;
-                          font-size: 13px;
-                          line-height: 1.6;
-                          color: #666;
-                        "
-                      >
-                        {{ club.announcement }}
-                      </div>
-                    </NCard>
-                  </NGi>
-
-                  <!-- 会长 -->
-                  <NGi span="2" v-if="leader">
-                    <NCard size="small" title="会长" embedded :bordered="false">
-                      <template #header-extra>
-                        <NIcon size="18" color="#2080f0"><Person /></NIcon>
-                      </template>
-                      <div
-                        style="display: flex; align-items: center; gap: 12px"
-                      >
-                        <NAvatar
-                          round
-                          :size="40"
-                          :src="leader.headImg || '/icons/xiaoyugan.png'"
-                          style="
-                            border: 2px solid #fff;
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                          "
-                        />
-                        <div>
-                          <div style="font-weight: bold; font-size: 14px">
-                            {{ leader.name }}
-                          </div>
-                          <div style="font-size: 12px; color: #999">
-                            ID: {{ leader.roleId }}
-                          </div>
-                        </div>
-                      </div>
-                    </NCard>
-                  </NGi>
-                </NGrid>
+              {{ section.label }}
+            </button>
+          </div>
+          <div v-if="activeTab === 'overview'" class="overview-panel">
+            <div class="overview-head">
+              <NAvatar
+                :size="40"
+                :src="club.logo || '/icons/xiaoyugan.png'"
+              />
+              <div class="overview-id">
+                <div class="overview-name">{{ club.name }}</div>
+                <div class="overview-meta">
+                  ID {{ club.id }} · {{ club.serverId - 27 }}服 ·
+                  {{ memberCount }}人
+                </div>
               </div>
-            </n-tab-pane>
+              <button
+                type="button"
+                class="sign-chip"
+                :class="{ done: legionSignedIn }"
+                :disabled="legionSignedIn"
+                @click="signInLegion"
+              >
+                {{ legionSignedIn ? "已签到" : "签到" }}
+              </button>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-cell">
+                <span>战力</span>
+                <strong>{{ formatNumber(clubOverview.power) }}</strong>
+              </div>
+              <div class="stat-cell">
+                <span>红粹</span>
+                <strong>{{ clubOverview.redQuench }}</strong>
+              </div>
+              <div class="stat-cell">
+                <span>Boss</span>
+                <strong>{{ clubOverview.currentBossId }}</strong>
+              </div>
+              <div class="stat-cell">
+                <span>剩余血量</span>
+                <strong>{{ clubOverview.currentHP }}</strong>
+              </div>
+            </div>
+            <div
+              v-if="clubOverview.unfoughtBosses?.length"
+              class="boss-line"
+            >
+              <span>
+                已击杀
+                {{ 150 - clubOverview.unfoughtBosses.length }}/150
+              </span>
+              <button type="button" @click="showMissedBosses = !showMissedBosses">
+                遗漏 {{ clubOverview.unfoughtBosses.length }}
+              </button>
+            </div>
+            <div v-if="showMissedBosses" class="missed-bosses">
+              <span
+                v-for="boss in clubOverview.unfoughtBosses"
+                :key="boss"
+              >{{ boss }}</span>
+            </div>
+          </div>
 
-            <n-tab-pane name="members" tab="成员" display-directive="show:lazy">
-              <div class="members" ref="exportDom">
+            <div v-else-if="activeTab === 'members'" class="members" ref="exportDom">
                 <NDataTable
                   :columns="memberColumns"
                   :data="topMembers"
@@ -368,27 +204,17 @@
                   :row-key="(row) => row.roleId"
                   flex-height
                   :scroll-x="650"
-                  style="height: 600px"
+                  style="height: 100%"
                 />
-              </div>
-            </n-tab-pane>
+            </div>
 
-            <n-tab-pane
-              name="history"
-              tab="俱乐部历史战绩"
-              display-directive="show:lazy"
-            >
+            <div v-else-if="activeTab === 'history'">
               <ClubHistoryRecords inline />
-            </n-tab-pane>
+            </div>
 
-            <n-tab-pane
-              name="weirdtower"
-              tab="怪异塔信息"
-              display-directive="show:lazy"
-            >
+            <div v-else-if="activeTab === 'weirdtower'">
               <ClubWeirdTowerInfo inline />
-            </n-tab-pane>
-          </n-tabs>
+            </div>
         </div>
 
         <!-- 右：盐场岛屿信息（所在岛屿 + 岛屿体系 + 实时榜单） -->
@@ -774,12 +600,6 @@ const club = computed(() => info.value?.info || null);
 const membersObj = computed(() => club.value?.members || {});
 const members = computed(() => Object.values(membersObj.value || {}));
 const memberCount = computed(() => members.value.length);
-
-const leader = computed(() => {
-  const lid = club.value?.leaderId;
-  if (!lid) return null;
-  return members.value.find((m) => Number(m.roleId) === Number(lid)) || null;
-});
 
 const topMembers = computed(() => {
   return [...members.value].sort((a, b) => {
@@ -1592,6 +1412,13 @@ const rejectAll = () => {
 };
 
 const activeTab = ref("overview");
+const clubSections = [
+  { name: "overview", label: "概览" },
+  { name: "members", label: "成员" },
+  { name: "history", label: "历史战绩" },
+  { name: "weirdtower", label: "怪异塔" },
+];
+const showMissedBosses = ref(false);
 
 // 申请列表状态
 const showApplyList = ref(false);
@@ -1810,6 +1637,14 @@ const formatNumber = (num) => {
   /* 与身份牌保持一致：跨满父级 grid 的所有列（.identity-embedded 同为 1 / -1） */
   grid-column: 1 / -1;
 
+  :deep(.card-header) {
+    align-items: center;
+  }
+
+  :deep(.status-title h3) {
+    margin-bottom: 0;
+  }
+
   /* 俱乐部信息（左） + 盐场岛屿积分榜（右），整卡占满宽度 */
   .club-layout {
     display: grid;
@@ -1905,6 +1740,146 @@ const formatNumber = (num) => {
 
   .overview {
     /* No specific styles needed for grid layout */
+  }
+
+  .club-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .club-section {
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .club-section.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color-light);
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .overview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .overview-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .overview-id {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .overview-name {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .overview-meta,
+  .boss-line {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .sign-chip {
+    flex: none;
+    height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 12px;
+  }
+
+  .sign-chip.done {
+    background: rgba(24, 160, 88, 0.12);
+    color: var(--success-color);
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-cell {
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+  }
+
+  .stat-cell span {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 12px;
+  }
+
+  .stat-cell strong {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .boss-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .boss-line button {
+    border: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 12px;
+  }
+
+  .missed-bosses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .missed-bosses span {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(208, 48, 80, 0.08);
+    color: var(--error-color);
+    font-size: 12px;
+  }
+
+  .members {
+    height: min(600px, 70vh);
+  }
+
+  .members :deep(.n-data-table) {
+    height: 100%;
   }
 
   .empty-club {
@@ -2300,6 +2275,15 @@ const formatNumber = (num) => {
 }
 
 @media (max-width: 768px) {
+  .club-info {
+    padding: 12px;
+    min-height: 0;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
   .hero-detail-modal {
     :deep(.n-modal-content) {
       padding: 0 !important;

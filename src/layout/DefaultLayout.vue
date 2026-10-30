@@ -24,16 +24,6 @@
             </n-icon>
             <span>首页</span>
           </router-link>
-          <router-link
-            to="/admin/game-features"
-            class="nav-item"
-            active-class="active"
-          >
-            <n-icon>
-              <Cube />
-            </n-icon>
-            <span>游戏功能</span>
-          </router-link>
           <router-link to="/tokens" class="nav-item" active-class="active">
             <n-icon>
               <PersonCircle />
@@ -122,16 +112,6 @@
           <span>首页</span>
         </router-link>
         <router-link
-          to="/admin/game-features"
-          class="drawer-item"
-          @click="isMobileMenuOpen = false"
-        >
-          <n-icon>
-            <Cube />
-          </n-icon>
-          <span>游戏功能</span>
-        </router-link>
-        <router-link
           to="/tokens"
           class="drawer-item"
           @click="isMobileMenuOpen = false"
@@ -215,7 +195,6 @@ import {
   ArrowUpCircle,
   ChatbubbleEllipsesSharp,
   ChevronDown,
-  Cube,
   Home,
   Layers,
   LockOpen,
