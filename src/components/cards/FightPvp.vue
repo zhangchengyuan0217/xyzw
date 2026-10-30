@@ -544,10 +544,8 @@ const fetchfightPVP = async () => {
 
   const tokenId = tokenStore.selectedToken.id;
 
-  // 检查WebSocket连接
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
+    message.warning("账号还在连接，稍后再查");
     return;
   }
 
@@ -635,10 +633,8 @@ const fetchTargetInfo = async () => {
 
   const tokenId = tokenStore.selectedToken.id;
 
-  // 检查WebSocket连接
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
+    message.warning("账号还在连接，稍后再查");
     return;
   }
 

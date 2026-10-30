@@ -870,10 +870,7 @@ const fetchTargetInfo = async (roleId) => {
 
   const tokenId = tokenStore.selectedToken.id;
 
-  // 检查WebSocket连接
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
     return;
   }
 
@@ -1309,10 +1306,7 @@ const fetchBattleRecords1 = async () => {
 
   const tokenId = tokenStore.selectedToken.id;
 
-  // 检查WebSocket连接
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
     return;
   }
 

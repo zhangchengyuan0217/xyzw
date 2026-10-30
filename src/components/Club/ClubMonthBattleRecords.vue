@@ -1199,10 +1199,7 @@ const fetchBattleRecords = async (date) => {
 
   const tokenId = tokenStore.selectedToken.id;
 
-  // 检查WebSocket连接
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
     return null;
   }
 
@@ -1248,9 +1245,7 @@ const fetchMonthlyBattleRecords = async () => {
   }
 
   const tokenId = tokenStore.selectedToken.id;
-  const wsStatus = tokenStore.getWebSocketStatus(tokenId);
-  if (wsStatus !== "connected") {
-    message.error("WebSocket未连接，无法查询战绩");
+  if (!(await tokenStore.ensureSocket(tokenId))) {
     return;
   }
 

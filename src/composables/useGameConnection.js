@@ -26,34 +26,12 @@ export function useGameConnection(isActive) {
     }
   };
 
-  const connectWebSocket = () => {
-    if (!tokenStore.selectedToken) {
-      message.warning("请先选择一个Token");
-      router.push("/tokens");
-      return;
-    }
-
-    const tokenId = tokenStore.selectedToken.id;
-    tokenStore.createWebSocketConnection(
-      tokenId,
-      tokenStore.selectedToken.token,
-    );
-
-    setTimeout(async () => {
-      if (tokenStore.getWebSocketStatus(tokenId) === "connected") {
-        await initializeGameData();
-      }
-    }, 2000);
-  };
-
-  const ensureConnection = () => {
+  const ensureConnection = async () => {
     if (!isActive.value || !tokenStore.selectedToken) return;
-    const status = tokenStore.getWebSocketStatus(tokenStore.selectedToken.id);
-    if (status === "connected") {
-      initializeGameData();
-      return;
-    }
-    connectWebSocket();
+    const tokenId = tokenStore.selectedToken.id;
+    const ready = await tokenStore.ensureSocket(tokenId);
+    if (!isActive.value || !ready) return;
+    await initializeGameData();
   };
 
   watch(isActive, ensureConnection, { immediate: true });

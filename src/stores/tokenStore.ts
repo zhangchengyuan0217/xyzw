@@ -337,7 +337,12 @@ export const useTokenStore = defineStore("tokens", () => {
       }
 
       // 创建WebSocket连接
-      createWebSocketConnection(tokenId, token.token, token.wsUrl);
+      createWebSocketConnection(
+        tokenId,
+        token.token,
+        token.wsUrl,
+        forceReconnect,
+      );
     } else {
       if (isConnected) {
         wsLogger.debug(`Token已连接，跳过连接创建: ${tokenId}`);
@@ -745,7 +750,18 @@ export const useTokenStore = defineStore("tokens", () => {
     tokenId: string,
     base64Token: string,
     customWsUrl = null,
+    force = false,
   ) => {
+    const existing = wsConnections.value[tokenId];
+    if (
+      !force &&
+      existing &&
+      (existing.status === "connected" || existing.status === "connecting")
+    ) {
+      wsLogger.debug(`已有连接，跳过重复创建: ${tokenId}`);
+      return existing.client;
+    }
+
     wsLogger.info(`开始创建连接: ${tokenId}`);
 
     // 1. 获取连接锁，防止竞态条件
@@ -974,6 +990,23 @@ export const useTokenStore = defineStore("tokens", () => {
 
   const getWebSocketStatus = (tokenId: string) => {
     return wsConnections.value[tokenId]?.status || "disconnected";
+  };
+
+  const ensureSocket = async (tokenId: string, timeout = 8000) => {
+    const statusOf = () => getWebSocketStatus(tokenId);
+    if (statusOf() === "connected") return true;
+
+    const token = gameTokens.value.find((item) => item.id === tokenId);
+    if (token && statusOf() !== "connecting") {
+      createWebSocketConnection(tokenId, token.token, token.wsUrl);
+    }
+
+    const started = Date.now();
+    while (Date.now() - started < timeout) {
+      if (statusOf() === "connected") return true;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    return statusOf() === "connected";
   };
 
   // 获取WebSocket客户端
@@ -1670,6 +1703,7 @@ export const useTokenStore = defineStore("tokens", () => {
     createWebSocketConnection,
     closeWebSocketConnection,
     getWebSocketStatus,
+    ensureSocket,
     getWebSocketClient,
     sendMessage,
     sendMessageWithPromise,
