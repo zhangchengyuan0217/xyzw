@@ -2001,6 +2001,7 @@ const handleRateLimitWaiting = (data) => {
 
 // 生命周期
 onMounted(async () => {
+  document.documentElement.classList.add("account-page");
   tokenStore.initTokenStore();
 
   // 监听限流等待事件
@@ -2016,6 +2017,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  document.documentElement.classList.remove("account-page");
   // 移除限流等待事件监听
   $emit.off("token:refresh:waiting", handleRateLimitWaiting);
 });
@@ -2023,7 +2025,11 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .token-import-page {
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: var(--spacing-xl) 0;
 }
@@ -2035,13 +2041,20 @@ onUnmounted(() => {
 
 .container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .page-header {
   text-align: center;
   margin-bottom: var(--spacing-2xl);
+  flex: none;
 }
 
 .header-content {
@@ -2247,7 +2260,9 @@ onUnmounted(() => {
   box-shadow: var(--shadow-medium);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--spacing-2xl) * 4);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* 深色主题下的列表区域背景 */
@@ -2330,6 +2345,8 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: var(--spacing-lg);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: var(--spacing-sm);
   scrollbar-width: thin;
@@ -2383,6 +2400,7 @@ onUnmounted(() => {
   scrollbar-width: thin;
   scrollbar-color: var(--border-medium) var(--bg-tertiary);
   flex: 1;
+  min-height: 0;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -2749,6 +2767,15 @@ onUnmounted(() => {
 :global(.import-method-option-active) {
   color: var(--primary-color);
   font-weight: 600;
+}
+
+:global(html.account-page),
+:global(html.account-page body),
+:global(html.account-page #app) {
+  height: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 :global([data-theme="dark"] .token-import-modal .arco-modal) {
