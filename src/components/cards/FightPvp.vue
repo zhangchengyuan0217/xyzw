@@ -2,25 +2,6 @@
   <div class="fight-pvp-container">
     <div class="status-card main-card">
       <div class="action-section">
-        <div class="input-group">
-          <n-input
-            v-model:value="targetId"
-            type="text"
-            placeholder="对手 ID"
-            class="target-input"
-            size="medium"
-            @keyup.enter="getTargetInfo"
-          />
-          <n-button
-            type="primary"
-            :disabled="loading1 || !targetId"
-            @click="getTargetInfo"
-            size="medium"
-          >
-            查询
-          </n-button>
-        </div>
-
         <div class="count-row">
           <button
             v-for="count in fightCounts"
@@ -30,252 +11,102 @@
             :class="{ active: fightNum === count }"
             @click="fightNum = count"
           >
-            {{ count }}
+            X{{ count }}
           </button>
         </div>
-        <div class="fight-actions">
-          <n-button
-            type="primary"
-            :disabled="loading1 || !targetId || !memberData"
-            @click="fightPVPRefresh"
-            size="medium"
-          >
-            开始切磋
-          </n-button>
-          <n-button
-            :disabled="loading1 || !memberData"
-            @click="handleExport1"
-            size="medium"
-          >
+        <n-input
+          v-model:value="targetId"
+          type="text"
+          placeholder="请输入角色ID"
+          class="target-input"
+          size="large"
+          @keyup.enter="startPk()"
+        />
+        <n-button
+          class="start-pk"
+          type="primary"
+          block
+          size="large"
+          :loading="fighting"
+          :disabled="fighting || !String(targetId || '').trim()"
+          @click="startPk()"
+        >
+          开始PK
+        </n-button>
+      </div>
+
+      <div v-if="memberData" class="opponent-line">
+        <button
+          type="button"
+          class="star-btn"
+          :class="{ on: isCurrentFavorite }"
+          @click="toggleFavorite"
+        >
+          {{ isCurrentFavorite ? "★" : "☆" }}
+        </button>
+        <n-avatar round :size="36" :src="memberData.headImg" />
+        <div class="opponent-main">
+          <strong>{{ memberData.name }}</strong>
+          <span>{{ memberData.serverName }} · {{ memberData.power }}</span>
+        </div>
+      </div>
+
+      <div v-if="fightResult && resultStats" ref="exportDom" class="info-card result-card">
+        <div class="card-title">
+          <h4>
+            切磋结果
+            <span v-if="fighting">{{ resultStats.finished }}/{{ resultStats.total }}</span>
+          </h4>
+          <n-button size="tiny" quaternary :disabled="fighting" @click="handleExport1">
             导出
           </n-button>
         </div>
-      </div>
-
-      <!-- 加载状态 -->
-      <div v-if="loading1" class="loading-section">
-        <n-spin size="large">
-          <template #description>
-            {{ loadingText }}
-          </template>
-        </n-spin>
-      </div>
-
-      <!-- 对手信息卡片 -->
-      <div v-else-if="memberData" ref="exportDom" class="content-section">
-        <!-- 对手信息和阵容左右布局 -->
-        <div class="opponent-main-layout">
-          <!-- 左侧对手信息 -->
-          <div class="info-card opponent-card left-card">
-            <div class="opponent-profile">
-              <n-avatar round :size="48" :src="memberData.headImg" />
-              <div class="opponent-main">
-                <strong>
-                  {{ memberData.name }}
-                  <n-tag
-                    v-if="memberData.legacy > 0"
-                    :style="{
-                      color: '#fff',
-                      backgroundColor: legacyColorMap[memberData.legacy]?.value,
-                    }"
-                    size="small"
-                    :bordered="false"
-                  >
-                    {{ legacyColorMap[memberData.legacy]?.name || "未知" }}
-                  </n-tag>
-                </strong>
-                <span>{{ memberData.serverName }} · {{ memberData.legionName }}</span>
-              </div>
-              <b class="opponent-power">{{ memberData.power }}</b>
-            </div>
-            <div class="opponent-stats">
-              <div>
-                <span>玩具</span>
-                <b>{{ memberData.lordWeaponId }}</b>
-              </div>
-              <div>
-                <span>红 / 孔</span>
-                <b>{{ memberData.red }} / {{ memberData.hole }}</b>
-              </div>
-              <div>
-                <span>俱乐部战力</span>
-                <b>{{ memberData.MaxPower }}</b>
-              </div>
-              <div>
-                <span>俱乐部红</span>
-                <b>{{ memberData.legionRed }}</b>
-              </div>
-            </div>
+        <div class="result-summary">
+          <div class="summary-item">
+            <span class="summary-label">胜</span>
+            <span class="summary-value win-count">{{ resultStats.wins }}</span>
           </div>
-
-          <!-- 右侧对手阵容 -->
-          <div class="info-card heroes-card right-card">
-            <div class="card-title">
-              <h4>阵容</h4>
-              <span class="hero-count">{{ memberData.heroList.length }} 人</span>
-            </div>
-
-            <div class="heroes-grid compact">
-              <div
-                v-for="hero in memberData.heroList"
-                :key="hero.heroId || hero.heroName"
-                class="hero-card compact"
-                @click="selectHeroInfo(hero)"
-              >
-                <div class="hero-avatar-container">
-                  <div class="hero-circle">
-                    <img
-                      v-if="hero.heroAvate"
-                      :src="hero.heroAvate"
-                      :alt="hero.heroName"
-                      class="hero-avatar-img"
-                    />
-                    <div v-else class="hero-placeholder">
-                      {{ hero.heroName?.substring(0, 2) || "?" }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="hero-info compact">
-                  <div class="hero-name-row">
-                    <h5 class="hero-name">{{ hero.heroName || "未知武将" }}</h5>
-                    <n-tag
-                      :type="hero.HolyBeast ? 'success' : 'warning'"
-                      size="small"
-                      class="holy-beast-tag"
-                    >
-                      {{ hero.HolyBeast ? "已开四圣" : "未开四圣" }}
-                    </n-tag>
-                  </div>
-                  <div class="hero-stats">
-                    <span class="stat-item">战力: {{ hero.power || "0" }}</span>
-                    <span class="stat-item">星级: {{ hero.star || "0" }}</span>
-                    <span class="stat-item">红数: {{ hero.red || "0" }}</span>
-                    <span class="stat-item" v-if="hero.HolyBeast"
-                      >四圣等级: {{ hero.HBlevel }}</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="summary-item">
+            <span class="summary-label">负</span>
+            <span class="summary-value loss-count">{{ resultStats.losses }}</span>
           </div>
-        </div>
-
-        <!-- 切磋结果卡片 -->
-        <div v-if="fightResult" class="info-card result-card">
-          <div class="card-title">
-            <h4>切磋结果</h4>
-            <div class="result-summary">
-              <div class="summary-item match-count">
-                <span class="summary-label">总次数：</span>
-                <span class="summary-value">{{ fightNum }}</span>
-              </div>
-              <div class="summary-item win-count">
-                <span class="summary-label">胜：</span>
-                <span class="summary-value">{{ fightResult.winCount }}</span>
-              </div>
-              <div class="summary-item loss-count">
-                <span class="summary-label">负：</span>
-                <span class="summary-value">{{
-                  fightNum - fightResult.winCount
-                }}</span>
-              </div>
-
-              <div class="summary-item win-rate">
-                <span class="summary-label">胜率：</span>
-                <span class="summary-value"
-                  >{{
-                    ((fightResult.winCount / fightNum) * 100).toFixed(2)
-                  }}%</span
-                >
-              </div>
-              <div class="summary-item die-rate">
-                <span class="summary-label">我方掉将率：</span>
-                <span class="summary-value"
-                  >{{
-                    (
-                      (fightResult.ourTotalDieHeroCount / (fightNum * 5)) *
-                      100
-                    ).toFixed(2)
-                  }}%</span
-                >
-              </div>
-              <div class="summary-item die-rate">
-                <span class="summary-label">敌方掉将率：</span>
-                <span class="summary-value"
-                  >{{
-                    (
-                      (fightResult.enemyTotalDieHeroCount / (fightNum * 5)) *
-                      100
-                    ).toFixed(2)
-                  }}%</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <div class="result-list">
-            <div
-              v-for="(battle, battleIndex) in fightResult.resultCount"
-              :key="battleIndex"
-              class="battle-result-item"
-              :class="[battle.isWin ? 'win' : 'loss']"
-            >
-              <div class="battle-header">
-                <span class="battle-index">第 {{ battleIndex + 1 }} 场</span>
-                <n-tag :type="battle.isWin ? 'success' : 'error'" size="small">
-                  {{ battle.isWin ? "胜利" : "失败" }}
-                </n-tag>
-              </div>
-
-              <div class="battle-details">
-                <div class="battle-side left-side">
-                  <n-avatar
-                    round
-                    :size="32"
-                    :src="battle.leftheadImg"
-                    class="side-avatar"
-                  />
-                  <div class="side-info">
-                    <span class="side-name">{{
-                      battle.leftName || "未知"
-                    }}</span>
-                    <span class="side-power">战力: {{ battle.leftpower }}</span>
-                    <span class="side-die"
-                      >掉将: {{ battle.leftDieHero }} 个</span
-                    >
-                  </div>
-                </div>
-
-                <div class="battle-vs">VS</div>
-
-                <div class="battle-side right-side">
-                  <n-avatar
-                    round
-                    :size="32"
-                    :src="battle.rightheadImg"
-                    class="side-avatar"
-                  />
-                  <div class="side-info">
-                    <span class="side-name">{{
-                      battle.rightName || "未知"
-                    }}</span>
-                    <span class="side-power"
-                      >战力: {{ battle.rightpower }}</span
-                    >
-                    <span class="side-die"
-                      >掉将: {{ battle.rightDieHero }} 个</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="summary-item">
+            <span class="summary-label">胜率</span>
+            <span class="summary-value">{{ resultStats.winRate }}%</span>
           </div>
         </div>
       </div>
 
-      <!-- 空状态 -->
-      <p v-else class="empty-hint">输入对手 ID，查询后再切磋</p>
+      <div class="fav-help">
+        <p>收藏说明</p>
+        <ul>
+          <li>最多可收藏 100 个用户（当前：{{ favorites.length }}/100）</li>
+          <li>查出对手后，点左侧星标即可收藏</li>
+          <li>点卡片上的 PK 直接开打，点删除即可移除</li>
+        </ul>
+      </div>
+
+      <div v-if="favorites.length" class="fav-list">
+        <div v-for="item in favorites" :key="item.id" class="fav-card">
+          <n-avatar round :size="44" :src="item.headImg || ''" />
+          <div class="fav-meta">
+            <strong>{{ item.name || item.id }}</strong>
+            <span>ID: {{ item.id }}</span>
+            <span v-if="item.savedAt">收藏时间: {{ formatSavedAt(item.savedAt) }}</span>
+          </div>
+          <button
+            type="button"
+            class="fav-pk"
+            :disabled="fighting"
+            @click="startPk(item.id)"
+          >
+            PK
+          </button>
+          <button type="button" class="fav-del" @click="removeFavorite(item.id)">
+            删除
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 武将详情模态框 -->
@@ -449,7 +280,7 @@
 
 import html2canvas from "html2canvas";
 import { useMessage } from "naive-ui";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { isSameGameValue } from "@/utils/gameValue.js";
 
@@ -481,6 +312,33 @@ const tokenStore = useTokenStore();
 
 const exportDom = ref(null);
 const loading1 = ref(false);
+const querying = ref(false);
+const fighting = ref(false);
+const FAVORITE_KEY = "pvpFavoriteTargets";
+const favorites = ref([]);
+const isCurrentFavorite = computed(() =>
+  favorites.value.some((item) => item.id === String(targetId.value || "").trim()),
+);
+const resultStats = computed(() => {
+  const result = fightResult.value;
+  if (!result) return null;
+  const finished = result.resultCount?.length || 0;
+  const wins = result.winCount || 0;
+  const rate = (value) => (finished ? Math.round((value / finished) * 100) : 0);
+  return {
+    finished,
+    total: result.total || fightNum.value,
+    wins,
+    losses: Math.max(0, finished - wins),
+    winRate: rate(wins),
+    ourDie: finished
+      ? Math.round((result.ourTotalDieHeroCount / (finished * 5)) * 100)
+      : 0,
+    enemyDie: finished
+      ? Math.round((result.enemyTotalDieHeroCount / (finished * 5)) * 100)
+      : 0,
+  };
+});
 const loadingText = ref("正在查询对手信息...");
 const topranklist = ref(null);
 
@@ -504,7 +362,7 @@ watch(targetId, (newId, oldId) => {
 const showHeroModal = ref(false);
 //选中的武将信息
 const heroModealTemp = ref(null);
-const fightCounts = [1, 10, 25, 50];
+const fightCounts = [1, 10, 20, 50, 100];
 
 // 分页状态
 
@@ -550,14 +408,21 @@ const fetchfightPVP = async () => {
   }
 
   loading1.value = true;
-  loadingText.value = "正在进行切磋，请稍候...";
+  fighting.value = true;
   queryDate.value = gettoday();
+  const liveResult = {
+    winCount: 0,
+    ourTotalDieHeroCount: 0,
+    enemyTotalDieHeroCount: 0,
+    resultCount: [],
+    total: fightNum.value,
+  };
+  fightResult.value = liveResult;
 
   try {
     let winCount = 0;
     let ourTotalDieHeroCount = 0; // 我方总掉落将领数
     let enemyTotalDieHeroCount = 0; // 敌方总掉落将领数
-    const resultCount = [];
     for (let i = 0; i < fightNum.value; i++) {
       const result = await tokenStore.sendMessageWithPromise(
         tokenId,
@@ -568,7 +433,6 @@ const fetchfightPVP = async () => {
         5000,
       );
       if (!result.battleData) {
-        fightResult.value = null;
         message.warning("切磋错误");
         return;
       }
@@ -604,28 +468,23 @@ const fetchfightPVP = async () => {
       if (result.battleData.result.isWin) {
         winCount++;
       }
-      resultCount.push(tempObj);
+      fightResult.value.resultCount.push(tempObj);
+      fightResult.value.winCount = winCount;
+      fightResult.value.ourTotalDieHeroCount = ourTotalDieHeroCount;
+      fightResult.value.enemyTotalDieHeroCount = enemyTotalDieHeroCount;
     }
-    const teamData = {
-      winCount,
-      ourTotalDieHeroCount,
-      enemyTotalDieHeroCount,
-      resultCount,
-    };
-    fightResult.value = teamData;
-    message.success("切磋完成");
-    return teamData;
+    return liveResult;
   } catch (error) {
     message.error(`查询失败: ${error.message}`);
     topranklist.value = null;
   } finally {
     loading1.value = false;
-    loadingText.value = "正在查询对手信息...";
+    fighting.value = false;
   }
 };
 
 // 查询
-const fetchTargetInfo = async () => {
+const fetchTargetInfo = async ({ keepResult = false } = {}) => {
   if (!tokenStore.selectedToken) {
     message.warning("请先选择游戏角色");
     return;
@@ -634,15 +493,13 @@ const fetchTargetInfo = async () => {
   const tokenId = tokenStore.selectedToken.id;
 
   if (!(await tokenStore.ensureSocket(tokenId))) {
-    message.warning("账号还在连接，稍后再查");
+    if (!keepResult) message.warning("账号还在连接，稍后再查");
     return;
   }
 
-  // 清除之前的切磋结果
-  fightResult.value = null;
+  if (!keepResult) fightResult.value = null;
 
-  loading1.value = true;
-  loadingText.value = "正在查询对手信息...";
+  querying.value = true;
   queryDate.value = gettoday();
 
   try {
@@ -659,8 +516,10 @@ const fetchTargetInfo = async () => {
     );
 
     if (!result.roleInfo && !result.legionInfo) {
-      memberData.value = null;
-      message.warning("未查询到对手信息");
+      if (!keepResult) {
+        memberData.value = null;
+        message.warning("未查询到对手信息");
+      }
       return;
     }
     const teamData = {};
@@ -695,15 +554,84 @@ const fetchTargetInfo = async () => {
     teamData.red = heroAndholdAndRed.redCount;
     teamData.legacy = result.roleInfo.legacy?.color || 0; // 功法等级
     memberData.value = teamData;
-    message.success("对手信息加载成功");
+    syncFavorite(teamData);
     return teamData;
   } catch (error) {
-    message.error(`查询失败: ${error.message}`);
+    if (!keepResult) message.error(`查询失败: ${error.message}`);
     topranklist.value = null;
   } finally {
-    loading1.value = false;
-    loadingText.value = "正在查询对手信息...";
+    querying.value = false;
   }
+};
+
+const startPk = (id) => {
+  const roleId = String(id ?? targetId.value ?? "").trim();
+  if (!roleId) {
+    message.warning("请输入角色ID");
+    return;
+  }
+  if (fighting.value) return;
+  targetId.value = roleId;
+  fetchTargetInfo({ keepResult: true });
+  fightPVPRefresh();
+};
+
+const formatSavedAt = (ts) => {
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
+const loadFavorites = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAVORITE_KEY) || "[]");
+    favorites.value = Array.isArray(saved) ? saved : [];
+  } catch {
+    favorites.value = [];
+  }
+};
+
+const saveFavorites = () => {
+  localStorage.setItem(FAVORITE_KEY, JSON.stringify(favorites.value));
+};
+
+const toggleFavorite = () => {
+  const id = String(targetId.value || "").trim();
+  if (!id) return;
+  const index = favorites.value.findIndex((item) => item.id === id);
+  if (index >= 0) {
+    favorites.value.splice(index, 1);
+  } else {
+    if (favorites.value.length >= 100) {
+      message.warning("最多收藏 100 个");
+      return;
+    }
+    favorites.value.unshift({
+      id,
+      name: memberData.value?.name || id,
+      headImg: memberData.value?.headImg || "",
+      power: memberData.value?.power || "",
+      savedAt: Date.now(),
+    });
+  }
+  saveFavorites();
+};
+
+const removeFavorite = (id) => {
+  favorites.value = favorites.value.filter((item) => item.id !== id);
+  saveFavorites();
+};
+
+const syncFavorite = (teamData) => {
+  const saved = favorites.value.find(
+    (item) => item.id === String(targetId.value || "").trim(),
+  );
+  if (!saved) return;
+  saved.name = teamData.name || saved.name;
+  saved.power = teamData.power || saved.power;
+  saved.headImg = teamData.headImg || saved.headImg;
+  saveFavorites();
 };
 
 /**
@@ -839,9 +767,7 @@ defineExpose({
 
 // Inline 模式：挂载后自动拉取
 onMounted(() => {
-  // if (props.inline) {
-  //     topranklistRefresh()
-  // }
+  loadFavorites();
 });
 </script>
 
@@ -1666,9 +1592,111 @@ onMounted(() => {
 
 .count-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.start-pk {
+  margin-top: 12px;
+}
+
+.fav-help {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+
+  p {
+    margin: 0 0 6px;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+}
+
+.fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.fav-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg-secondary);
+}
+
+.fav-meta {
+  min-width: 0;
+
+  strong,
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 15px;
+  }
+
+  span {
+    margin-top: 2px;
+    color: var(--text-tertiary);
+    font-size: 12px;
+  }
+}
+
+.fav-pk,
+.fav-del,
+.star-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fav-pk {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 700;
+}
+
+.fav-pk:disabled {
+  opacity: 0.5;
+}
+
+.fav-del {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.star-btn {
+  width: 32px;
+  color: var(--text-tertiary);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.star-btn.on {
+  color: #f59e0b;
 }
 
 .count-chip {
@@ -1686,6 +1714,94 @@ onMounted(() => {
   border-color: transparent;
   background: var(--primary-color);
   color: #fff;
+}
+
+.favorite-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+}
+
+.favorite-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+
+  i {
+    color: var(--text-tertiary);
+    font-style: normal;
+  }
+}
+
+.opponent-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.battle-row {
+  display: grid;
+  grid-template-columns: 64px 28px 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-primary);
+  font-size: 13px;
+}
+
+.battle-row.win span:nth-child(2) {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.battle-row.loss span:nth-child(2) {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 52vh;
+  overflow: auto;
+}
+
+.result-card .result-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.result-summary .summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.result-summary .win-count {
+  color: #16a34a;
+}
+
+.result-summary .loss-count {
+  color: #dc2626;
 }
 
 .fight-actions {
