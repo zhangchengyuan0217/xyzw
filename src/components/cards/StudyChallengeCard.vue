@@ -8,17 +8,16 @@
     </template>
     <template #title>
       <h3>咸鱼大冲关</h3>
-      <p>每日知识挑战</p>
     </template>
     <template #badge>
-      <span>每周任务</span>
+      <span>每周</span>
     </template>
     <template #default>
-      <p class="description">没有什么可以阻挡我求知的欲望！</p>
+      <p class="study-status">{{ studyStatusText }}</p>
     </template>
     <template #action>
       <a-button v-if="!study.thisWeek" status="primary" @click="startStudy">
-        🎯 一键答题.
+        一键答题
       </a-button>
       <a-button
         v-if="!study.thisWeek && isSameGameValue(study.status, 'starting')"
@@ -73,6 +72,16 @@ const tokenStore = useTokenStore();
 const message = useMessage();
 const study = computed(() => tokenStore.gameData.studyStatus);
 
+const studyStatusText = computed(() => {
+  if (study.value.thisWeek) return "本周已完成";
+  if (isSameGameValue(study.value.status, "starting")) return "正在获取题库";
+  if (isSameGameValue(study.value.status, "answering")) return "答题中";
+  if (isSameGameValue(study.value.status, "claiming_rewards"))
+    return "正在领取奖励";
+  if (isSameGameValue(study.value.status, "completed")) return "答题完成";
+  return "本周尚未作答";
+});
+
 const startStudy = async () => {
   if (!tokenStore.selectedToken || study.value.thisWeek) return;
   if (
@@ -121,3 +130,35 @@ const startStudy = async () => {
   }
 };
 </script>
+
+<style scoped lang="scss">
+.study {
+  min-height: 0;
+
+  &:hover {
+    transform: none;
+  }
+
+  :deep(.card-header) {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  :deep(.status-title h3) {
+    margin-bottom: 0;
+  }
+
+  :deep(.card-content) {
+    margin-bottom: 8px;
+  }
+
+  :deep(.card-action > button) {
+    min-height: 36px;
+  }
+}
+
+.study-status {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+</style>

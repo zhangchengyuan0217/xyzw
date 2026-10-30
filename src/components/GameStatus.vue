@@ -10,10 +10,14 @@
         activeSection === 'peachGroup' ||
         activeSection === 'rankGroup',
       'club-mode': activeSection === 'club',
+      'activity-mode': activeSection === 'activity',
     }"
   >
     <!-- 身份牌常驻（嵌入式，Tabs 上方） -->
-    <IdentityCard v-if="activeSection !== 'club'" embedded />
+    <IdentityCard
+      v-if="activeSection !== 'club' && activeSection !== 'activity'"
+      embedded
+    />
 
     <!-- 阵容（仅日常） -->
     <TeamFormation v-show="activeSection === 'daily'" />
@@ -145,9 +149,6 @@
 
     <!-- 咸鱼大冲关（提取组件） -->
     <StudyChallengeCard v-show="activeSection === 'activity'" />
-
-    <!-- 换皮闯关 -->
-    <SkinChallengeCard v-show="activeSection === 'activity'" />
 
     <!-- 逐鹿盐山分组 -->
     <div
@@ -284,7 +285,6 @@ import MonthlyTasksCard from "./cards/MonthlyTasksCard.vue";
 import RecruitHelperCard from "./cards/RecruitHelperCard.vue";
 import RefineHelperCard from "./cards/RefineHelperCard.vue";
 import ServerRankList from "./cards/ServerRankListPageCard.vue";
-import SkinChallengeCard from "./cards/SkinChallengeCard.vue";
 import StarUpgradeCard from "./cards/StarUpgradeCard.vue";
 import StudyChallengeCard from "./cards/StudyChallengeCard.vue";
 import TopClubList from "./cards/TopClubListPageCard.vue";
@@ -595,6 +595,14 @@ onUnmounted(() => {
     grid-template-columns: repeat(2, 1fr);
     max-width: 100% !important;
   }
+}
+
+.game-status-container.activity-mode {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .section-header {

@@ -5,18 +5,14 @@
     </template>
     <template #title>
       <h3>换皮闯关</h3>
-      <p>挑战关卡赢取奖励</p>
     </template>
     <template #badge>
-      <!-- Badge content moved to default slot -->
+      <span>{{ dailyFightNum }}/10</span>
     </template>
     <template #default>
       <div class="header-info">
-        <span class="challenge-count">今日挑战 {{ dailyFightNum }}/10</span>
-        <span class="daily-target" v-if="isActivityValid"
-          >今日可挑战 {{ todayInfo }}</span
-        >
-        <span class="daily-target" v-else>活动已结束</span>
+        <span v-if="isActivityValid">{{ todayInfo }}</span>
+        <span v-else>活动已结束</span>
       </div>
 
       <div v-if="!isActivityValid" class="expired-mask">当前活动已结束</div>
@@ -45,6 +41,7 @@
           </div>
 
           <button
+            v-if="isTowerOpen(type) && !isTowerCleared(type)"
             class="challenge-btn"
             :disabled="!canChallenge(type) || isFighting"
             @click="challengeSingle(type)"
@@ -308,36 +305,44 @@ watch(
 </script>
 
 <style scoped lang="scss">
+.skin-challenge {
+  min-height: 0;
+
+  &:hover {
+    transform: none;
+  }
+
+  :deep(.card-header) {
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  :deep(.status-title h3) {
+    margin-bottom: 0;
+  }
+
+  :deep(.card-content) {
+    margin-bottom: 0;
+  }
+}
+
 .header-info {
-  display: flex;
-  gap: var(--spacing-md);
-  font-size: var(--font-size-sm);
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.challenge-count {
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-.daily-target {
+  margin-bottom: 10px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .boss-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .boss-card {
   background: var(--bg-secondary);
   border-radius: var(--border-radius-medium);
-  padding: var(--spacing-sm);
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -378,20 +383,21 @@ watch(
 }
 
 .boss-title {
-  font-weight: bold;
-  color: var(--primary-color);
-  font-size: var(--font-size-md);
-  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+  margin-bottom: 2px;
 }
 
 .boss-level {
-  font-size: var(--font-size-lg);
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
 }
 
 .boss-status {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  min-height: 16px;
 }
 
 .status-text {
@@ -453,9 +459,4 @@ watch(
   }
 }
 
-@media (max-width: 640px) {
-  .boss-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 </style>
