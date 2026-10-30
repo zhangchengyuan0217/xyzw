@@ -10,6 +10,7 @@
       'club-mode': activeSection === 'club',
       'activity-mode': activeSection === 'activity',
       'camp-mode': activeSection === 'campChallengeGroup',
+      'pvp-mode': activeSection === 'fightPvp',
     }"
   >
     <!-- 阵容（仅日常） -->
@@ -511,6 +512,12 @@ onUnmounted(() => {
 .game-status-container.camp-mode {
   padding: 0;
   gap: 0;
+}
+
+.game-status-container.pvp-mode {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 12px;
 }
 
 .game-status-container.activity-mode {

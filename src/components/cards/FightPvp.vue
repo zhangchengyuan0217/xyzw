@@ -1,29 +1,15 @@
 <template>
   <div class="fight-pvp-container">
-    <!-- 主卡片容器 -->
     <div class="status-card main-card">
-      <!-- 卡片头部 -->
-      <div class="card-header">
-        <img
-          src="/icons/Ob7pyorzmHiJcbab2c25af264d0758b527bc1b61cc3b.png"
-          alt="切磋图标"
-          class="status-icon"
-        />
-        <div class="status-info">
-          <h3>切磋系统</h3>
-          <p>查询对手信息并进行切磋</p>
-        </div>
-      </div>
-
-      <!-- 操作区域 -->
       <div class="action-section">
         <div class="input-group">
           <n-input
             v-model:value="targetId"
             type="text"
-            placeholder="请输入对手ID"
+            placeholder="对手 ID"
             class="target-input"
             size="medium"
+            @keyup.enter="getTargetInfo"
           />
           <n-button
             type="primary"
@@ -31,60 +17,38 @@
             @click="getTargetInfo"
             size="medium"
           >
-            <template #icon>
-              <n-icon>
-                <Refresh />
-              </n-icon>
-            </template>
-            查询对手
+            查询
           </n-button>
         </div>
 
-        <div class="fight-options">
-          <div class="option-item">
-            <span class="option-label">切磋次数：</span>
-            <n-select
-              v-model:value="fightNum"
-              :options="options"
-              size="medium"
-              class="fight-count-select"
-              filterable
-              tag
-              allow-create
-              placeholder="请选择或输入切磋次数"
-              @update:value="handleFightNumChange"
-            />
-          </div>
-
-          <div class="option-actions">
-            <n-button
-              type="success"
-              :disabled="loading1 || !targetId || !memberData"
-              @click="fightPVPRefresh"
-              size="medium"
-            >
-              <template #icon>
-                <n-icon>
-                  <Trophy />
-                </n-icon>
-              </template>
-              开始切磋
-            </n-button>
-
-            <n-button
-              type="default"
-              :disabled="loading1 || !memberData"
-              @click="handleExport1"
-              size="medium"
-            >
-              <template #icon>
-                <n-icon>
-                  <Copy />
-                </n-icon>
-              </template>
-              导出数据
-            </n-button>
-          </div>
+        <div class="count-row">
+          <button
+            v-for="count in fightCounts"
+            :key="count"
+            type="button"
+            class="count-chip"
+            :class="{ active: fightNum === count }"
+            @click="fightNum = count"
+          >
+            {{ count }}
+          </button>
+        </div>
+        <div class="fight-actions">
+          <n-button
+            type="primary"
+            :disabled="loading1 || !targetId || !memberData"
+            @click="fightPVPRefresh"
+            size="medium"
+          >
+            开始切磋
+          </n-button>
+          <n-button
+            :disabled="loading1 || !memberData"
+            @click="handleExport1"
+            size="medium"
+          >
+            导出
+          </n-button>
         </div>
       </div>
 
@@ -103,91 +67,52 @@
         <div class="opponent-main-layout">
           <!-- 左侧对手信息 -->
           <div class="info-card opponent-card left-card">
-            <div class="card-title">
-              <h4>对手信息</h4>
+            <div class="opponent-profile">
+              <n-avatar round :size="48" :src="memberData.headImg" />
+              <div class="opponent-main">
+                <strong>
+                  {{ memberData.name }}
+                  <n-tag
+                    v-if="memberData.legacy > 0"
+                    :style="{
+                      color: '#fff',
+                      backgroundColor: legacyColorMap[memberData.legacy]?.value,
+                    }"
+                    size="small"
+                    :bordered="false"
+                  >
+                    {{ legacyColorMap[memberData.legacy]?.name || "未知" }}
+                  </n-tag>
+                </strong>
+                <span>{{ memberData.serverName }} · {{ memberData.legionName }}</span>
+              </div>
+              <b class="opponent-power">{{ memberData.power }}</b>
             </div>
-
-            <!-- 表格形式显示对手信息 -->
-            <div class="opponent-info-table">
-              <table class="info-table">
-                <tbody>
-                  <tr>
-                    <td class="avatar-cell" rowspan="8">
-                      <n-avatar
-                        round
-                        :size="60"
-                        :src="memberData.headImg"
-                        class="opponent-avatar"
-                      />
-                    </td>
-                    <td class="label-cell">游戏名：</td>
-                    <td class="value-cell">
-                      {{ memberData.name }}
-                      <n-tag
-                        v-if="memberData.legacy > 0"
-                        :style="{
-                          color: '#fff',
-                          backgroundColor:
-                            legacyColorMap[memberData.legacy]?.value,
-                        }"
-                        size="small"
-                        style="margin-left: 8px"
-                      >
-                        {{ legacyColorMap[memberData.legacy]?.name || "未知" }}
-                      </n-tag>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">区服：</td>
-                    <td class="value-cell">{{ memberData.serverName }}</td>
-                  </tr>
-                  <tr class="highlight-row">
-                    <td class="label-cell">战力：</td>
-                    <td class="value-cell power-value">
-                      {{ memberData.power }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">玩具：</td>
-                    <td class="value-cell">{{ memberData.lordWeaponId }}</td>
-                  </tr>
-                  <tr class="highlight-row">
-                    <td class="label-cell">阵容：</td>
-                    <td class="value-cell lineup">
-                      <span class="red-count">红数: {{ memberData.red }}</span>
-                      <span class="separator">/</span>
-                      <span class="hole-count"
-                        >孔数: {{ memberData.hole }}</span
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">俱乐部：</td>
-                    <td class="value-cell">{{ memberData.legionName }}</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">俱乐部战力：</td>
-                    <td class="value-cell">{{ memberData.MaxPower }}</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">当前红数：</td>
-                    <td class="value-cell">{{ memberData.legionRed }}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="opponent-stats">
+              <div>
+                <span>玩具</span>
+                <b>{{ memberData.lordWeaponId }}</b>
+              </div>
+              <div>
+                <span>红 / 孔</span>
+                <b>{{ memberData.red }} / {{ memberData.hole }}</b>
+              </div>
+              <div>
+                <span>俱乐部战力</span>
+                <b>{{ memberData.MaxPower }}</b>
+              </div>
+              <div>
+                <span>俱乐部红</span>
+                <b>{{ memberData.legionRed }}</b>
+              </div>
             </div>
           </div>
 
           <!-- 右侧对手阵容 -->
           <div class="info-card heroes-card right-card">
             <div class="card-title">
-              <h4>对手阵容</h4>
-              <div class="card-title-right">
-                <span class="hero-count"
-                  >{{ memberData.heroList.length }} 名武将</span
-                >
-                <span class="click-hint">（点击头像图片可看详情）</span>
-              </div>
+              <h4>阵容</h4>
+              <span class="hero-count">{{ memberData.heroList.length }} 人</span>
             </div>
 
             <div class="heroes-grid compact">
@@ -350,9 +275,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="empty-state">
-        <n-empty description="请输入对手ID并点击查询按钮获取对手信息" />
-      </div>
+      <p v-else class="empty-hint">输入对手 ID，查询后再切磋</p>
     </div>
 
     <!-- 武将详情模态框 -->
@@ -523,7 +446,6 @@
 </template>
 
 <script setup>
-import { Copy, Refresh, Trophy } from "@vicons/ionicons5";
 
 import html2canvas from "html2canvas";
 import { useMessage } from "naive-ui";
@@ -582,24 +504,7 @@ watch(targetId, (newId, oldId) => {
 const showHeroModal = ref(false);
 //选中的武将信息
 const heroModealTemp = ref(null);
-const options = [
-  {
-    label: "1",
-    value: 1,
-  },
-  {
-    label: "10",
-    value: 10,
-  },
-  {
-    label: "25",
-    value: 25,
-  },
-  {
-    label: "50",
-    value: 50,
-  },
-];
+const fightCounts = [1, 10, 25, 50];
 
 // 分页状态
 
@@ -868,29 +773,6 @@ const getEquipment = (equipment) => {
 // 刷新战绩
 const fightPVPRefresh = () => {
   fetchfightPVP();
-};
-
-//处理切磋次数变化
-const handleFightNumChange = (value) => {
-  // 确保输入的是有效的数字
-  if (typeof value === "string") {
-    // 如果是字符串，转换为数字
-    const num = Number.parseInt(value, 10);
-    // 确保数字有效且大于0,尽量限制最大次数,万一谁请求打多了,可不是什么好事情
-    if (!Number.isNaN(+num) && num > 0 && num <= 50) {
-      fightNum.value = num;
-    } else {
-      // 否则重置为默认值1
-      fightNum.value = 1;
-    }
-  } else {
-    if (value > 0 && value <= 50) {
-      // 如果已经是数字类型，直接使用
-      fightNum.value = value;
-    } else {
-      fightNum.value = 1;
-    }
-  }
 };
 
 //获取对手信息
@@ -1761,33 +1643,185 @@ onMounted(() => {
   }
 }
 
+.main-card {
+  padding: 14px;
+  box-shadow: none;
+  transform: none;
+}
+
+.main-card:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.action-section {
+  margin-bottom: 12px;
+}
+
+.action-section .input-group {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.action-section .input-group .n-button {
+  flex: none;
+  min-width: 72px;
+}
+
+.count-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.count-chip {
+  height: 36px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.count-chip.active {
+  border-color: transparent;
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.fight-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.empty-hint {
+  margin: 8px 0 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.opponent-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.opponent-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.opponent-main strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.opponent-main span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opponent-power {
+  flex: none;
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+.opponent-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.opponent-stats div {
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--bg-primary);
+}
+
+.opponent-stats span {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.opponent-stats b {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .main-card {
     padding: 12px;
-  }
-
-  .card-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
+    border-radius: 16px;
   }
 
   .action-section .input-group {
+    flex-direction: row;
+  }
+
+  .heroes-grid.compact {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero-card.compact .hero-circle {
+    width: 52px;
+    height: 52px;
+  }
+
+  .result-card .card-title {
     flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .result-card .card-title .result-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .result-summary .summary-item {
     flex-direction: column;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 2px;
   }
 
   .result-card .battle-details {
-    flex-direction: column;
-    gap: 16px;
+    gap: 8px;
   }
 
   .result-card .battle-side {
-    justify-content: center !important;
+    min-width: 0;
+  }
+
+  .result-card .side-info {
+    min-width: 0;
+  }
+
+  .result-card .side-name,
+  .result-card .side-power,
+  .result-card .side-die {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
