@@ -690,10 +690,14 @@ onUnmounted(() => {
 
   :deep(.n-tabs-nav),
   :deep(.n-tabs-nav-scroll-wrapper),
-  :deep(.n-tabs-nav-scroll-content),
-  :deep(.n-radio-group) {
+  :deep(.n-tabs-nav-scroll-content) {
     max-width: 100%;
     overflow-x: hidden !important;
+  }
+
+  :deep(.n-radio-group) {
+    max-width: 100%;
+    overflow: hidden;
   }
 
   :deep(table),
