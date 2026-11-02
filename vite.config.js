@@ -76,7 +76,7 @@ export default defineConfig(async () => {
   const { ArcoResolver } = componentsResolversModule ?? {};
   const componentsPlugin = componentsModule?.default?.({
     dirs: ["src/components"],
-    globsExclude: ["**/Private/**"],
+    globsExclude: ["**/Private/**", "**/GameStatus.vue"],
     resolvers: ArcoResolver
       ? [
           ArcoResolver({

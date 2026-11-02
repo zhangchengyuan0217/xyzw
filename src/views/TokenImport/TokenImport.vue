@@ -1335,9 +1335,8 @@ const openGame = async () => {
 
 // 开始任务管理 - 直接跳转到控制台
 const startTaskManagement = (token) => {
-  // 选择token
+  document.documentElement.classList.remove("account-page");
   tokenStore.selectToken(token.id);
-  // 直接跳转到控制台，不等待连接
   message.success(`正在进入 ${token.name} 的控制台`);
   router.push("/admin/dashboard");
 };

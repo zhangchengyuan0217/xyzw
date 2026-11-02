@@ -838,9 +838,16 @@ export const useTokenStore = defineStore("tokens", () => {
       const connection = wsConnections.value[tokenId];
       const isCurrentConnection = () =>
         wsConnections.value[tokenId] === connection;
+      let connectTimer: ReturnType<typeof setTimeout> | null = null;
+      const clearConnectTimer = () => {
+        if (!connectTimer) return;
+        clearTimeout(connectTimer);
+        connectTimer = null;
+      };
 
       // 9. 设置事件监听（增强版）
       wsClient.onConnect = () => {
+        clearConnectTimer();
         if (!isCurrentConnection()) return;
         wsLogger.wsConnect(tokenId);
         if (wsConnections.value[tokenId]) {
@@ -874,7 +881,12 @@ export const useTokenStore = defineStore("tokens", () => {
 
           // 如果连接异常断开(1006)且从未连接成功(握手失败)，尝试刷新Token
           // connectedAt 为 null 表示 socket.onopen 还没触发就断开了，通常意味着握手失败（如403 Forbidden）
-          if (event.code === 1006 && !conn.connectedAt && !wasDisconnecting) {
+          if (
+            event.code === 1006 &&
+            !conn.connectedAt &&
+            !wasDisconnecting &&
+            conn.lastError?.error !== "connect timeout"
+          ) {
             wsLogger.warn(`检测到握手失败(1006)，尝试刷新Token [${tokenId}]`);
             // 强制刷新并重连
             await attemptTokenRefresh(tokenId, true);
@@ -883,6 +895,7 @@ export const useTokenStore = defineStore("tokens", () => {
       };
 
       wsClient.onError = (error) => {
+        clearConnectTimer();
         if (!isCurrentConnection()) return;
         wsLogger.wsError(tokenId, error);
         if (wsConnections.value[tokenId]) {
@@ -912,8 +925,26 @@ export const useTokenStore = defineStore("tokens", () => {
         }
       });
 
-      // 11. 初始化连接
+      // 11. 初始化连接。握手没有结果时不能一直停在 connecting。
       wsClient.init();
+      connectTimer = setTimeout(() => {
+        if (!isCurrentConnection()) return;
+        if (wsConnections.value[tokenId]?.status !== "connecting") return;
+        wsLogger.warn(`连接超时: ${tokenId}`);
+        const current = wsConnections.value[tokenId];
+        current.status = "error";
+        current.lastError = {
+          timestamp: new Date().toISOString(),
+          error: "connect timeout",
+        };
+        updateCrossTabConnectionState(tokenId, "disconnected");
+        releaseConnectionLock(tokenId, "connect");
+        try {
+          wsClient.disconnect();
+        } catch (error) {
+          wsLogger.warn(`超时后关闭连接失败 [${tokenId}]`, error);
+        }
+      }, 8000);
 
       wsLogger.verbose(`WebSocket客户端创建成功: ${tokenId}`);
       return wsClient;
@@ -1528,7 +1559,10 @@ export const useTokenStore = defineStore("tokens", () => {
   };
 
   // 初始化
+  let tokenStoreInitialized = false;
   const initTokenStore = () => {
+    if (tokenStoreInitialized) return;
+    tokenStoreInitialized = true;
     // // 恢复数据
     // const savedTokens = localStorage.getItem('gameTokens')
     // const savedSelectedId = localStorage.getItem('selectedTokenId')

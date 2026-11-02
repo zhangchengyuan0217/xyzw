@@ -86,12 +86,16 @@ import {
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
 import { useMessage } from "naive-ui";
-import { computed, onMounted, ref } from "vue";
+import { computed, defineAsyncComponent, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import { findGameFeature, gameFeatures } from "@/utils/gameFeatureCatalog";
+
+const GameStatus = defineAsyncComponent(
+  () => import("@/components/GameStatus.vue"),
+);
 
 const router = useRouter();
 const route = useRoute();
