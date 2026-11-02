@@ -979,11 +979,10 @@ onMounted(() => {
 
 // 使用GameStatus中的统一卡片样式
 .weird-tower {
-  border-left: 4px solid #8b5cf6; // 怪异塔专用颜色
   display: flex;
   flex-direction: column;
-  min-height: 240px; // 继续缩小整体高度
-  padding: var(--spacing-lg);
+  min-height: 0;
+  padding: 14px;
 }
 
 .status-icon {
@@ -995,9 +994,14 @@ onMounted(() => {
 
 .card-header {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.status-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .energy-display {
@@ -1261,17 +1265,18 @@ onMounted(() => {
 .card-content {
   background: var(--bg-tertiary);
   border-radius: var(--border-radius-medium);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
-  flex: 1; // 占据可用空间，使上下分布更均衡
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  flex: none;
   display: flex;
-  align-items: center; // 内容在中部更居中
+  align-items: center;
 }
 
 .tower-floor {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 
   .label {
     font-size: var(--font-size-sm);
@@ -1369,13 +1374,13 @@ onMounted(() => {
 // 响应式设计
 @media (max-width: 768px) {
   .card-header {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    text-align: center;
+    flex-direction: row;
+    text-align: left;
   }
 
   .energy-display {
     align-self: center;
+    margin-left: auto;
   }
 }
 </style>

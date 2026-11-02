@@ -33,14 +33,13 @@ defineProps<{
 .status-card {
   background: var(--bg-primary);
   border-radius: var(--border-radius-xl);
-  padding: var(--spacing-lg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all var(--transition-normal);
-  min-height: 200px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow var(--transition-normal);
+  min-height: 0;
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   }
 
   .active {
@@ -93,9 +92,9 @@ defineProps<{
 
 .card-header {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 
   .status-icon {
     width: 32px;
@@ -167,7 +166,8 @@ defineProps<{
     line-height: 1.5;
   }
 
-  margin-bottom: var(--spacing-lg);
+  flex: none;
+  margin-bottom: 10px;
 
   // .time-display {
   //   font-size: 1.5rem;
@@ -256,17 +256,19 @@ defineProps<{
 
 @media (max-width: 768px) {
   .status-card {
-    padding: var(--spacing-md);
-    min-height: auto;
+    padding: 14px;
+    min-height: 0;
   }
 
   .card-header {
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
 
     .status-title {
-      min-width: 100px;
+      min-width: 0;
+      flex: 1;
     }
 
     .status-badge {

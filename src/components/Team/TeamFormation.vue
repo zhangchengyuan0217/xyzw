@@ -358,14 +358,19 @@ watch(
 
 <style scoped lang="scss">
 .team-formation-card {
-  min-height: 220px;
+  min-height: 0;
 }
 
 .card-header {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
 }
 
 .icon {
@@ -390,6 +395,8 @@ watch(
 .team-selector {
   display: flex;
   gap: var(--spacing-xs);
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .team-button {
@@ -569,16 +576,14 @@ watch(
 
 @media (max-width: 768px) {
   .card-header {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    text-align: center;
+    flex-direction: row;
+    text-align: left;
     align-items: center;
   }
 
   .team-selector {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    justify-content: flex-end;
+    flex-wrap: nowrap;
   }
 
   .heroes-container {

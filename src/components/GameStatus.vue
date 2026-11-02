@@ -463,8 +463,8 @@ onUnmounted(() => {
 .game-status-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
-  padding: var(--spacing-lg);
+  gap: 12px;
+  padding: 12px;
 
   // 在大屏幕上限制最大列数以确保卡片有足够宽度
   @media (min-width: 1400px) {

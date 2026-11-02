@@ -53,9 +53,6 @@
           rail-color="#f3f4f6"
         />
       </div>
-
-      <!-- 提示信息 -->
-      <div class="info-container">右上角小齿轮有惊喜</div>
     </div>
 
     <!-- 一键执行按钮 -->
@@ -632,12 +629,11 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 // 使用GameStatus中的统一卡片样式
 .daily-task {
-  border-left: 4px solid #f0a020; // 每日任务专用颜色
   display: flex;
   flex-direction: column;
-  min-height: 240px; // 继续缩小整体高度
-  padding: var(--spacing-lg);
-  gap: var(--spacing-md);
+  min-height: 0;
+  padding: 14px;
+  gap: 10px;
 
   .status-badge {
     &.completed {
@@ -653,16 +649,15 @@ onBeforeUnmount(() => {
 
 .card-header {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .daily-task .card-content {
-  flex: 1;
+  flex: none;
   display: flex;
   flex-direction: column;
-  justify-content: center; // 使进度和提示在可用空间内居中
 }
 
 .progress-container {
@@ -671,8 +666,8 @@ onBeforeUnmount(() => {
 
 .info-container {
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  text-align: center;
+  font-size: 12px;
+  text-align: right;
 }
 
 // 使用GameStatus中的统一按钮样式
@@ -923,19 +918,14 @@ onBeforeUnmount(() => {
 
 // 响应式设计
 @media (max-width: 768px) {
-  .daily-task {
-    padding: var(--spacing-md);
-    min-height: auto;
-  }
-
   .card-header {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .header-right {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: var(--spacing-sm);
+    width: auto;
+    margin-top: 0;
+    margin-left: auto;
   }
 }
 </style>
