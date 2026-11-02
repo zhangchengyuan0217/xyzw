@@ -15,17 +15,18 @@ export const downloadCanvasAsImage = (canvas, filename) => {
           return;
         }
 
-        // 尝试使用 navigator.share (主要针对移动端)
-        // 注意：navigator.share 需要在 HTTPS 环境下，且必须由用户手势触发
-        // 这里作为一种尝试，如果失败则回退到下载链接
+        // 电脑端 Chrome 也有 navigator.share，会弹出系统分享窗口，这个窗口会把桌面卡死。
+        // 只有手机才走分享，电脑直接下载。
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
+          navigator.userAgent,
+        );
+        const file = new File([blob], filename, { type: blob.type });
         if (
+          isMobile &&
           navigator.share &&
           navigator.canShare &&
-          navigator.canShare({
-            files: [new File([blob], filename, { type: blob.type })],
-          })
+          navigator.canShare({ files: [file] })
         ) {
-          const file = new File([blob], filename, { type: blob.type });
           navigator
             .share({
               files: [file],
