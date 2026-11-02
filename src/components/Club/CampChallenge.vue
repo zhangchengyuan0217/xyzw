@@ -1,10 +1,6 @@
 <template>
   <div class="camp-challenge-container" ref="exportDom">
     <div class="toolbar" v-if="battleInfo">
-      <n-radio-group v-model:value="selectedSide" size="small" class="side-switch">
-        <n-radio-button value="own">我方</n-radio-button>
-        <n-radio-button value="opponent">敌方</n-radio-button>
-      </n-radio-group>
       <div class="toolbar-meta">
         <NTag :type="isMatchDay ? 'success' : 'info'" round size="small">
           {{ scheduleText }}
@@ -59,33 +55,187 @@
       </div>
     </div>
 
-    <!-- 4 大多维战术视图切换 Tab -->
-    <div class="view-tabs-container" v-if="battleInfo && !loading">
-      <n-tabs
-        v-model:value="activeViewTab"
-        type="segment"
-        animated
-        class="camp-main-tabs"
-      >
-        <n-tab name="battleMap">
-          <div class="tab-item-content">
-            <n-icon><ShieldOutline /></n-icon>
-            <span>据点沙盘</span>
+    <div v-if="battleInfo && !loading" class="report-board">
+      <div class="report-overview">
+        <div class="overview-card">
+          <span>攻破据点</span>
+          <b>{{ weeklyStats.defeatedCount }}/{{ weeklyStats.totalDefenders }}</b>
+          <em>{{ weeklyStats.defeatedRate }}%</em>
+        </div>
+        <div class="overview-card">
+          <span>满刀率</span>
+          <b>{{ attendanceStats.completedCount }}/{{ attendanceStats.total }}</b>
+          <em>{{ attendanceStats.completedRate }}%</em>
+        </div>
+        <div class="overview-card">
+          <span>未动刀</span>
+          <b>{{ attendanceStats.unattackedCount }}</b>
+          <em>0/3</em>
+        </div>
+        <div class="overview-card">
+          <span>未打满</span>
+          <b>{{ attendanceStats.incompleteCount }}</b>
+          <em>1~2/3</em>
+        </div>
+      </div>
+
+      <div class="group-rank-strip" v-if="groupRankData.length > 0">
+        <span class="strip-label">小组周榜</span>
+        <div
+          v-for="(club, idx) in groupRankData"
+          :key="club.id || idx"
+          class="rank-chip"
+          :class="{ 'is-own': club.id === battleInfo.ownClub.id }"
+        >
+          <i>{{ idx + 1 }}</i>
+          <span>{{ club.name }}</span>
+          <b>{{ club.score }}</b>
+        </div>
+      </div>
+
+      <div class="blade-panel">
+        <div class="blade-head">
+          <div class="blade-title">
+            <b>今日出刀</b>
+            <span v-if="bladeSavedAt">已保存 {{ bladeSavedAt }}</span>
           </div>
-        </n-tab>
-        <n-tab name="todayDetails">
-          <div class="tab-item-content">
-            <n-icon><FlameOutline /></n-icon>
-            <span>今日对战</span>
+          <div class="blade-meter" :title="`满刀 ${attendanceStats.completedCount}/${attendanceStats.total}`">
+            <i :style="{ width: `${attendanceStats.completedRate}%` }" />
           </div>
-        </n-tab>
-        <n-tab name="weekRoster">
-          <div class="tab-item-content">
-            <n-icon><TrophyOutline /></n-icon>
-            <span>本周战绩</span>
+          <em>满刀 {{ attendanceStats.completedCount }}/{{ attendanceStats.total }}</em>
+          <div class="blade-actions">
+            <button
+              type="button"
+              :disabled="attendanceStats.unattackedCount === 0"
+              @click="copyUnattackedList"
+            >
+              复制未动刀
+            </button>
+            <button
+              type="button"
+              :disabled="attendanceStats.incompleteCount === 0"
+              @click="copyIncompleteList"
+            >
+              复制未打满
+            </button>
           </div>
-        </n-tab>
-      </n-tabs>
+        </div>
+
+        <div class="blade-group is-none" v-if="attendanceStats.unattackedCount > 0">
+          <div class="blade-group-title">
+            未动刀
+            <i>{{ attendanceStats.unattackedCount }}</i>
+          </div>
+          <div class="blade-grid">
+            <button
+              v-for="m in attendanceStats.unattacked"
+              :key="m.id"
+              type="button"
+              class="blade-chip"
+              @click="openDuelModal(m)"
+            >
+              <span :title="m.name">{{ m.name }}</span>
+              <i>0/3</i>
+            </button>
+          </div>
+        </div>
+
+        <div class="blade-group is-partial" v-if="attendanceStats.incompleteCount > 0">
+          <div class="blade-group-title">
+            未打满
+            <i>{{ attendanceStats.incompleteCount }}</i>
+          </div>
+          <div class="blade-grid">
+            <button
+              v-for="m in attendanceStats.incomplete"
+              :key="m.id"
+              type="button"
+              class="blade-chip"
+              @click="openDuelModal(m)"
+            >
+              <span :title="m.name">{{ m.name }}</span>
+              <i>{{ m.realAttackCnt }}/3</i>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="blade-done"
+          v-if="attendanceStats.unattackedCount === 0 && attendanceStats.incompleteCount === 0"
+        >
+          今日已全部出战
+        </div>
+      </div>
+
+      <section class="side-list">
+        <header>
+          <b>我方成员</b>
+          <span>{{ battleInfo.ownClub.name }} · {{ sortedTodayMembers.length }}人</span>
+        </header>
+        <div class="member-head">
+          <span>成员</span>
+          <span>战力</span>
+          <span>出刀</span>
+          <span>战功</span>
+          <span>胜</span>
+          <span>负</span>
+          <span>防守</span>
+        </div>
+        <button
+          v-for="row in sortedTodayMembers"
+          :key="`own_${row.id}_${row.slot}`"
+          type="button"
+          class="member-row"
+          @click="openDuelModal(row)"
+        >
+          <span class="who">
+            <i>{{ row.rankIndex }}</i>
+            <NAvatar round :size="28" :src="row.headImg || '/icons/xiaoyugan.png'" />
+            <em :title="row.name">{{ row.name }}</em>
+          </span>
+          <span>{{ formatPower(row.power) }}</span>
+          <span :class="bladeClass(row.realAttackCnt)">{{ row.realAttackCnt || 0 }}/3</span>
+          <span class="score">{{ row.todayScore || 0 }}</span>
+          <span class="win">{{ row.attackWins || 0 }}</span>
+          <span class="loss">{{ row.attackLosses || 0 }}</span>
+          <span>{{ row.defWins || 0 }}/{{ row.challengeCnt || 0 }}</span>
+        </button>
+      </section>
+
+      <section class="side-list enemy">
+        <header>
+          <b>敌方成员</b>
+          <span>{{ battleInfo.opponentClub.name }} · {{ sortedOpponentMembers.length }}人</span>
+        </header>
+        <div class="member-head">
+          <span>成员</span>
+          <span>战力</span>
+          <span>据点</span>
+          <span>战功</span>
+          <span>被打</span>
+          <span>失守</span>
+          <span>状态</span>
+        </div>
+        <button
+          v-for="(row, idx) in sortedOpponentMembers"
+          :key="`opp_${row.id}_${row.slot}`"
+          type="button"
+          class="member-row"
+          @click="openDuelModal(row)"
+        >
+          <span class="who">
+            <i>{{ idx + 1 }}</i>
+            <NAvatar round :size="28" :src="row.headImg || '/icons/xiaoyugan.png'" />
+            <em :title="row.name">{{ row.name }}</em>
+          </span>
+          <span>{{ formatPower(row.power) }}</span>
+          <span>#{{ row.slot || idx + 1 }}</span>
+          <span class="score">{{ row.score || 0 }}</span>
+          <span>{{ row.challengeCnt || 0 }}</span>
+          <span class="loss">{{ Math.max(0, (row.challengeCnt || 0) - (row.failCnt || 0)) }}</span>
+          <span :class="row.defeated ? 'loss' : 'win'">{{ row.defeated ? "已破" : "坚守" }}</span>
+        </button>
+      </section>
     </div>
 
     <!-- 加载状态 -->
@@ -94,335 +244,8 @@
       <p>正在加载阵容<span v-if="progressText"> {{ progressText }}</span></p>
     </div>
 
-    <!-- 视图内容区域 -->
-    <div v-else-if="currentMemberList.length > 0" class="views-content-wrapper">
-      <!-- ================= 视图 1：今日战场据点沙盘 (击破图表) ================= -->
-      <div v-if="activeViewTab === 'battleMap'" class="battle-map-section">
-        <!-- 控制栏与筛选器 -->
-        <div class="map-control-bar">
-          <div class="map-filters-group">
-            <n-radio-group v-model:value="mapFilter" size="small">
-              <n-radio-button value="all">全部</n-radio-button>
-              <n-radio-button value="alive">坚守</n-radio-button>
-              <n-radio-button value="defeated">已破</n-radio-button>
-            </n-radio-group>
-            <NSelect
-              v-model:value="mapSort"
-              :options="mapSortOptions"
-              size="small"
-              class="map-sort"
-            />
-          </div>
-        </div>
-
-        <!-- 30 人据点卡片网格 -->
-        <div class="fortress-grid">
-          <div
-            v-for="item in displayMapList"
-            :key="`slot_${item.slot}_${item.id}_${item.mirror ? 'mirror' : 'real'}`"
-            class="fortress-card"
-            :class="{
-              'is-defeated': item.defeated,
-              'is-alive': !item.defeated,
-              'is-mirror': item.mirror,
-            }"
-            @click="openDuelModal(item)"
-          >
-            <!-- 卡片顶部据点编号与状态印章 -->
-            <div class="card-header-bar">
-              <span class="slot-badge">
-                #{{ item.slot || "?" }} 据点
-                <NTag
-                  v-if="item.mirror"
-                  size="tiny"
-                  type="warning"
-                  round
-                  :bordered="false"
-                  style="
-                    margin-left: 4px;
-                    transform: scale(0.9);
-                    transform-origin: left center;
-                  "
-                >
-                  镜像
-                </NTag>
-              </span>
-              <div class="stamp-wrapper">
-                <span v-if="item.defeated" class="stamp stamp-defeated"
-                  >💥 已攻破</span
-                >
-                <span v-else class="stamp stamp-alive">🛡️ 坚守中</span>
-              </div>
-            </div>
-
-            <!-- 卡片中间：头像与基本信息 -->
-            <div class="card-body">
-              <div class="avatar-box">
-                <NAvatar
-                  round
-                  :size="46"
-                  :src="item.headImg || '/icons/xiaoyugan.png'"
-                  class="fortress-avatar"
-                />
-                <NTag
-                  v-if="item.redQuench > 0"
-                  size="tiny"
-                  round
-                  :bordered="false"
-                  class="red-quench-tag"
-                >
-                  {{ item.redQuench }}红
-                </NTag>
-              </div>
-              <div class="member-detail">
-                <div class="member-name" :title="item.name">
-                  {{ item.name }}
-                  <span
-                    v-if="item.mirror"
-                    class="mirror-text"
-                    style="font-size: 11px; color: #f0a020; margin-left: 2px"
-                    >(镜像)</span
-                  >
-                </div>
-                <div class="member-power">{{ formatPower(item.power) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= 视图 2：今日公会对战详细 (催刀督战) ================= -->
-      <div
-        v-else-if="activeViewTab === 'todayDetails'"
-        class="today-details-section"
-      >
-        <!-- 督战催刀大卡片 (真实 0/3次未动刀 与 1~2/3次未打满 精确统计) -->
-        <div class="attendance-control-panel">
-          <div class="attendance-header">
-            <div class="att-title-group">
-              <n-icon class="att-icon"><FlameOutline /></n-icon>
-              <span class="att-title">今日出刀</span>
-              <NTag
-                size="small"
-                :type="
-                  attendanceStats.unattackedCount === 0 &&
-                  attendanceStats.incompleteCount === 0
-                    ? 'success'
-                    : 'warning'
-                "
-                round
-                :bordered="false"
-              >
-                满刀率: {{ attendanceStats.completedRate }}% ({{
-                  attendanceStats.completedCount
-                }}/{{ attendanceStats.total }})
-              </NTag>
-            </div>
-            <div class="att-actions">
-              <NButton
-                size="small"
-                :disabled="attendanceStats.unattackedCount === 0"
-                @click="copyUnattackedList"
-              >
-                复制未动刀
-              </NButton>
-              <NButton
-                size="small"
-                :disabled="attendanceStats.incompleteCount === 0"
-                @click="copyIncompleteList"
-              >
-                复制未打满
-              </NButton>
-            </div>
-          </div>
-
-          <div class="attendance-body">
-            <!-- 0 刀未动成员 (0/3) -->
-            <div
-              class="unattacked-preview-box"
-              v-if="attendanceStats.unattackedCount > 0"
-              style="margin-bottom: 10px"
-            >
-              <span class="box-label error-label"
-                >🛑 0 刀未动成员（{{
-                  attendanceStats.unattackedCount
-                }}人，急需催刀）：</span
-              >
-              <div class="unattacked-tags">
-                <NTag
-                  v-for="m in attendanceStats.unattacked"
-                  :key="m.id"
-                  size="small"
-                  type="error"
-                  :bordered="false"
-                  class="member-reminder-tag"
-                  @click="openDuelModal(m)"
-                >
-                  {{ m.name }} ({{ formatPower(m.power) }} · 0/3次)
-                </NTag>
-              </div>
-            </div>
-
-            <!-- 未打满成员 (1~2/3) -->
-            <div
-              class="unattacked-preview-box"
-              v-if="attendanceStats.incompleteCount > 0"
-              style="margin-bottom: 10px"
-            >
-              <span class="box-label warning-label"
-                >⚠️ 未打满成员（{{
-                  attendanceStats.incompleteCount
-                }}人，仍有剩余免费挑战机会）：</span
-              >
-              <div class="unattacked-tags">
-                <NTag
-                  v-for="m in attendanceStats.incomplete"
-                  :key="m.id"
-                  size="small"
-                  type="warning"
-                  :bordered="false"
-                  class="member-reminder-tag"
-                  @click="openDuelModal(m)"
-                >
-                  {{ m.name }} (出战{{ m.realAttackCnt }}/3次 · 剩{{
-                    3 - m.realAttackCnt
-                  }}次)
-                </NTag>
-              </div>
-            </div>
-
-            <!-- 全员打满提示 -->
-            <div
-              class="all-attacked-box"
-              v-if="
-                attendanceStats.unattackedCount === 0 &&
-                attendanceStats.incompleteCount === 0
-              "
-            >
-              <NTag size="medium" type="success" :bordered="false">
-                今日已全部出战
-              </NTag>
-            </div>
-          </div>
-        </div>
-
-        <!-- 30人今日出战详细大宽表 -->
-        <NSelect
-          v-model:value="todaySortBy"
-          size="small"
-          class="sort-select"
-          :options="[
-            { label: '按贡献', value: 'score' },
-            { label: '按出手胜率', value: 'attackWinRate' },
-            { label: '按防守胜率', value: 'defWinRate' },
-          ]"
-        />
-        <div class="plain-list">
-          <button
-            v-for="row in sortedTodayMembers"
-            :key="`today_${row.id}_${row.slot}`"
-            type="button"
-            class="plain-row"
-            @click="openDuelModal(row)"
-          >
-            <b>{{ row.rankIndex }}</b>
-            <span class="plain-name">{{ row.name }}</span>
-            <span>{{ formatPower(row.power) }}</span>
-            <span>{{ row.todayScore > 0 ? `+${row.todayScore}` : "0" }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ================= 视图 3：当周全员战绩 & 排位天梯 ================= -->
-      <div
-        v-else-if="activeViewTab === 'weekRoster'"
-        class="week-roster-section"
-      >
-        <!-- 4 公会排位天梯榜 -->
-        <div class="group-rank-section" v-if="groupRankData.length > 0">
-          <div class="section-title">
-            <n-icon><TrophyOutline /></n-icon>
-            <span>本组排名</span>
-          </div>
-          <div class="group-rank-grid">
-            <div
-              v-for="(club, idx) in groupRankData"
-              :key="club.id || idx"
-              class="group-rank-card"
-              :class="{
-                'is-own-club': club.id === battleInfo.ownClub.id,
-                'rank-1': idx === 0,
-                'rank-2': idx === 1,
-                'rank-3': idx === 2,
-              }"
-            >
-              <div class="rank-badge-num">
-                {{
-                  idx === 0
-                    ? "🥇 冠军位"
-                    : idx === 1
-                      ? "🥈 亚军位"
-                      : idx === 2
-                        ? "🥉 季军位"
-                        : "第 4 名"
-                }}
-              </div>
-              <div class="club-main-info">
-                <div class="club-title-row">
-                  <span class="club-name">{{ club.name }}</span>
-                  <NTag
-                    v-if="club.id === battleInfo.ownClub.id"
-                    size="tiny"
-                    type="success"
-                    round
-                    >我方</NTag
-                  >
-                </div>
-                <div class="server-tag">
-                  {{
-                    club.serverName ||
-                    (club.serverId ? `${club.serverId}服` : "跨服")
-                  }}
-                </div>
-              </div>
-              <div class="club-rank-score">
-                <span class="score-val">{{ club.score }}</span>
-                <span class="score-unit">本周积分</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 30人当周战功排行榜与防守胜率考核大宽表 -->
-        <NSelect
-          v-model:value="weeklySortBy"
-          size="small"
-          class="sort-select"
-          :options="[
-            { label: '按贡献', value: 'score' },
-            { label: '按防守胜率', value: 'defWinRate' },
-          ]"
-        />
-        <div class="plain-list">
-          <button
-            v-for="row in sortedWeeklyRoster"
-            :key="`week_${row.id}_${row.slot}`"
-            type="button"
-            class="plain-row"
-            @click="openDuelModal(row)"
-          >
-            <b>{{ row.currentRank }}</b>
-            <span class="plain-name">{{ row.name }}</span>
-            <span>{{ row.score || 0 }}分</span>
-            <span>{{ row.defWinRate || "—" }}</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-
     <!-- 空数据展示 -->
-    <div v-else class="empty-state">
+    <div v-if="!loading && !battleInfo" class="empty-state">
       <div class="query-fail">
         <p class="query-fail-title">{{ failTitle }}</p>
         <p class="query-fail-desc">{{ failDesc }}</p>
@@ -722,21 +545,14 @@
  * 通过 role_gettargetteam 获取成员在营地挑战中真实生效的 1~5 号站位布阵阵容。
  */
 
-import {
-  FlameOutline,
-  ShieldOutline,
-  TrophyOutline,
-} from "@vicons/ionicons5";
-import { NAvatar, NButton, NSelect, NTag, useMessage } from "naive-ui";
-import { computed, h, onMounted, ref, watch } from "vue";
+import { NAvatar, NButton, NTag, useMessage } from "naive-ui";
+import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { captureElement as html2canvas } from "@/utils/captureElement";
 import {
   formatWeapon,
   getLineupType,
   HERO_DICT,
-  legacycolor,
-  LINEUP_RULES,
 } from "@/utils/HeroList";
 
 /**
@@ -764,20 +580,9 @@ const exportDom = ref<HTMLElement | null>(null);
 
 // 界面状态与视图切换
 const selectedSide = ref<"own" | "opponent">("own");
-const activeViewTab = ref<
-  "battleMap" | "todayDetails" | "weekRoster" | "lineupTable"
->("battleMap");
-const mapFilter = ref<"all" | "alive" | "defeated">("all");
-const mapSort = ref<"slot" | "powerAsc" | "powerDesc">("slot");
-const mapSortOptions = [
-  { label: "据点序号 (#1 ~ #30)", value: "slot" },
-  { label: "战力升序 (挑软柿子)", value: "powerAsc" },
-  { label: "战力降序 (核心高战)", value: "powerDesc" },
-];
 
 // 今日与当周战绩详表多维排序维度 ('score' 贡献积分 | 'attackWinRate' 出手胜率 | 'defWinRate' 防守胜率)
 const todaySortBy = ref<"score" | "attackWinRate" | "defWinRate">("score");
-const weeklySortBy = ref<"score" | "attackWinRate" | "defWinRate">("score");
 
 const groupRankData = ref<any[]>([]);
 const loading = ref(false);
@@ -965,13 +770,6 @@ const formatCombatTime = (timestamp: number | undefined | null) => {
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
-// 当前成员列表（根据单选框切换敌方/我方）
-const currentMemberList = computed(() => {
-  return selectedSide.value === "opponent"
-    ? opponentMembers.value
-    : ownMembers.value;
-});
-
 // 日程判断：当前星期几是否在营地挑战日程列表中
 const isMatchDay = computed(() => {
   const day = new Date().getDay();
@@ -989,26 +787,6 @@ const scheduleText = computed(() => {
   return `今日${currentDayName}（非排位日${
     matchDaysDesc ? `，开放日：${matchDaysDesc}` : ""
   }）`;
-});
-
-// 阵容流派统计聚合
-const lineupStats = computed(() => {
-  const counts: Record<string, number> = {};
-  for (const m of currentMemberList.value) {
-    const type = m.lineupType || "其他阵容";
-    counts[type] = (counts[type] || 0) + 1;
-  }
-
-  return Object.entries(counts)
-    .map(([name, count]) => {
-      const rule = LINEUP_RULES.find((r) => r.name === name);
-      return {
-        name,
-        count,
-        colorProps: rule?.colorProps || { color: "#e8e8e8", textColor: "#444" },
-      };
-    })
-    .sort((a, b) => b.count - a.count);
 });
 
 /**
@@ -1131,43 +909,6 @@ const weeklyStats = computed(() => {
   };
 });
 
-// 视图切换与沙盘据点筛选
-const displayMapList = computed(() => {
-  let list = [...currentMemberList.value];
-  if (mapFilter.value === "alive") {
-    list = list.filter((m) => !m.defeated);
-  } else if (mapFilter.value === "defeated") {
-    list = list.filter((m) => m.defeated);
-  }
-
-  if (mapSort.value === "powerAsc") {
-    list.sort((a, b) => (a.power || 0) - (b.power || 0));
-  } else if (mapSort.value === "powerDesc") {
-    list.sort((a, b) => (b.power || 0) - (a.power || 0));
-  } else {
-    list.sort((a, b) => (a.slot || 0) - (b.slot || 0));
-  }
-  return list;
-});
-
-const mapStats = computed(() => {
-  const total = currentMemberList.value.length || 30;
-  const defeatedCount = currentMemberList.value.filter(
-    (m) => m.defeated,
-  ).length;
-  const aliveCount = Math.max(0, total - defeatedCount);
-  const defeatedRate =
-    total > 0 ? ((defeatedCount / total) * 100).toFixed(1) : "0.0";
-  return { total, defeatedCount, aliveCount, defeatedRate };
-});
-
-// 我方防守状态统计
-const ownDefendDefeatedCount = computed(
-  () => ownMembers.value.filter((m) => m.defeated).length,
-);
-
-// 敌方防守状态统计
-
 // 敌方今日得分
 const currentOppoDayScore = computed(() => {
   const oppo = matchDayList.value.find((d) => d.day === selectedMatchDay.value);
@@ -1258,26 +999,6 @@ const copyIncompleteList = () => {
   );
 };
 
-// 我方 30 人当周战功排行榜与防守胜率考核基础数据
-const weeklyRosterRanked = computed(() => {
-  // 结合当周累计贡献与周防守统计构建成员数据
-  const members = [...ownMembers.value];
-  return members.map((m) => {
-    const w =
-      weeklyDefenseStatsMap.value.get(`${Number(m.id)}_${!!m.mirror}`) ||
-      weeklyDefenseStatsMap.value.get(Number(m.id)) ||
-      weeklyDefenseStatsMap.value.get(m.id as any);
-    return {
-      ...m,
-      challengeCnt: w ? w.challengeCnt : 0,
-      defWins: w ? w.defWins : 0,
-      defLosses: w ? w.defLosses : 0,
-      defWinRate: w ? w.defWinRate : "—",
-      defWinRateNum: w ? w.defWinRateNum : -1,
-    };
-  });
-});
-
 /**
  * 战绩表多维排序比较器工厂（今日/当周两表共用）
  *
@@ -1345,389 +1066,46 @@ const sortedTodayMembers = computed(() => {
   }));
 });
 
-/**
- * 当周全员战绩多维动态排序数据 (支持 贡献排名 | 出手胜率排名 | 防守胜率排名)
- */
-const sortedWeeklyRoster = computed(() => {
-  const list = [...weeklyRosterRanked.value];
-  list.sort(createRosterComparator(weeklySortBy.value));
-  return list.map((item, idx) => ({
-    ...item,
-    currentRank: idx + 1,
-  }));
+const sortedOpponentMembers = computed(() => {
+  const list = [...opponentMembers.value];
+  list.sort(
+    (a, b) => (b.score || 0) - (a.score || 0) || (b.power || 0) - (a.power || 0),
+  );
+  return list;
 });
 
-// 今日公会成员战报表格列
-const todayTableColumns = [
-  {
-    title: "序号",
-    key: "rankIndex",
-    width: 60,
-    align: "center",
-    render: (row: any, index: number) => row.rankIndex || index + 1,
-  },
-  {
-    title: "防守据点",
-    key: "slot",
-    width: 90,
-    align: "center",
-    render: (row: any) =>
-      h(
-        NTag,
-        { size: "small", type: "info", round: true, bordered: false },
-        { default: () => `#${row.slot || 1} 据点` },
-      ),
-  },
-  {
-    title: "头像",
-    key: "headImg",
-    width: 60,
-    align: "center",
-    render: (row: any) =>
-      h(NAvatar, { round: true, size: 34, src: row.headImg }),
-  },
-  {
-    title: "角色名称",
-    key: "name",
-    width: 140,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: {
-            fontWeight: "600",
-            color: "#1890ff",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-          },
-          onClick: () => openDuelModal(row),
-        },
-        [
-          row.name,
-          row.mirror
-            ? h(
-                NTag,
-                { size: "tiny", type: "warning", round: true, bordered: false },
-                { default: () => "镜像" },
-              )
-            : null,
-        ],
-      ),
-  },
-  {
-    title: "真实战力",
-    key: "power",
-    width: 100,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { fontWeight: "600", color: "#fa8c16" } },
-        formatPower(row.power),
-      ),
-  },
-  {
-    title: "今日战功贡献",
-    key: "todayScore",
-    width: 110,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: {
-            fontWeight: "700",
-            color: row.todayScore > 0 ? "#10b981" : "#94a3b8",
-            fontSize: "14px",
-          },
-        },
-        row.todayScore > 0 ? `+${row.todayScore}分` : "0分",
-      ),
-  },
-  {
-    title: "据点防守态势",
-    key: "defeated",
-    width: 110,
-    align: "center",
-    render: (row: any) =>
-      row.defeated
-        ? h(
-            NTag,
-            { size: "small", type: "error", round: true },
-            { default: () => "💥 已被攻破" },
-          )
-        : h(
-            NTag,
-            { size: "small", type: "success", round: true },
-            { default: () => "🛡️ 坚守中" },
-          ),
-  },
-  {
-    title: "防守交战记录",
-    key: "challengeCnt",
-    width: 170,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { fontSize: "12px", color: "#64748b" } },
-        `遭遇 ${row.challengeCnt || 0} 次 / 守住 ${row.defWins || 0} 次 (胜率 ${
-          row.defWinRate || "—"
-        })`,
-      ),
-  },
-  {
-    title: "今日出刀状态",
-    key: "participation",
-    width: 120,
-    align: "center",
-    render: (row: any) => {
-      const cnt = row.realAttackCnt;
-      if (cnt === undefined || cnt === 0) {
-        return h(
-          NTag,
-          { size: "small", type: "error", bordered: false },
-          { default: () => "0/3 未出战" },
-        );
-      }
-      if (cnt < 3) {
-        return h(
-          NTag,
-          { size: "small", type: "warning", bordered: false },
-          { default: () => `${cnt}/3 未打满` },
-        );
-      }
-      if (cnt === 3) {
-        return h(
-          NTag,
-          { size: "small", type: "success", bordered: false },
-          { default: () => "3/3 已打满" },
-        );
-      }
-      return h(
-        NTag,
-        { size: "small", type: "info", bordered: false },
-        { default: () => `${cnt}次 (满战)` },
-      );
-    },
-  },
-  {
-    title: "今日出刀实绩",
-    key: "realAttackRecord",
-    width: 140,
-    align: "center",
-    render: (row: any) => {
-      if ((row.realAttackCnt || 0) > 0) {
-        return h(
-          "span",
-          {
-            style: {
-              fontSize: "12px",
-              fontWeight: "600",
-              color: "#10b981",
-            },
-          },
-          `${row.attackWins || 0}胜 / ${row.attackLosses || 0}负 (胜率 ${
-            row.attackWinRate || "—"
-          })`,
-        );
-      }
-      return h(
-        "span",
-        { style: { color: "#94a3b8", fontSize: "12px" } },
-        "0刀",
-      );
-    },
-  },
-  {
-    title: "操作",
-    key: "action",
-    width: 90,
-    align: "center",
-    render: (row: any) =>
-      h(
-        NButton,
-        { size: "tiny", type: "primary", onClick: () => openDuelModal(row) },
-        { default: () => "战报流水" },
-      ),
-  },
-];
+const bladeSavedAt = ref("");
 
-// 当周全员战功与胜率大宽表列
-const weeklyRosterColumns = [
-  {
-    title: "当周排名",
-    key: "rank",
-    width: 80,
-    align: "center",
-    render: (row: any, index: number) => {
-      const rank = row.currentRank || index + 1;
-      const type =
-        rank === 1
-          ? "warning"
-          : rank === 2
-            ? "info"
-            : rank === 3
-              ? "success"
-              : "default";
-      return h(
-        NTag,
-        { size: "small", type, round: true },
-        { default: () => `第 ${rank} 名` },
-      );
-    },
-  },
-  {
-    title: "防守据点",
-    key: "slot",
-    width: 90,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { color: "#64748b", fontWeight: "600" } },
-        `#${row.slot || 1} 据点`,
-      ),
-  },
-  {
-    title: "头像",
-    key: "headImg",
-    width: 60,
-    align: "center",
-    render: (row: any) =>
-      h(NAvatar, { round: true, size: 34, src: row.headImg }),
-  },
-  {
-    title: "成员姓名",
-    key: "name",
-    width: 140,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: {
-            fontWeight: "600",
-            color: "#1890ff",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-          },
-          onClick: () => openDuelModal(row),
-        },
-        [
-          row.name,
-          row.mirror
-            ? h(
-                NTag,
-                { size: "tiny", type: "warning", round: true, bordered: false },
-                { default: () => "镜像" },
-              )
-            : null,
-        ],
-      ),
-  },
-  {
-    title: "真实战力",
-    key: "power",
-    width: 110,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { fontWeight: "600", color: "#fa8c16" } },
-        formatPower(row.power),
-      ),
-  },
-  {
-    title: "红淬",
-    key: "redQuench",
-    width: 70,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { color: "#ff4d4f", fontWeight: "700" } },
-        row.redQuench || 0,
-      ),
-  },
-  {
-    title: "当周总战功",
-    key: "score",
-    width: 110,
-    align: "center",
-    sorter: (a: any, b: any) => (a.score || 0) - (b.score || 0),
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: {
-            fontWeight: "700",
-            color: "#6366f1",
-            fontSize: "14px",
-          },
-        },
-        `${row.score || 0}分`,
-      ),
-  },
-  {
-    title: "本周遭遇挑战",
-    key: "challengeCnt",
-    width: 90,
-    align: "center",
-    render: (row: any) => h("span", `${row.challengeCnt || 0}次`),
-  },
-  {
-    title: "本周防守守住",
-    key: "defWins",
-    width: 90,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { color: "#10b981", fontWeight: "600" } },
-        `${row.defWins || 0}次`,
-      ),
-  },
-  {
-    title: "本周防守胜率",
-    key: "defWinRate",
-    width: 100,
-    align: "center",
-    sorter: (a: any, b: any) =>
-      (a.defWinRateNum ?? -1) - (b.defWinRateNum ?? -1),
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: {
-            fontWeight: "700",
-            color:
-              Number.parseFloat(row.defWinRate) >= 50 ? "#10b981" : "#f59e0b",
-          },
-        },
-        row.defWinRate,
-      ),
-  },
-  {
-    title: "操作",
-    key: "action",
-    width: 90,
-    align: "center",
-    render: (row: any) =>
-      h(
-        NButton,
-        { size: "tiny", type: "primary", onClick: () => openDuelModal(row) },
-        { default: () => "对战详情" },
-      ),
-  },
-];
+const bladeClass = (cnt: number) => {
+  if (!cnt) return "blade-none";
+  if (cnt < 3) return "blade-partial";
+  return "blade-full";
+};
+
+const saveTodayBlade = () => {
+  const tokenId = tokenStore.selectedToken?.id;
+  if (!tokenId) return;
+  const now = new Date();
+  const day = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const savedAt = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const payload = {
+    day,
+    tokenId,
+    savedAt,
+    club: battleInfo.value?.ownClub?.name || "",
+    members: ownMembers.value.map((m: any) => ({
+      id: m.id,
+      name: m.name,
+      realAttackCnt: m.realAttackCnt || 0,
+      attackWins: m.attackWins || 0,
+      attackLosses: m.attackLosses || 0,
+      todayScore: m.todayScore || 0,
+    })),
+  };
+  localStorage.setItem(`campTodayBlade:${tokenId}:${day}`, JSON.stringify(payload));
+  bladeSavedAt.value = savedAt;
+};
+
 
 /**
  * 解析并拉取单名成员的真实营地挑战布阵阵容
@@ -2504,6 +1882,7 @@ const injectAttackStatsIntoOwnMembers = () => {
       todayScore,
     };
   });
+  saveTodayBlade();
 };
 
 /**
@@ -2621,6 +2000,10 @@ const handleMatchDayChange = async (day: number) => {
  * @param {object} player 目标玩家对象
  */
 const openDuelModal = async (player: any) => {
+  const inOpponent = opponentMembers.value.some(
+    (m) => m.id === player?.id && m.slot === player?.slot,
+  );
+  selectedSide.value = inOpponent ? "opponent" : "own";
   targetPlayer.value = player;
   showDuelModal.value = true;
   modalLoading.value = true;
@@ -2772,9 +2155,7 @@ const handleExportImage = async () => {
     const url = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = url;
-    link.download = `营地挑战阵容_${
-      selectedSide.value === "opponent" ? "敌方" : "我方"
-    }.png`;
+    link.download = `营地挑战当日攻防战报.png`;
     link.click();
     message.success("长图导出成功！");
   } catch (err: any) {
@@ -2784,173 +2165,6 @@ const handleExportImage = async () => {
   }
 };
 
-// 表格列定义 (包含核心真实 1~5 号位布阵卡片列)
-const columns = [
-  {
-    title: "序号",
-    key: "index",
-    width: 60,
-    align: "center",
-    render: (_: any, index: number) => index + 1,
-  },
-  {
-    title: "头像",
-    key: "headImg",
-    width: 64,
-    align: "center",
-    render: (row: any) =>
-      h(NAvatar, {
-        round: true,
-        size: 38,
-        src: row.headImg,
-      }),
-  },
-  {
-    title: "ID",
-    key: "id",
-    width: 100,
-    align: "center",
-    render: (row: any) => h("span", { class: "member-id-cell" }, row.id),
-  },
-  {
-    title: "角色名称",
-    key: "name",
-    width: 130,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        {
-          style: { cursor: "pointer", color: "#1890ff", fontWeight: "600" },
-          onClick: () => openDuelModal(row),
-        },
-        row.name,
-      ),
-  },
-  {
-    title: "真实战力",
-    key: "power",
-    width: 100,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { fontWeight: "600", color: "#fa8c16" } },
-        formatPower(row.power),
-      ),
-  },
-  {
-    title: "红淬",
-    key: "redQuench",
-    width: 70,
-    align: "center",
-    render: (row: any) =>
-      h(
-        "span",
-        { style: { color: "#ff4d4f", fontWeight: "700" } },
-        row.redQuench,
-      ),
-  },
-  {
-    title: "珍卡",
-    key: "legacy",
-    width: 80,
-    align: "center",
-    render: (row: any) => {
-      const cfg = legacycolor[row.legacy];
-      if (!row.legacy || !cfg) return h("span", { class: "text-muted" }, "—");
-      return h(
-        NTag,
-        {
-          size: "small",
-          bordered: false,
-          color: { color: cfg.value, textColor: "#fff" },
-        },
-        { default: () => cfg.name },
-      );
-    },
-  },
-  {
-    title: "玩具",
-    key: "toyName",
-    width: 100,
-    align: "center",
-    render: (row: any) => h("span", { class: "toy-cell" }, row.toyName || "—"),
-  },
-  {
-    title: "真实营地挑战布阵 (1~5号站位)",
-    key: "lineup",
-    width: 620,
-    align: "left",
-    render: (row: any) => {
-      const heroes = row.heroList || [];
-      if (!heroes.length)
-        return h("span", { class: "text-muted" }, "暂无出战布阵");
-
-      // 横向并排渲染 5 张真实站位小卡片
-      const cards = heroes.map((hero: any) => {
-        const titleLine = [
-          h("span", { class: "hero-slot-badge" }, `${hero.slotIndex}号位`),
-          h("span", { class: "hero-name" }, hero.heroName),
-          h("span", { class: "hero-red" }, `(${hero.red}红)`),
-        ];
-
-        if (hero.HolyBeast) {
-          titleLine.push(h("span", { class: "hb-badge" }, `圣${hero.HBlevel}`));
-        }
-
-        const fishName = hero.PearlInfo?.FishInfo?.name || "";
-        const pearlParts = [];
-        if (fishName)
-          pearlParts.push(h("span", { class: "fish-name" }, fishName));
-
-        return h("div", { class: "hero-lineup-card" }, [
-          h("div", { class: "hero-card-header" }, titleLine),
-          h(
-            "div",
-            { class: "hero-card-pearl" },
-            pearlParts.length
-              ? pearlParts
-              : h("span", { class: "text-muted" }, "专属鱼灵"),
-          ),
-        ]);
-      });
-
-      return h("div", { class: "lineup-cards-wrapper" }, cards);
-    },
-  },
-  {
-    title: "阵容流派",
-    key: "lineupType",
-    width: 100,
-    align: "center",
-    render: (row: any) => {
-      const type = row.lineupType || "其他";
-      const rule = LINEUP_RULES.find((r) => r.name === type);
-      const colorProps = rule?.colorProps || {
-        color: "#e8e8e8",
-        textColor: "#444",
-      };
-      return h(
-        NTag,
-        { size: "small", bordered: false, color: colorProps },
-        { default: () => type },
-      );
-    },
-  },
-  {
-    title: "操作",
-    key: "action",
-    width: 80,
-    align: "center",
-    render: (row: any) =>
-      h(
-        NButton,
-        { size: "tiny", type: "primary", onClick: () => openDuelModal(row) },
-        { default: () => "对战详情" },
-      ),
-  },
-];
 
 // 监听 Token 切换自动查询
 watch(
@@ -4540,5 +3754,413 @@ onMounted(() => {
     max-width: 100%;
     overflow-x: hidden;
   }
+}
+
+.report-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 2px 16px;
+}
+
+.report-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.overview-card {
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.overview-card span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.overview-card b {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.overview-card em {
+  font-style: normal;
+  font-size: 12px;
+  color: #18a058;
+}
+
+.group-rank-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.strip-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rank-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  font-size: 12px;
+}
+
+.rank-chip i {
+  font-style: normal;
+  width: 16px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.rank-chip.is-own {
+  border-color: #18a058;
+  color: #18a058;
+}
+
+.blade-saved {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.side-list {
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.side-list header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 12px;
+  background: #18a058;
+  color: #fff;
+}
+
+.side-list.enemy header {
+  background: #d03050;
+}
+
+.side-list header span {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.member-head,
+.member-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.6fr) repeat(6, minmax(48px, 0.7fr));
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+}
+
+.member-head {
+  color: #64748b;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.member-row {
+  border: 0;
+  border-top: 1px solid var(--border-light, #eee);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.member-row:hover {
+  background: rgba(24, 160, 88, 0.06);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: left;
+}
+
+.who i {
+  width: 18px;
+  font-style: normal;
+  color: #94a3b8;
+  text-align: center;
+  flex: none;
+}
+
+.who em {
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  font-weight: 700;
+}
+
+.win {
+  color: #18a058;
+  font-weight: 600;
+}
+
+.loss {
+  color: #d03050;
+  font-weight: 600;
+}
+
+.blade-none {
+  color: #d03050;
+}
+
+.blade-partial {
+  color: #f0a020;
+}
+
+.blade-full {
+  color: #18a058;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .report-overview {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .member-head,
+  .member-row {
+    grid-template-columns: minmax(120px, 1.4fr) repeat(6, minmax(36px, 0.6fr));
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .blade-head {
+    grid-template-columns: 1fr auto;
+  }
+
+  .blade-meter {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .blade-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+.blade-panel {
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.blade-head {
+  display: grid;
+  grid-template-columns: auto minmax(80px, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.blade-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.blade-title b {
+  font-size: 15px;
+}
+
+.blade-title span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.blade-meter {
+  height: 6px;
+  border-radius: 999px;
+  background: #fee2e2;
+  overflow: hidden;
+}
+
+.blade-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #18a058;
+}
+
+.blade-head > em {
+  font-style: normal;
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.blade-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.blade-actions button {
+  border: 1px solid var(--border-light, #e5e7eb);
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.blade-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.blade-group {
+  margin-top: 12px;
+}
+
+.blade-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.blade-group-title i {
+  font-style: normal;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.blade-group.is-none .blade-group-title {
+  color: #e11d48;
+}
+
+.blade-group.is-none .blade-group-title i {
+  background: #ffe4e6;
+}
+
+.blade-group.is-partial .blade-group-title {
+  color: #d97706;
+}
+
+.blade-group.is-partial .blade-group-title i {
+  background: #fef3c7;
+}
+
+.blade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 6px;
+}
+
+.blade-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: #f8fafc;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.blade-group.is-none .blade-chip {
+  background: #fff7f7;
+  border-color: #fecdd3;
+}
+
+.blade-group.is-partial .blade-chip {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.blade-chip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.blade-chip i {
+  flex: none;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.blade-group.is-none .blade-chip i {
+  color: #e11d48;
+}
+
+.blade-group.is-partial .blade-chip i {
+  color: #d97706;
+}
+
+.blade-chip:hover {
+  filter: brightness(0.98);
+}
+
+.blade-done {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #ecfdf3;
+  color: #15803d;
+  font-size: 13px;
+}
+
+:global(.dark) .blade-meter {
+  background: rgba(225, 29, 72, 0.25);
+}
+
+:global(.dark) .blade-group.is-none .blade-chip {
+  background: rgba(225, 29, 72, 0.12);
+  border-color: rgba(225, 29, 72, 0.35);
+}
+
+:global(.dark) .blade-group.is-partial .blade-chip {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
+:global(.dark) .blade-chip i,
+:global(.dark) .blade-actions button {
+  background: transparent;
 }
 </style>
