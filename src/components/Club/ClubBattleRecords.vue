@@ -155,39 +155,21 @@
                         <div v-else class="player-avatar-placeholder-small">
                           {{ player.name?.charAt(0) || "?" }}
                         </div>
-                        <span>{{ player.name }}</span>
+                        <span class="player-name" :title="player.name">{{
+                          player.name
+                        }}</span>
                       </div>
                     </td>
-                    <td
-                      class="col-kill"
-                      :style="{ backgroundColor: getKillColor(player.winCnt) }"
-                    >
+                    <td class="col-kill">
                       {{ player.winCnt || 0 }}
                     </td>
-                    <td
-                      class="col-death"
-                      :style="{
-                        backgroundColor: getDeathColor(player.loseCnt),
-                      }"
-                    >
+                    <td class="col-death">
                       {{ player.loseCnt || 0 }}
                     </td>
-                    <td
-                      class="col-occupy"
-                      :style="{
-                        backgroundColor: getOccupyColor(player.buildingCnt),
-                      }"
-                    >
+                    <td class="col-occupy">
                       {{ player.buildingCnt || 0 }}
                     </td>
-                    <td
-                      class="col-revive"
-                      :style="{
-                        backgroundColor: getReviveColor(
-                          Math.max((player.loseCnt || 0) - 6, 0),
-                        ),
-                      }"
-                    >
+                    <td class="col-revive">
                       {{ Math.max((player.loseCnt || 0) - 6, 0) }}
                     </td>
                     <td class="col-kd">
@@ -262,7 +244,9 @@
                     <div v-else class="player-avatar-placeholder-xs">
                       {{ player.name?.charAt(0) || "?" }}
                     </div>
-                    <span class="top3-name">{{ player.name }}</span>
+                    <span class="top3-name" :title="player.name">{{
+                      player.name
+                    }}</span>
                   </div>
                   <div class="top3-value">{{ player.winCnt }}</div>
                 </div>
@@ -297,7 +281,9 @@
                     <div v-else class="player-avatar-placeholder-xs">
                       {{ player.name?.charAt(0) || "?" }}
                     </div>
-                    <span class="top3-name">{{ player.name }}</span>
+                    <span class="top3-name" :title="player.name">{{
+                      player.name
+                    }}</span>
                   </div>
                   <div class="top3-value">{{ player.buildingCnt }}</div>
                 </div>
@@ -332,7 +318,9 @@
                     <div v-else class="player-avatar-placeholder-xs">
                       {{ player.name?.charAt(0) || "?" }}
                     </div>
-                    <span class="top3-name">{{ player.name }}</span>
+                    <span class="top3-name" :title="player.name">{{
+                      player.name
+                    }}</span>
                   </div>
                   <div class="top3-value">{{ player.kd }}</div>
                 </div>
@@ -367,7 +355,9 @@
                     <div v-else class="player-avatar-placeholder-xs">
                       {{ player.name?.charAt(0) || "?" }}
                     </div>
-                    <span class="top3-name">{{ player.name }}</span>
+                    <span class="top3-name" :title="player.name">{{
+                      player.name
+                    }}</span>
                   </div>
                   <div class="top3-value">{{ player.reviveCnt }}</div>
                 </div>
@@ -648,7 +638,9 @@
                       <div v-else class="avatar-placeholder-xs">
                         {{ player.name?.charAt(0) || "?" }}
                       </div>
-                      <span class="player-name-s2">{{ player.name }}</span>
+                      <span class="player-name-s2" :title="player.name">{{
+                        player.name
+                      }}</span>
                     </div>
                   </td>
                   <td>
@@ -926,29 +918,6 @@ const getPercent = (val, max) => {
   return Math.min(100, (val / max) * 100);
 };
 
-const getKillColor = (val) => {
-  if (val >= 50) return "rgba(76, 175, 80, 0.3)";
-  if (val >= 20) return "rgba(139, 195, 74, 0.3)";
-  return "transparent";
-};
-
-const getOccupyColor = (val) => {
-  if (val >= 100) return "rgba(255, 204, 128, 0.3)";
-  if (val >= 50) return "rgba(255, 224, 178, 0.3)";
-  return "transparent";
-};
-
-const getDeathColor = (val) => {
-  if (val >= 20) return "rgba(239, 154, 154, 0.3)";
-  if (val >= 10) return "rgba(255, 205, 210, 0.3)";
-  return "transparent";
-};
-
-const getReviveColor = (val) => {
-  if (val >= 5) return "rgba(200, 230, 201, 0.3)";
-  return "transparent";
-};
-
 // 格式化战力
 
 // 处理图片加载错误
@@ -1040,7 +1009,7 @@ const handleExport = async () => {
       );
     }
     if (exportmethod.value.includes("2")) {
-      exportToImage();
+      await exportToImage();
     }
     message.success("导出成功");
   } catch (error) {
@@ -1050,53 +1019,201 @@ const handleExport = async () => {
 };
 
 const exportToImage = async () => {
-  // 校验：确保DOM已正确绑定
   if (!exportDom.value) {
     // eslint-disable-next-line no-alert -- Preserve the existing native notification or confirmation flow.
     alert("未找到要导出的DOM元素");
     return;
   }
 
+  const locked = [];
+  let node = exportDom.value;
+  while (node && node !== document.body) {
+    const style = getComputedStyle(node);
+    const clips =
+      ["auto", "scroll", "hidden", "clip"].includes(style.overflowY) ||
+      ["auto", "scroll", "hidden", "clip"].includes(style.overflowX) ||
+      (style.maxHeight && style.maxHeight !== "none");
+    if (clips) {
+      locked.push(
+        pinStyles(node, {
+          "max-height": "none",
+          overflow: "visible",
+          height: "auto",
+        }),
+      );
+    }
+    node = node.parentElement;
+  }
+
+  const expanded = expandExportNames(exportDom.value);
+
   try {
-    // 临时移除战神榜内容区域的最大高度限制，确保所有内容都可见
-    const godRankingContents = exportDom.value.querySelectorAll(
-      ".god-ranking-content",
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const target = exportDom.value;
+    const table = target.querySelector("table");
+    const targetStyle = getComputedStyle(target);
+    const horizontalPadding =
+      Number.parseFloat(targetStyle.paddingLeft) +
+      Number.parseFloat(targetStyle.paddingRight);
+    const tableWidth = table?.getBoundingClientRect().width || target.scrollWidth;
+    const contentWidth = Math.ceil(
+      targetStyle.boxSizing === "border-box"
+        ? tableWidth + horizontalPadding
+        : tableWidth,
     );
-    const originalStyles = [];
-
-    godRankingContents.forEach((content) => {
-      originalStyles.push({
-        element: content,
-        maxHeight: content.style.maxHeight,
-        overflow: content.style.overflow,
+    target.style.setProperty("width", `${contentWidth}px`, "important");
+    target
+      .querySelectorAll(".style1-content, .style1-table-container")
+      .forEach((element) => {
+        element.style.setProperty("width", "100%", "important");
+        element.style.setProperty("max-width", "100%", "important");
       });
-      content.style.maxHeight = "none";
-      content.style.overflow = "visible";
+    target.querySelectorAll(".style1-summary, .summary-card").forEach((element) => {
+      element.style.setProperty("width", "100%", "important");
+      element.style.setProperty("max-width", "100%", "important");
+      element.style.setProperty("align-self", "stretch", "important");
+    });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const width = target.offsetWidth;
+    const height = target.offsetHeight;
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
     });
 
-    // 5. 用html2canvas渲染DOM为Canvas
-    const canvas = await html2canvas(exportDom.value, {
-      scale: 2, // 放大2倍，解决图片模糊问题
-      useCORS: true, // 允许跨域图片（若DOM内有远程图片，需开启）
-      backgroundColor: "#ffffff", // 避免透明背景（默认透明）
-      logging: false, // 关闭控制台日志
-    });
-
-    // 恢复战神榜内容区域的原始样式
-    originalStyles.forEach(({ element, maxHeight, overflow }) => {
-      element.style.maxHeight = maxHeight;
-      element.style.overflow = overflow;
-    });
-
-    // 6. Canvas转图片链接并下载
     const filename = `${queryDate.value.replace("/", "年").replace("/", "月")}日盐场战报.png`;
     downloadCanvasAsImage(canvas, filename);
   } catch (err) {
     console.error("DOM转图片失败：", err);
-    // eslint-disable-next-line no-alert -- Preserve the existing native notification or confirmation flow.
-    alert("导出图片失败，请重试");
+    throw err;
+  } finally {
+    [...expanded, ...locked].forEach(restorePinnedStyles);
   }
 };
+
+function expandExportNames(root) {
+  const pinned = [
+    pinStyles(root, {
+      width: "max-content",
+      "max-width": "none",
+    }),
+  ];
+
+  root.querySelectorAll(".style1-content").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        display: "flex",
+        "flex-direction": "column",
+        width: "100%",
+        "max-width": "100%",
+        overflow: "visible",
+      }),
+    );
+  });
+
+  root
+    .querySelectorAll(
+      ".style1-table-container, .style2-dashboard, .style2-table-wrapper, .player-info, .player-cell, .top3-info, .rank-player-s2",
+    )
+    .forEach((element) => {
+      pinned.push(
+        pinStyles(element, {
+          width: "max-content",
+          "max-width": "none",
+          "min-width": "max-content",
+          flex: "none",
+          overflow: "visible",
+        }),
+      );
+    });
+
+  root.querySelectorAll(".style1-summary, .summary-card").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        width: "100%",
+        "max-width": "100%",
+        "align-self": "stretch",
+      }),
+    );
+  });
+
+  root.querySelectorAll("table").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        "table-layout": "auto",
+        width: "max-content",
+        "min-width": "max-content",
+        "max-width": "none",
+      }),
+    );
+  });
+
+  root.querySelectorAll("th, td").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        overflow: "visible",
+        "max-width": "none",
+        width: "auto",
+        "white-space": "nowrap",
+      }),
+    );
+  });
+
+  root
+    .querySelectorAll(
+      ".player-name, .player-name-s2, .top3-name, .mvp-name, .rank-player-s2 .name",
+    )
+    .forEach((element) => {
+      pinned.push(
+        pinStyles(element, {
+          overflow: "visible",
+          "text-overflow": "clip",
+          "white-space": "nowrap",
+          "max-width": "none",
+          width: "auto",
+          flex: "none",
+        }),
+      );
+    });
+
+  return pinned;
+}
+
+function pinStyles(element, styles) {
+  const snapshot = Object.fromEntries(
+    Object.keys(styles).map((property) => [
+      property,
+      {
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property),
+      },
+    ]),
+  );
+  Object.entries(styles).forEach(([property, value]) => {
+    element.style.setProperty(property, value, "important");
+  });
+  return { element, snapshot };
+}
+
+function restorePinnedStyles({ element, snapshot }) {
+  Object.entries(snapshot).forEach(([property, { value, priority }]) => {
+    restoreStyle(element, property, value, priority);
+  });
+}
+
+function restoreStyle(element, property, value, priority) {
+  if (value) {
+    element.style.setProperty(property, value, priority);
+  } else {
+    element.style.removeProperty(property);
+  }
+}
 
 // 暴露方法给父组件
 defineExpose({
@@ -1304,35 +1421,40 @@ onMounted(() => {
 
 .style1-content {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
   align-items: flex-start;
 }
 
 .style1-table-container {
-  flex: 2;
-  overflow-x: auto;
+  flex: 1 1 520px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .style1-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 13px;
 }
 
 .style1-table th {
-  background: #800080;
-  color: #fff;
-  padding: 8px;
+  background: #800080 !important;
+  color: #fff !important;
+  padding: 8px 4px;
   text-align: center;
   font-weight: bold;
 }
 
 .style1-table td {
-  padding: 6px;
+  padding: 6px 4px;
   border-bottom: 1px solid #eee;
   text-align: center;
   vertical-align: middle;
   height: 36px;
+  overflow: hidden;
 }
 
 .style1-table tr:nth-child(even) {
@@ -1340,17 +1462,39 @@ onMounted(() => {
 }
 
 .col-rank {
-  width: 50px;
+  width: 44px;
+}
+.col-kill,
+.col-death,
+.col-occupy {
+  width: 46px;
+}
+.col-revive {
+  width: 58px;
+}
+.col-kd {
+  width: 48px;
 }
 .col-name {
   text-align: left !important;
-  padding-left: 10px !important;
+  padding-left: 8px !important;
+  overflow: hidden;
 }
 
 .player-info {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.player-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .player-avatar-small {
@@ -1358,6 +1502,7 @@ onMounted(() => {
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .player-avatar-placeholder-small {
@@ -1370,14 +1515,16 @@ onMounted(() => {
   justify-content: center;
   font-size: 10px;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .style1-summary {
-  flex: 1;
+  flex: 1 1 240px;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  min-width: 250px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .summary-card {
@@ -1774,6 +1921,7 @@ onMounted(() => {
 .style2-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .style2-table thead {
@@ -1781,11 +1929,18 @@ onMounted(() => {
 }
 
 .style2-table th {
-  color: #fff;
+  background: #4285f4 !important;
+  color: #fff !important;
   padding: 12px 8px;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
+}
+
+.style2-table th:nth-child(2),
+.style2-table td:nth-child(2) {
+  overflow: hidden;
+  text-align: left;
 }
 
 .style2-table th:nth-child(2) {
@@ -1820,9 +1975,16 @@ onMounted(() => {
   gap: 8px;
   justify-content: flex-start;
   padding-left: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .player-name-s2 {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-weight: 600;
   color: #333;
 }
@@ -1832,6 +1994,7 @@ onMounted(() => {
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .avatar-placeholder-xs {
@@ -1844,6 +2007,7 @@ onMounted(() => {
   justify-content: center;
   font-size: 12px;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .bar-cell {
