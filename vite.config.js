@@ -73,17 +73,18 @@ export default defineConfig(async () => {
     dts: "src/auto-imports.d.ts",
   });
 
-  const { ArcoResolver } = componentsResolversModule ?? {};
+  const { ArcoResolver, NaiveUiResolver } = componentsResolversModule ?? {};
   const componentsPlugin = componentsModule?.default?.({
     dirs: ["src/components"],
     globsExclude: ["**/Private/**", "**/GameStatus.vue"],
-    resolvers: ArcoResolver
-      ? [
-          ArcoResolver({
-            importStyle: false,
-          }),
-        ]
-      : [],
+    resolvers: [
+      ArcoResolver
+        ? ArcoResolver({
+            importStyle: "css",
+          })
+        : null,
+      NaiveUiResolver ? NaiveUiResolver() : null,
+    ].filter(Boolean),
   });
 
   const unoCssPlugin = unoCssModule?.default?.();
@@ -181,6 +182,22 @@ export default defineConfig(async () => {
         scss: {
           api: "modern",
           additionalData: '@use "@/assets/styles/variables.scss" as vars;',
+        },
+      },
+    },
+    build: {
+      reportCompressedSize: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const normalized = id.replaceAll("\\", "/");
+            if (
+              /\/node_modules\/(?:vue|vue-router|pinia)\//.test(normalized) ||
+              normalized.includes("/node_modules/@vue/")
+            ) {
+              return "vue-vendor";
+            }
+          },
         },
       },
     },

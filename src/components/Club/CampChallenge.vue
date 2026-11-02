@@ -727,10 +727,10 @@ import {
   ShieldOutline,
   TrophyOutline,
 } from "@vicons/ionicons5";
-import html2canvas from "html2canvas";
 import { NAvatar, NButton, NSelect, NTag, useMessage } from "naive-ui";
 import { computed, h, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import {
   formatWeapon,
   getLineupType,

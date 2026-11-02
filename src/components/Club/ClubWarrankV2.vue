@@ -746,7 +746,6 @@
 <script setup>
 import { Copy, CreateOutline, DocumentText, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NCheckbox,
@@ -759,6 +758,7 @@ import {
 } from "naive-ui";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { formatTimestamp1, getLastSaturday } from "@/utils/clubBattleUtils";
 import {
   allianceincludes,
@@ -2713,7 +2713,7 @@ const handleExport1 = async () => {
 
   try {
     if (exportmethod.value.includes("1")) {
-      formatWarrankRecordsForExport(
+      await formatWarrankRecordsForExport(
         battleRecords1.value.legionRankList,
         queryDate.value,
       );

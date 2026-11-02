@@ -54,10 +54,10 @@
 
 <script setup>
 import { Copy, Refresh } from "@vicons/ionicons5";
-import html2canvas from "html2canvas";
 import { NButton, NDataTable, NIcon, NTag, useMessage } from "naive-ui";
 import { computed, h, nextTick, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { getLastSaturday } from "@/utils/clubBattleUtils";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
 

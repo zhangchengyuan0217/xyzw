@@ -674,10 +674,10 @@
 <script setup>
 import { Copy, DocumentText, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import { NAvatar, NModal, NPagination, useMessage } from "naive-ui";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import {
   getFirstSaturdayOfMonth,
   getRankParams,

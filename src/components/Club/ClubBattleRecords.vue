@@ -724,7 +724,6 @@
 <script setup>
 import { Copy, DocumentText, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NCheckbox,
   NCheckboxGroup,
@@ -734,6 +733,7 @@ import {
 } from "naive-ui";
 import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import {
   formatBattleRecordsForExport,
   getLastSaturday,
@@ -1034,7 +1034,7 @@ const handleExport = async () => {
 
   try {
     if (exportmethod.value.includes("1")) {
-      formatBattleRecordsForExport(
+      await formatBattleRecordsForExport(
         battleRecords.value.roleDetailsList,
         queryDate.value,
       );

@@ -598,7 +598,6 @@
 <script setup>
 import { Copy, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NButton,
@@ -614,6 +613,7 @@ import {
 } from "naive-ui";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { gettoday } from "@/utils/clubWarrankUtils";
 import { isSameGameValue } from "@/utils/gameValue.js";
 import { HERO_DICT, HeroFillInfo, legacycolor } from "@/utils/HeroList";

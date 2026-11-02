@@ -171,12 +171,12 @@ import {
   MapOutline,
   RefreshOutline,
 } from "@vicons/ionicons5";
-import html2canvas from "html2canvas";
 import { useMessage } from "naive-ui";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useLegionWarStore } from "@/stores/legionWarStore";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isLegionWarAccessible } from "@/utils/clubBattleUtils";
 import { allianceincludes } from "@/utils/clubWarrankUtils";
 import { getCurrentTimeByFormat } from "@/utils/DateTimeUtils";

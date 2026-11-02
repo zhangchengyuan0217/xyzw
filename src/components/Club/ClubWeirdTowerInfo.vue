@@ -123,7 +123,6 @@
 
 <script setup>
 import { Copy, Refresh } from "@vicons/ionicons5";
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NButton,
@@ -134,6 +133,7 @@ import {
 } from "naive-ui";
 import { computed, h, nextTick, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { gettoday } from "@/utils/clubWarrankUtils";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
 const props = defineProps({

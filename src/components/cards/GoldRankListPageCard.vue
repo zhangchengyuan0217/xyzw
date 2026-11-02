@@ -708,7 +708,6 @@
 <script setup>
 import { Copy, DocumentText, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NCheckbox,
@@ -719,6 +718,7 @@ import {
 } from "naive-ui";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { formatTimestamp1, getLastSaturday } from "@/utils/clubBattleUtils";
 import { isSameGameValue } from "@/utils/gameValue.js";
 import {
@@ -1643,7 +1643,7 @@ const handleExport1 = async () => {
       loadingMsg.destroy(); // 完成后销毁
       prepareMsg.destroy(); // 销毁准备导出的提示
 
-      formatWarrankRecordsForExport(
+      await formatWarrankRecordsForExport(
         allData,
         queryDate.value || formatTimestamp1(new Date()),
       );

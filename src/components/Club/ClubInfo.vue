@@ -541,7 +541,6 @@ import {
   Skull,
 } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAlert,
   NAvatar,
@@ -565,6 +564,7 @@ import {
 } from "naive-ui";
 import { computed, h, nextTick, onErrorCaptured, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isSameGameValue } from "@/utils/gameValue.js";
 import {
   getLineupType,

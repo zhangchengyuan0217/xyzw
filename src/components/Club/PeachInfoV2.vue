@@ -656,7 +656,6 @@
 <script setup>
 import { Copy, Flash, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NButton,
@@ -674,6 +673,7 @@ import {
 } from "naive-ui";
 import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isSameGameValue } from "@/utils/gameValue.js";
 
 import {

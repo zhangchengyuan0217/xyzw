@@ -251,17 +251,17 @@ import {
   StatsChart,
 } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import { useMessage } from "naive-ui";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
-import * as XLSX from "xlsx";
 import { useLegionWarStore } from "@/stores/legionWarStore";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isLegionWarAccessible } from "@/utils/clubBattleUtils";
 import { getCurrentTimeByFormat } from "@/utils/DateTimeUtils";
 import { isSameGameValue } from "@/utils/gameValue.js";
 import { formatPower } from "@/utils/legionWar";
+import { loadXlsx } from "@/utils/loadXlsx";
 
 const message = useMessage();
 const tokenStore = useTokenStore();
@@ -284,7 +284,7 @@ const {
 const viewMode = ref("legion"); // legion | individual
 const exporting = ref(false);
 const tableMaxHeight = ref(600);
-const exportExcel = () => {
+const exportExcel = async () => {
   if (!validData.value) {
     message.warning("无数据可导出");
     return;
@@ -341,6 +341,7 @@ const exportExcel = () => {
     return;
   }
 
+  const XLSX = await loadXlsx();
   const ws = XLSX.utils.json_to_sheet(dataToExport);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");

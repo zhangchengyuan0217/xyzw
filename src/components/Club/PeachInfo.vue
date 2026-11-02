@@ -152,7 +152,7 @@
                 class="lineup-hero"
                 :src="hero.avatar"
                 :alt="hero.name"
-                :title="`${hero.name}${player.lineupType ? ' · ' + player.lineupType : ''}`"
+                :title="`${hero.name}${player.lineupType ? ` · ${player.lineupType}` : ''}`"
               />
               <b v-if="!player.lineupHeroes.length">—</b>
             </div>
@@ -619,7 +619,6 @@
 <script setup>
 import { Copy, Refresh } from "@vicons/ionicons5";
 
-import html2canvas from "html2canvas";
 import {
   NAvatar,
   NButton,
@@ -636,6 +635,7 @@ import {
 } from "naive-ui";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
+import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isSameGameValue } from "@/utils/gameValue.js";
 
 import {
@@ -644,8 +644,9 @@ import {
   HeroFillInfo,
   legacycolor,
 } from "@/utils/HeroList";
-import { getShowPet } from "@/utils/PetList";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
+import { getShowPet } from "@/utils/PetList";
+
 const message = useMessage();
 const tokenStore = useTokenStore();
 const info = computed(() => tokenStore.gameData?.legionInfo || null);
