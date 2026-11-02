@@ -732,7 +732,7 @@ const battleInfo = ref(null); // Opponent Club Info
 const ownMembers = ref([]);
 const opponentMembers = ref([]);
 let memberFetchSeq = 0;
-const memberSide = ref("own");
+const memberSide = ref("opponent");
 const activeMembers = computed(() =>
   memberSide.value === "opponent"
     ? opponentMembers.value
@@ -1543,13 +1543,37 @@ const handleExportImage = async () => {
       }
     }
 
-    // 调整外层容器，并展开仅导出时显示的 ID / 公告
+    // 调整外层容器，并展开仅导出时显示的 ID / 公告。
+    // 页面上武将行可以横向滚动，导出时要按整行宽度截，不能停在屏幕宽度。
+    const scoreLists = exportDom.value.querySelector(".score-lists");
+    const scoreSide = exportDom.value.querySelector(".score-side");
+    exportDom.value.classList.add("exporting-image");
+    exportDom.value.style.maxWidth = "none";
+    exportDom.value.style.width = "max-content";
     exportDom.value.style.height = "auto";
     exportDom.value.style.overflow = "visible";
-    exportDom.value.classList.add("exporting-image");
+    for (const node of [scoreLists, scoreSide]) {
+      if (!node) continue;
+      node.scrollLeft = 0;
+      node.style.maxWidth = "none";
+      node.style.width = "max-content";
+      node.style.maxHeight = "none";
+      node.style.height = "auto";
+      node.style.overflow = "visible";
+    }
 
     // 等待DOM更新
     await new Promise((resolve) => setTimeout(resolve, 500));
+    const exportWidth = Math.max(
+      exportDom.value.scrollWidth,
+      scoreSide?.scrollWidth || 0,
+    );
+    const exportHeight = Math.max(
+      exportDom.value.scrollHeight,
+      scoreLists?.scrollHeight || 0,
+    );
+    exportDom.value.style.width = `${exportWidth}px`;
+    exportDom.value.style.height = `${exportHeight}px`;
 
     // 5. 用html2canvas渲染DOM为Canvas
     const canvas = await html2canvas(exportDom.value, {
@@ -1558,6 +1582,10 @@ const handleExportImage = async () => {
       backgroundColor: "#ffffff", // 避免透明背景
       logging: false, // 关闭控制台日志
       allowTaint: true, // 允许跨域图片污染画布
+      width: exportWidth,
+      height: exportHeight,
+      windowWidth: exportWidth,
+      windowHeight: exportHeight,
     });
 
     // 6. Canvas转图片链接并下载
@@ -1572,7 +1600,18 @@ const handleExportImage = async () => {
     // 恢复原始样式
     exportDom.value.classList.remove("exporting-image");
     exportDom.value.style.height = "";
+    exportDom.value.style.width = "";
+    exportDom.value.style.maxWidth = "";
     exportDom.value.style.overflow = "";
+    for (const node of exportDom.value.querySelectorAll(
+      ".score-lists, .score-side",
+    )) {
+      node.style.width = "";
+      node.style.maxWidth = "";
+      node.style.height = "";
+      node.style.maxHeight = "";
+      node.style.overflow = "";
+    }
 
     if (tableContainer) {
       const scrollContainer = tableContainer.querySelector(
@@ -1801,9 +1840,16 @@ onMounted(() => {
 
 .peach-info-card.exporting-image {
   width: max-content;
+  max-width: none;
+  height: auto;
+  overflow: visible;
 
   .score-lists,
   .score-side {
+    width: max-content;
+    max-width: none;
+    height: auto;
+    max-height: none;
     overflow: visible;
   }
 
