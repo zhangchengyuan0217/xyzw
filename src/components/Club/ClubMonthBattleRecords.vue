@@ -1317,8 +1317,7 @@ const handleExport = async () => {
   }
 
   try {
-    // 导出图片
-    exportToImage();
+    await exportToImage();
     message.success("导出成功");
   } catch (error) {
     console.error("导出失败:", error);
@@ -1327,23 +1326,81 @@ const handleExport = async () => {
 };
 
 const exportToImage = async () => {
-  // 校验：确保DOM已正确绑定
   if (!exportDom.value) {
     // eslint-disable-next-line no-alert -- Preserve the existing native notification or confirmation flow.
     alert("未找到要导出的DOM元素");
     return;
   }
 
-  try {
-    // 用html2canvas渲染DOM为Canvas
-    const canvas = await html2canvas(exportDom.value, {
-      scale: 2, // 放大2倍，解决图片模糊问题
-      useCORS: true, // 允许跨域图片（若DOM内有远程图片，需开启）
-      backgroundColor: "#ffffff", // 避免透明背景（默认透明）
-      logging: false, // 关闭控制台日志
+  const pinned = [];
+  let node = exportDom.value;
+  while (node && node !== document.body) {
+    pinned.push(
+      pinStyles(node, {
+        "max-height": "none",
+        "max-width": "none",
+        overflow: "visible",
+        height: "auto",
+      }),
+    );
+    node = node.parentElement;
+  }
+
+  exportDom.value
+    .querySelectorAll(
+      ".members-table-wrapper, .style1-table-container, .style1-content, .style2-table-wrapper, .style2-dashboard, .style2-rankings-grid",
+    )
+    .forEach((element) => {
+      pinned.push(
+        pinStyles(element, {
+          "max-height": "none",
+          "max-width": "none",
+          width: "max-content",
+          overflow: "visible",
+          height: "auto",
+        }),
+      );
     });
 
-    // Canvas转图片链接并下载
+  exportDom.value.querySelectorAll("table").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        "table-layout": "auto",
+        width: "max-content",
+        "min-width": "max-content",
+        "max-width": "none",
+      }),
+    );
+  });
+
+  exportDom.value.querySelectorAll("th, td").forEach((element) => {
+    pinned.push(
+      pinStyles(element, {
+        overflow: "visible",
+        "max-width": "none",
+        "white-space": "nowrap",
+      }),
+    );
+  });
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const target = exportDom.value;
+    const width = Math.max(target.scrollWidth, target.offsetWidth);
+    const height = Math.max(target.scrollHeight, target.offsetHeight);
+    target.style.setProperty("width", `${width}px`, "important");
+    target.style.setProperty("height", `${height}px`, "important");
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
+    });
+
     const monthYear = currentMonthDisplay.value
       .replace("年", "-")
       .replace("月", "");
@@ -1351,10 +1408,41 @@ const exportToImage = async () => {
     downloadCanvasAsImage(canvas, filename);
   } catch (err) {
     console.error("DOM转图片失败：", err);
-    // eslint-disable-next-line no-alert -- Preserve the existing native notification or confirmation flow.
-    alert("导出图片失败，请重试");
+    throw err;
+  } finally {
+    pinned.forEach(restorePinnedStyles);
   }
 };
+
+function pinStyles(element, styles) {
+  const snapshot = Object.fromEntries(
+    Object.keys(styles).map((property) => [
+      property,
+      {
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property),
+      },
+    ]),
+  );
+  Object.entries(styles).forEach(([property, value]) => {
+    element.style.setProperty(property, value, "important");
+  });
+  return { element, snapshot };
+}
+
+function restorePinnedStyles({ element, snapshot }) {
+  Object.entries(snapshot).forEach(([property, { value, priority }]) => {
+    restoreStyle(element, property, value, priority);
+  });
+}
+
+function restoreStyle(element, property, value, priority) {
+  if (value) {
+    element.style.setProperty(property, value, priority);
+  } else {
+    element.style.removeProperty(property);
+  }
+}
 
 // 关闭弹窗
 
