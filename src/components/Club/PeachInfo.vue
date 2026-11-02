@@ -105,13 +105,12 @@
         </button>
       </div>
       <section class="score-side" :class="memberSide">
-        <div class="score-row score-head">
-          <span>角色</span>
-          <span class="stat-col">胜利</span>
-          <span class="stat-col">复活</span>
-        </div>
         <div v-if="!activeMembers.length" class="side-empty">暂无成员</div>
-        <div v-for="player in activeMembers" :key="player.id" class="score-row">
+        <div
+          v-for="player in activeMembers"
+          :key="player.id"
+          class="member-card"
+        >
           <span class="player-role" @click="fetchTargetInfo(player.id)">
             <img
               v-if="player.headImg"
@@ -124,8 +123,32 @@
             }}</span>
             <span class="player-name">{{ player.name }}</span>
           </span>
-          <span class="stat-col player-win">{{ player.killCnt }}</span>
-          <span class="stat-col player-revive">{{ player.reviveCnt }}</span>
+          <div class="member-stats">
+            <div class="member-stat">
+              <span>战力</span>
+              <b>{{
+                player.detailReady ? formatPower(player.power) : "…"
+              }}</b>
+            </div>
+            <div class="member-stat">
+              <span>宠物</span>
+              <b :style="{ color: player.pet?.color || '#333' }">{{
+                player.detailReady ? player.pet?.name || "—" : "…"
+              }}</b>
+            </div>
+            <div class="member-stat">
+              <span>红淬</span>
+              <b class="red-quench">{{
+                player.detailReady ? player.redQuench : "…"
+              }}</b>
+            </div>
+            <div class="member-stat">
+              <span>阵容</span>
+              <b>{{
+                player.detailReady ? player.lineupType || "—" : "…"
+              }}</b>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -606,7 +629,13 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { isSameGameValue } from "@/utils/gameValue.js";
 
-import { HERO_DICT, HeroFillInfo, legacycolor } from "@/utils/HeroList";
+import {
+  getLineupType,
+  HERO_DICT,
+  HeroFillInfo,
+  legacycolor,
+} from "@/utils/HeroList";
+import { getShowPet } from "@/utils/PetList";
 import { downloadCanvasAsImage } from "@/utils/imageExport";
 const message = useMessage();
 const tokenStore = useTokenStore();
@@ -693,6 +722,7 @@ const loading = ref(false);
 const battleInfo = ref(null); // Opponent Club Info
 const ownMembers = ref([]);
 const opponentMembers = ref([]);
+let memberFetchSeq = 0;
 const memberSide = ref("own");
 const activeMembers = computed(() =>
   memberSide.value === "opponent"
@@ -1170,6 +1200,7 @@ const fetchBattleRecordsByDate = (val) => {
 
 // Fetch Data
 const fetchBattleInfo = async () => {
+  const seq = ++memberFetchSeq;
   if (!tokenStore.selectedToken) {
     message.warning("请先选择游戏角色");
     return;
@@ -1263,15 +1294,16 @@ const fetchBattleInfo = async () => {
     );
 
     const toPlayers = (records) =>
-      (records || [])
-        .map((record) => ({
-          id: record.roleInfo?.roleId,
-          name: record.roleInfo?.name || "未知",
-          headImg: record.roleInfo?.headImg || "",
-          killCnt: record.killCnt || 0,
-          reviveCnt: record.reviveCnt || 0,
-        }))
-        .sort((a, b) => b.killCnt - a.killCnt || b.reviveCnt - a.reviveCnt);
+      (records || []).map((record) => ({
+        id: record.roleInfo?.roleId,
+        name: record.roleInfo?.name || "未知",
+        headImg: record.roleInfo?.headImg || "",
+        power: 0,
+        redQuench: 0,
+        pet: null,
+        lineupType: "",
+        detailReady: false,
+      }));
 
     const recordsOf = (legionId) => {
       const map = killRes?.recordsMap || {};
@@ -1328,12 +1360,80 @@ const fetchBattleInfo = async () => {
         memberCount: opponentRecords.length,
       },
     };
+    if (seq !== memberFetchSeq) return;
+    loading.value = false;
+    await enrichMemberDetails(tokenId, seq);
   } catch (error) {
     message.error(`获取数据失败: ${error.message}`);
     console.error(error);
   } finally {
     loading.value = false;
   }
+};
+
+const countRedQuench = (heroes) => {
+  let total = 0;
+  for (const hero of heroes) {
+    if (!hero?.equipment) continue;
+    for (const equipment of Object.values(hero.equipment)) {
+      if (!equipment?.quenches) continue;
+      for (const quench of Object.values(equipment.quenches)) {
+        if (isSameGameValue(quench?.colorId, 6)) total += 1;
+      }
+    }
+  }
+  return total;
+};
+
+const enrichMemberDetails = async (tokenId, seq) => {
+  const members = [...ownMembers.value, ...opponentMembers.value].filter(
+    (player) => player.id,
+  );
+  const chunkSize = 5;
+  for (let index = 0; index < members.length; index += chunkSize) {
+    if (seq !== memberFetchSeq) return;
+    const chunk = members.slice(index, index + chunkSize);
+    await Promise.all(
+      chunk.map(async (player) => {
+        try {
+          const roleRes = await tokenStore.sendMessageWithPromise(
+            tokenId,
+            "rank_getroleinfo",
+            {
+              roleId: Number(player.id),
+              includeBottleTeam: false,
+              isSearch: false,
+              bottleType: 0,
+              includeHero: true,
+              includeHeroDetail: true,
+              includePearl: true,
+            },
+            5000,
+          );
+          if (seq !== memberFetchSeq || !roleRes?.roleInfo) return;
+          const heroes = Object.values(roleRes.roleInfo.heroes || {});
+          const heroList = heroes.map((hero) => ({
+            heroId: hero.heroId,
+            battleTeamSlot: hero.battleTeamSlot || 0,
+          }));
+          player.power = roleRes.roleInfo.power || 0;
+          player.redQuench = countRedQuench(heroes);
+          player.pet = getShowPet(roleRes);
+          player.lineupType = getLineupType(heroList);
+          player.headImg = roleRes.roleInfo.headImg || player.headImg;
+          player.name = roleRes.roleInfo.name || player.name;
+          player.detailReady = true;
+        } catch (error) {
+          console.error(`获取角色详情失败 ${player.id}`, error);
+          if (seq === memberFetchSeq) player.detailReady = true;
+        }
+      }),
+    );
+  }
+  if (seq !== memberFetchSeq) return;
+  const byPower = (a, b) => (b.power || 0) - (a.power || 0);
+  ownMembers.value = [...ownMembers.value].sort(byPower);
+  opponentMembers.value = [...opponentMembers.value].sort(byPower);
 };
 
 const handleExportImage = async () => {
@@ -1709,19 +1809,40 @@ onMounted(() => {
   text-align: center;
 }
 
-.score-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 48px 48px;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 4px;
+.member-card {
+  padding: 10px 4px;
   border-bottom: 1px solid #f5f5f5;
-  font-size: 14px;
 }
 
-.score-head {
-  color: #999;
+.member-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.member-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
   font-size: 12px;
+  color: #8c8c8c;
+}
+
+.member-stat b {
+  max-width: 100%;
+  overflow: hidden;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.red-quench {
+  color: #ff4d4f;
 }
 
 .player-role {
