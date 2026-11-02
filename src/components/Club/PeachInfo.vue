@@ -142,12 +142,21 @@
                 player.detailReady ? player.redQuench : "…"
               }}</b>
             </div>
-            <div class="member-stat">
-              <span>阵容</span>
-              <b>{{
-                player.detailReady ? player.lineupType || "—" : "…"
-              }}</b>
+          </div>
+          <div class="member-lineup">
+            <span>阵容</span>
+            <div v-if="player.detailReady" class="lineup-heroes">
+              <img
+                v-for="hero in player.lineupHeroes"
+                :key="`${player.id}-${hero.slot}-${hero.heroId}`"
+                class="lineup-hero"
+                :src="hero.avatar"
+                :alt="hero.name"
+                :title="`${hero.name}${player.lineupType ? ' · ' + player.lineupType : ''}`"
+              />
+              <b v-if="!player.lineupHeroes.length">—</b>
             </div>
+            <b v-else>…</b>
           </div>
         </div>
       </section>
@@ -1222,8 +1231,27 @@ const fetchBattleInfo = async () => {
   opponentMembers.value = [];
   try {
     let opponentLegionId;
-    let ownLegionId;
     const shortDate = formatDateToShort(queryDate.value);
+    const payloadTaskRes = await tokenStore.sendMessageWithPromise(
+      tokenId,
+      "legion_getpayloadtask",
+      {},
+      10000,
+    );
+    let ownLegionId = payloadTaskRes?.firstLegionId || club.value?.id || null;
+    if (!ownLegionId) {
+      const legionRes = await tokenStore.sendMessageWithPromise(
+        tokenId,
+        "legion_getinfo",
+        {},
+        10000,
+      );
+      ownLegionId = legionRes?.info?.id || null;
+    }
+    if (!ownLegionId) {
+      message.error("未获取到当前俱乐部");
+      return;
+    }
 
     // Time-based Logic
     // If selected date is today AND it is currently battle time, fetch live data
@@ -1235,32 +1263,23 @@ const fetchBattleInfo = async () => {
         {},
         10000,
       );
-      if (!res || !res.legions) {
+      const legions = (
+        Array.isArray(res?.legions) ? res.legions : Object.values(res?.legions || {})
+      ).filter((legion) => legion?.id);
+      if (!legions.length) {
         message.error("未获取到战场信息");
         loading.value = false;
         return;
       }
-      ownLegionId = club.value.id;
-      opponentLegionId = res.legions[0].id;
-      if (ownLegionId === opponentLegionId) {
-        opponentLegionId = res.legions[1].id;
-      }
+      opponentLegionId =
+        legions.find((legion) => !isSameGameValue(legion.id, ownLegionId))?.id ||
+        null;
       if (!opponentLegionId) {
         message.error("未获取到对战俱乐部ID");
         return;
       }
     } else {
       // Other times: Use legion_getpayloadrecord + legion_getpayloadkillrecord
-      // 1. Get Task (for own ID reference, though not strictly needed if we trust the map)
-      await tokenStore.sendMessageWithPromise(
-        tokenId,
-        "legion_getpayloadtask",
-        {},
-        10000,
-      );
-
-      // 2. Get Record Map
-      ownLegionId = club.value.id;
       const res = await tokenStore.sendMessageWithPromise(
         tokenId,
         "legion_getpayloadrecord",
@@ -1294,7 +1313,9 @@ const fetchBattleInfo = async () => {
     );
 
     const toPlayers = (records) =>
-      (records || []).map((record) => ({
+      (Array.isArray(records) ? records : [])
+        .filter((record) => record?.roleInfo)
+        .map((record) => ({
         id: record.roleInfo?.roleId,
         name: record.roleInfo?.name || "未知",
         headImg: record.roleInfo?.headImg || "",
@@ -1302,6 +1323,7 @@ const fetchBattleInfo = async () => {
         redQuench: 0,
         pet: null,
         lineupType: "",
+        lineupHeroes: [],
         detailReady: false,
       }));
 
@@ -1371,6 +1393,53 @@ const fetchBattleInfo = async () => {
   }
 };
 
+const toLineupHero = (heroId, slot) => {
+  const id = Number(heroId);
+  if (!Number.isFinite(id) || id <= 0) return null;
+  const info = HERO_DICT[id] || {};
+  return {
+    heroId: id,
+    slot,
+    name: info.name || `武将${id}`,
+    avatar: info.avatar || "",
+  };
+};
+
+const resolveSlotHeroId = (slotData) => {
+  if (slotData == null || slotData === false) return 0;
+  if (typeof slotData === "number" || typeof slotData === "string") {
+    return Number(slotData);
+  }
+  return Number(slotData.heroId || slotData.id || 0);
+};
+
+const pickDeployedHeroes = (roleInfo) => {
+  const battleTeam = roleInfo?.battleTeam;
+  if (battleTeam && typeof battleTeam === "object") {
+    const deployed = Object.keys(battleTeam)
+      .map((key) => Number(key))
+      .filter((slot) => Number.isFinite(slot) && slot >= 0 && slot < 5)
+      .sort((a, b) => a - b)
+      .map((slot) =>
+        toLineupHero(
+          resolveSlotHeroId(battleTeam[slot] ?? battleTeam[String(slot)]),
+          slot,
+        ),
+      )
+      .filter(Boolean);
+    if (deployed.length) return deployed;
+  }
+
+  return Object.values(roleInfo?.heroes || {})
+    .filter((hero) => {
+      const slot = Number(hero?.battleTeamSlot);
+      return Number.isFinite(slot) && slot >= 0 && slot < 5;
+    })
+    .sort((a, b) => Number(a.battleTeamSlot) - Number(b.battleTeamSlot))
+    .map((hero) => toLineupHero(hero.heroId, Number(hero.battleTeamSlot)))
+    .filter(Boolean);
+};
+
 const countRedQuench = (heroes) => {
   let total = 0;
   for (const hero of heroes) {
@@ -1412,13 +1481,16 @@ const enrichMemberDetails = async (tokenId, seq) => {
           );
           if (seq !== memberFetchSeq || !roleRes?.roleInfo) return;
           const heroes = Object.values(roleRes.roleInfo.heroes || {});
-          const heroList = heroes.map((hero) => ({
-            heroId: hero.heroId,
-            battleTeamSlot: hero.battleTeamSlot || 0,
-          }));
+          const lineupHeroes = pickDeployedHeroes(roleRes.roleInfo);
+          const heroList = (
+            lineupHeroes.length
+              ? lineupHeroes
+              : heroes.map((hero) => ({ heroId: hero.heroId }))
+          ).map((hero) => ({ heroId: hero.heroId }));
           player.power = roleRes.roleInfo.power || 0;
           player.redQuench = countRedQuench(heroes);
           player.pet = getShowPet(roleRes);
+          player.lineupHeroes = lineupHeroes;
           player.lineupType = getLineupType(heroList);
           player.headImg = roleRes.roleInfo.headImg || player.headImg;
           player.name = roleRes.roleInfo.name || player.name;
@@ -1538,6 +1610,9 @@ onMounted(() => {
   padding: 16px;
   min-height: 400px;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -1723,6 +1798,13 @@ onMounted(() => {
 }
 
 .peach-info-card.exporting-image {
+  width: max-content;
+
+  .score-lists,
+  .score-side {
+    overflow: visible;
+  }
+
   .export-only {
     display: block;
   }
@@ -1809,16 +1891,60 @@ onMounted(() => {
   text-align: center;
 }
 
+.score-side {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
 .member-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  min-width: 100%;
   padding: 10px 4px;
   border-bottom: 1px solid #f5f5f5;
 }
 
 .member-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 64px 72px 48px;
+  flex: 0 0 auto;
   gap: 6px;
-  margin-top: 8px;
+}
+
+.member-lineup {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 4px;
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
+.lineup-heroes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+}
+
+.lineup-hero {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f5f5f5;
+}
+
+.member-lineup b {
+  color: #333;
+  font-size: 13px;
 }
 
 .member-stat {
@@ -1846,10 +1972,17 @@ onMounted(() => {
 }
 
 .player-role {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   display: flex;
+  flex: 0 0 132px;
   align-items: center;
   gap: 8px;
+  width: 132px;
   min-width: 0;
+  padding-right: 6px;
+  background: #fff;
   cursor: pointer;
 }
 
