@@ -700,6 +700,13 @@ onUnmounted(() => {
     overflow: hidden;
   }
 
+  :deep(.club-month-battle-records-container .records-list),
+  :deep(.club-month-battle-records-container .members-table-wrapper),
+  :deep(.club-month-battle-records-container .style1-table-container) {
+    max-height: none !important;
+    overflow-y: hidden !important;
+  }
+
   :deep(table),
   :deep(.n-data-table-table) {
     width: 100% !important;

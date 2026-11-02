@@ -17,6 +17,15 @@
 
         <!-- 功能操作区 -->
         <div class="header-actions">
+          <NDatePicker
+            v-model:formatted-value="selectedMonth"
+            class="month-picker"
+            type="month"
+            value-format="yyyy-MM"
+            :is-date-disabled="disableFutureMonth"
+            :clearable="false"
+            :disabled="loading"
+          />
           <NRadioGroup v-model:value="currentStyle" size="small">
             <NRadioButton value="default">默认</NRadioButton>
             <NRadioButton value="style1">样式一</NRadioButton>
@@ -51,7 +60,7 @@
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-state">
           <n-spin size="large">
-            <template #description>正在加载本月战绩数据...</template>
+            <template #description>正在加载战绩数据...</template>
           </n-spin>
         </div>
 
@@ -863,7 +872,7 @@
 
 <script setup>
 import { Copy, DocumentText, Refresh } from "@vicons/ionicons5";
-import { NRadioButton, NRadioGroup, useMessage } from "naive-ui";
+import { NDatePicker, NRadioButton, NRadioGroup, useMessage } from "naive-ui";
 import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { captureElement as html2canvas } from "@/utils/captureElement";
@@ -887,44 +896,47 @@ const tokenStore = useTokenStore();
 
 const loading = ref(false);
 const monthlyBattleRecords = ref({});
-
 const battleDates = ref([]);
 
-// 计算当月的5个战斗日期
-const getCurrentMonthBattleDates = () => {
-  const dateObj = new Date();
+function formatYearMonth(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
 
+const selectedMonth = ref(formatYearMonth(new Date()));
+
+function disableFutureMonth(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  return (
+    date.getFullYear() > now.getFullYear() ||
+    (date.getFullYear() === now.getFullYear() &&
+      date.getMonth() > now.getMonth())
+  );
+}
+
+// 计算指定月份的战斗日期：前 4 个周六，以及第 4 个周六的次日
+const getMonthBattleDates = (yearMonth) => {
+  const [yearText, monthText] = yearMonth.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText) - 1;
   const dates = [];
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth();
 
-  // 获取本月的所有周六
   const saturdays = [];
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-
-  for (let i = firstDay.getDate(); i <= lastDay.getDate(); i++) {
-    const currentDate = new Date(year, month, i);
-    if (currentDate.getDay() === 6) {
-      // 6 = 周六
-      saturdays.push(currentDate);
-    }
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  for (let day = 1; day <= lastDay; day++) {
+    const currentDate = new Date(year, month, day);
+    if (currentDate.getDay() === 6) saturdays.push(currentDate);
   }
 
-  // 取前4个周六
-  for (let i = 0; i < Math.min(4, saturdays.length); i++) {
-    dates.push(saturdays[i]);
-  }
-
-  // 计算第四周的周日
+  dates.push(...saturdays.slice(0, 4));
   if (saturdays.length >= 4) {
-    const fourthSaturday = saturdays[3];
-    const fourthSunday = new Date(fourthSaturday);
+    const fourthSunday = new Date(saturdays[3]);
     fourthSunday.setDate(fourthSunday.getDate() + 1);
     dates.push(fourthSunday);
   }
 
-  // 格式化日期为 YYYY/MM/DD
   const formattedDates = dates.map((date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -932,10 +944,12 @@ const getCurrentMonthBattleDates = () => {
     return `${y}/${m}/${d}`;
   });
 
-  // 过滤掉当前日期之后的战斗日期
-  const currentDate = new Date();
-  const currentDateStr = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, "0")}/${String(currentDate.getDate()).padStart(2, "0")}`;
+  const now = new Date();
+  const isCurrentMonth =
+    year === now.getFullYear() && month === now.getMonth();
+  if (!isCurrentMonth) return formattedDates;
 
+  const currentDateStr = `${formatYearMonth(now).replace("-", "/")}/${String(now.getDate()).padStart(2, "0")}`;
   return formattedDates.filter((date) => date <= currentDateStr);
 };
 
@@ -1072,6 +1086,10 @@ watch(currentStyle, (newStyle) => {
   localStorage.setItem("club_month_battle_records_style", newStyle);
 });
 
+watch(selectedMonth, () => {
+  fetchMonthlyBattleRecords();
+});
+
 const club = computed(() => {
   // Try to get club info from store if available, otherwise mock or empty
   return tokenStore.gameData?.legionInfo?.info || { name: "俱乐部" };
@@ -1180,10 +1198,8 @@ const getReviveColor = (val) => {
 
 // 当前月份显示
 const currentMonthDisplay = computed(() => {
-  const dateObj = new Date();
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth() + 1;
-  return `${year}年${month}月`;
+  const [year, month] = selectedMonth.value.split("-");
+  return `${year}年${Number(month)}月`;
 });
 
 // 处理图片加载错误
@@ -1254,7 +1270,13 @@ const fetchMonthlyBattleRecords = async () => {
 
   try {
     // 获取本月5个战斗日期
-    battleDates.value = getCurrentMonthBattleDates();
+    battleDates.value = getMonthBattleDates(selectedMonth.value);
+
+    if (battleDates.value.length === 0) {
+      monthlyBattleRecords.value = {};
+      message.info(`${currentMonthDisplay.value}还没有已结束的盐场`);
+      return;
+    }
 
     // 并行获取所有日期的战绩
     const promises = battleDates.value.map((date) => fetchBattleRecords(date));
@@ -1269,7 +1291,7 @@ const fetchMonthlyBattleRecords = async () => {
     });
 
     monthlyBattleRecords.value = records;
-    message.success("本月战绩加载成功");
+    message.success(`${currentMonthDisplay.value}战绩加载成功`);
   } catch (error) {
     console.error("查询本月战绩失败:", error);
     message.error(`查询本月战绩失败: ${error.message}`);
@@ -1403,6 +1425,10 @@ onMounted(() => {
   align-items: center;
 }
 
+.month-picker {
+  width: 132px;
+}
+
 .battle-records-content {
   flex: 1;
   overflow-y: auto;
@@ -1421,6 +1447,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
 }
 
 // 本月统计概览样式
@@ -1513,7 +1542,9 @@ onMounted(() => {
 }
 
 .members-table-wrapper {
-  overflow-x: auto;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   border-radius: var(--border-radius-medium);
   border: 1px solid var(--border-light);
   background: var(--bg-primary);
@@ -1718,7 +1749,9 @@ onMounted(() => {
 
 .style1-table-container {
   flex: 2;
-  overflow-x: auto;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
 }
 
 .style1-table {
@@ -1728,8 +1761,8 @@ onMounted(() => {
 }
 
 .style1-table th {
-  background: #800080;
-  color: #fff;
+  background: #800080 !important;
+  color: #fff !important;
   padding: 8px;
   text-align: center;
   font-weight: bold;
@@ -2119,7 +2152,8 @@ onMounted(() => {
 }
 
 .style2-table th {
-  color: #fff;
+  background: #4285f4 !important;
+  color: #fff !important;
   padding: 12px 8px;
   text-align: center;
   font-size: 13px;
