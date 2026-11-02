@@ -727,7 +727,7 @@ const isSundayBattleTime = () => {
 // Helper: Check if date string is today
 
 // State
-const loading = ref(false);
+const loading = ref(true);
 const battleInfo = ref(null); // Opponent Club Info
 const ownMembers = ref([]);
 const opponentMembers = ref([]);
@@ -1211,6 +1211,7 @@ const fetchBattleRecordsByDate = (val) => {
 const fetchBattleInfo = async () => {
   const seq = ++memberFetchSeq;
   if (!tokenStore.selectedToken) {
+    loading.value = false;
     message.warning("请先选择游戏角色");
     return;
   }
@@ -1218,6 +1219,7 @@ const fetchBattleInfo = async () => {
   const tokenId = tokenStore.selectedToken.id;
   const wsStatus = tokenStore.getWebSocketStatus(tokenId);
   if (wsStatus !== "connected") {
+    loading.value = false;
     message.error("WebSocket未连接，无法查询");
     return;
   }

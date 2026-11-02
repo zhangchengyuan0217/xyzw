@@ -791,8 +791,6 @@ onUnmounted(() => {
 .warrank-full-container {
   grid-column: 1 / -1;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   height: calc(100vh - 200px);
   min-height: 600px;
   overflow: hidden;

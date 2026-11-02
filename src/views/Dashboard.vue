@@ -85,17 +85,36 @@ import {
   Trophy,
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
-import { useMessage } from "naive-ui";
-import { computed, defineAsyncComponent, onMounted, ref } from "vue";
+import { NSpin, useMessage } from "naive-ui";
+import {
+  computed,
+  defineAsyncComponent,
+  defineComponent,
+  h,
+  onMounted,
+  ref,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import { findGameFeature, gameFeatures } from "@/utils/gameFeatureCatalog";
 
-const GameStatus = defineAsyncComponent(
-  () => import("@/components/GameStatus.vue"),
-);
+const FeatureLoading = defineComponent({
+  name: "FeatureLoading",
+  setup() {
+    return () =>
+      h("div", { class: "feature-loading" }, [
+        h(NSpin, { size: "large" }, { description: () => "页面加载中..." }),
+      ]);
+  },
+});
+
+const GameStatus = defineAsyncComponent({
+  loader: () => import("@/components/GameStatus.vue"),
+  loadingComponent: FeatureLoading,
+  delay: 0,
+});
 
 const router = useRouter();
 const route = useRoute();
@@ -584,6 +603,13 @@ onMounted(async () => {
     width: 18px;
     height: 18px;
   }
+}
+
+.feature-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
 }
 
 .feature-page {
