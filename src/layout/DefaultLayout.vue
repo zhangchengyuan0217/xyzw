@@ -5,12 +5,14 @@
       <div class="nav-container">
         <div class="nav-brand">
           <img src="/icons/xiaoyugan.png" alt="XYZW" class="brand-logo" />
+          <!--
           <div class="brand-toggle" @click="isMobileMenuOpen = true">
             <n-icon>
               <Menu />
             </n-icon>
             <span class="brand-text">XYZW</span>
           </div>
+          -->
         </div>
 
         <div class="nav-menu">
@@ -198,7 +200,7 @@ import {
   Home,
   Layers,
   LockOpen,
-  Menu,
+  // Menu,
   PersonCircle,
   Settings,
 } from "@vicons/ionicons5";
