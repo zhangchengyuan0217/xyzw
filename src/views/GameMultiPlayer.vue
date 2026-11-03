@@ -3,6 +3,16 @@
     <header class="multi-game-toolbar">
       <BackButton class="toolbar-button" to="/tokens" />
       <strong class="toolbar-title">批量游戏</strong>
+      <button
+        class="speed-toggle"
+        :class="{ 'is-on': shidianSpeedEnabled }"
+        type="button"
+        :aria-pressed="shidianSpeedEnabled"
+        title="只加快十殿战斗播放，固定 2 倍"
+        @click="toggleShidianSpeed"
+      >
+        {{ shidianSpeedEnabled ? "十殿加速 2倍" : "十殿加速" }}
+      </button>
       <span class="toolbar-count">{{ frames.length }} 个窗口</span>
       <span
         v-if="skippedSummary"
@@ -169,9 +179,16 @@ import {
   readActiveMultiGameLaunch,
   resolveMultiGameFrameMessage,
 } from "@/utils/gameLauncher";
+import {
+  isShidianSpeedReadyMessage,
+  postShidianSpeed,
+  readShidianSpeedEnabled,
+  writeShidianSpeedEnabled,
+} from "@/utils/shidianSpeed";
 
 const router = useRouter();
 const FRAME_LOAD_TIMEOUT_MS = 45_000;
+const shidianSpeedEnabled = ref(readShidianSpeedEnabled());
 const launch = ref(readLaunchSafely());
 const gameStrip = ref(null);
 const movingFrame = ref(false);
@@ -410,7 +427,26 @@ function closeFrame(frame) {
   }
 }
 
+function broadcastShidianSpeed() {
+  for (const frame of frameElements.values()) {
+    postShidianSpeed(frame.contentWindow, shidianSpeedEnabled.value);
+  }
+}
+
+function toggleShidianSpeed() {
+  shidianSpeedEnabled.value = !shidianSpeedEnabled.value;
+  writeShidianSpeedEnabled(shidianSpeedEnabled.value);
+  broadcastShidianSpeed();
+}
+
 function handleMessage(event) {
+  if (
+    event.origin === window.location.origin &&
+    isShidianSpeedReadyMessage(event.data)
+  ) {
+    postShidianSpeed(event.source, shidianSpeedEnabled.value);
+  }
+
   const result = resolveMultiGameFrameMessage({
     event,
     expectedOrigin: window.location.origin,
@@ -475,6 +511,30 @@ onUnmounted(() => {
 
 .toolbar-button {
   padding: 7px 11px;
+}
+
+.speed-toggle {
+  flex: none;
+  padding: 7px 11px;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #f8fafc;
+  background: #1e293b;
+  cursor: pointer;
+}
+
+.speed-toggle.is-on {
+  border-color: #fbbf24;
+  color: #fde68a;
+  background: #78350f;
+}
+
+.speed-toggle:hover {
+  background: #334155;
+}
+
+.speed-toggle.is-on:hover {
+  background: #92400e;
 }
 
 .toolbar-button:hover,
