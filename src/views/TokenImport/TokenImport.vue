@@ -5,6 +5,7 @@
       <div class="page-header">
         <div class="header-content">
           <div class="header-top">
+            <BackButton class="page-back" />
             <img src="/icons/xiaoyugan.png" alt="XYZW" class="brand-logo" />
             <!-- 主题切换按钮 -->
             <ThemeToggle />
@@ -1512,6 +1513,14 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   justify-content: center;
+}
+
+.page-back {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
 }
 
 .theme-toggle {

@@ -1,10 +1,7 @@
 <template>
   <div class="app-shell">
     <div v-if="currentFeature && activeTab !== 'pvp'" class="feature-page">
-      <button type="button" class="feature-back" @click="backToTab">
-        <ChevronBack />
-        <span>{{ currentFeature.title }}</span>
-      </button>
+      <BackButton class="feature-back" @click="onFeatureBack" />
       <GameStatus
         :section="currentFeature.section"
         :sub="currentFeature.sub || ''"
@@ -75,7 +72,6 @@
 import {
   Add,
   CheckmarkCircle,
-  ChevronBack,
   ChevronForward,
   Cloud,
   Cube,
@@ -357,6 +353,11 @@ const selectTab = (id) => {
 
 const backToTab = () => {
   selectTab(featureTab[currentFeature.value?.id] || "mine");
+};
+
+const onFeatureBack = (event) => {
+  event.preventDefault();
+  backToTab();
 };
 
 const openMenuItem = (item) => {

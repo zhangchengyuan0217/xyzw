@@ -1,6 +1,6 @@
 <template>
   <div class="game-player">
-    <button class="back-btn" @click="goBack">← 返回</button>
+    <BackButton class="back-btn" fallback="/admin/dashboard" />
 
     <div class="iframe-wrapper">
       <iframe :src="gameSrc" class="game-iframe" allow="fullscreen; autoplay" />
@@ -9,15 +9,7 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-
 const gameSrc = `${import.meta.env.BASE_URL}game/index.html`;
-
-function goBack() {
-  router.push("/admin/dashboard");
-}
 </script>
 
 <style scoped>
@@ -50,19 +42,11 @@ function goBack() {
   z-index: 200;
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
-  border: none;
-  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
+  padding: 6px 12px;
 }
 
 .back-btn:hover {
   background: rgba(0, 0, 0, 0.7);
-}
-
-.back-btn:active {
-  background: rgba(0, 0, 0, 0.8);
 }
 </style>

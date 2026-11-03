@@ -18,6 +18,7 @@ declare module 'vue' {
     AModal: typeof import('@arco-design/web-vue')['Modal']
     ApexChallenge: typeof import('./src/components/Apex/ApexChallenge.vue')['default']
     AUpload: typeof import('@arco-design/web-vue')['Upload']
+    BackButton: typeof import('./src/components/Common/BackButton.vue')['default']
     BossTower: typeof import('./src/components/Tower/BossTower.vue')['default']
     BottleHelperCard: typeof import('./src/components/cards/BottleHelperCard.vue')['default']
     BoxHelperCard: typeof import('./src/components/cards/BoxHelperCard.vue')['default']

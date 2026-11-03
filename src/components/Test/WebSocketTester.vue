@@ -1,7 +1,7 @@
 <template>
   <div class="ws-page">
     <header class="ws-top">
-      <button type="button" class="ws-back" @click="goBack">返回</button>
+      <BackButton class="ws-back" />
       <h1>连接测试</h1>
     </header>
 
@@ -30,11 +30,9 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import { useTokenStore } from "@/stores/tokenStore";
 
 const tokenStore = useTokenStore();
-const router = useRouter();
 
 const selectedRoleId = ref(null);
 const status = ref("idle");
@@ -58,11 +56,6 @@ const statusText = computed(() => {
   };
   return textMap[status.value] || "连不上";
 });
-
-const goBack = () => {
-  if (window.history.state?.back) router.back();
-  else router.push("/admin/dashboard");
-};
 
 const updateStatus = () => {
   if (!selectedRoleId.value) {
@@ -135,16 +128,6 @@ onUnmounted(() => {
   font-size: 18px;
 }
 
-.ws-back,
-.ws-text-btn {
-  border: 0;
-  background: transparent;
-  color: #18a058;
-  font-size: 15px;
-  padding: 8px 4px;
-  cursor: pointer;
-}
-
 .ws-label {
   display: block;
   margin: 14px 0 6px;
@@ -186,5 +169,13 @@ onUnmounted(() => {
 .ws-result.disconnected b,
 .ws-result.error b {
   color: #d03050;
+}
+
+.ws-text-btn {
+  border: 0;
+  background: transparent;
+  color: #18a058;
+  font-size: 15px;
+  cursor: pointer;
 }
 </style>

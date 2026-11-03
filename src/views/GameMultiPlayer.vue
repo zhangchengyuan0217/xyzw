@@ -1,9 +1,7 @@
 <template>
   <div class="multi-game-page">
     <header class="multi-game-toolbar">
-      <button class="toolbar-button" type="button" @click="goToTokens">
-        ← 返回 Token 管理
-      </button>
+      <BackButton class="toolbar-button" to="/tokens" />
       <strong class="toolbar-title">批量游戏</strong>
       <span class="toolbar-count">{{ frames.length }} 个窗口</span>
       <span
