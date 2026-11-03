@@ -4,119 +4,41 @@
       <!-- Left Column -->
       <div class="left-column">
         <!-- Header -->
-        <div
-          class="page-header"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-          "
-        >
-          <div style="display: flex; align-items: center; gap: 16px">
+        <div class="page-header">
+          <div class="page-title-row">
+            <BackButton />
             <h2>批量日常任务</h2>
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 8px 12px;
-                background-color: #f8f9fa;
-                border-radius: 8px;
-                border: 1px solid #e9ecef;
-              "
-            >
-              <div style="font-size: 14px; color: #495057">
-                共 {{ scheduledTasks.length }} 个定时任务
-              </div>
-              <div
-                v-if="shortestCountdownTask"
-                style="font-size: 14px; font-weight: 500; color: #1677ff"
-              >
-                即将执行：{{ shortestCountdownTask.task.name }} ({{
-                  shortestCountdownTask.countdown.formatted
-                }})
-              </div>
-              <div v-else style="font-size: 14px; color: #6c757d">
-                暂无定时任务
-              </div>
-              <div style="display: flex; gap: 8px">
-                <n-button type="primary" size="small" @click="openTaskModal">
-                  新增定时任务
-                </n-button>
-                <n-button size="small" @click="showTasksModal = true">
-                  查看定时任务
-                </n-button>
-                <n-button size="small" @click="exportConfig">
-                  导出配置
-                </n-button>
-                <n-upload
-                  :show-file-list="false"
-                  accept=".json"
-                  :custom-request="importConfig"
-                >
-                  <n-button size="small">导入配置</n-button>
-                </n-upload>
-              </div>
-              <div
-                class="setting-item"
-                style="
-                  flex-direction: row;
-                  justify-content: space-between;
-                  align-items: center;
-                "
-              >
-                <label class="setting-label">黑市采购清单配置</label>
-                <n-button size="small" @click="openBlackMarketPurchaseModal">
-                  点击配置
-                </n-button>
-              </div>
-            </div>
           </div>
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              padding: 8px 12px;
-              background-color: #f8f9fa;
-              border-radius: 8px;
-              border: 1px solid #e9ecef;
-            "
-          >
+          <p class="page-hint">
+            已选 {{ selectedTokens.length }} 个账号
+            <template v-if="shortestCountdownTask">
+              · 即将执行 {{ shortestCountdownTask.task.name }}
+            </template>
+          </p>
+          <div class="primary-actions">
             <n-button
               type="primary"
-              @click="startBatch"
               :disabled="isRunning || selectedTokens.length === 0"
-              size="medium"
+              @click="startBatch"
             >
               {{ isRunning ? "执行中..." : "开始执行" }}
             </n-button>
-            <n-button
-              @click="stopBatch"
-              :disabled="!isRunning"
-              type="error"
-              size="medium"
-            >
+            <n-button type="error" :disabled="!isRunning" @click="stopBatch">
               停止
             </n-button>
-            <n-button
-              @click="openTemplateManagerModal"
-              type="info"
-              size="medium"
-            >
-              任务模板
-            </n-button>
-            <n-button @click="openBatchSettings" type="default" size="medium">
-              <template #icon>
-                <n-icon>
-                  <Settings />
-                </n-icon>
-              </template>
-              设置
-            </n-button>
           </div>
+          <n-dropdown :options="moreOptions" trigger="click" @select="handleMore">
+            <n-button block quaternary>更多</n-button>
+          </n-dropdown>
+          <n-upload
+            ref="configUpload"
+            class="config-upload"
+            :show-file-list="false"
+            accept=".json"
+            :custom-request="importConfig"
+          >
+            <span />
+          </n-upload>
         </div>
 
         <!-- Token Selection -->
@@ -174,33 +96,17 @@
               </div>
 
               <!-- 分组管理按钮 -->
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                "
-              >
-                <n-button
-                  type="info"
-                  size="small"
-                  @click="showGroupManageModal = true"
-                >
-                  管理分组
-                </n-button>
-                <span
-                  v-if="selectedGroups.length > 0"
-                  style="font-size: 12px; color: #86909c"
-                >
-                  已选择 {{ selectedGroups.length }} 个分组，包含
-                  {{ selectedTokens.length }} 个账号
+              <div class="group-manage-row">
+                <span v-if="selectedGroups.length > 0">
+                  已选 {{ selectedGroups.length }} 个分组
                 </span>
               </div>
             </n-space>
           </div>
 
-          <!-- 排序按钮组 -->
-          <div class="sort-buttons" style="margin-bottom: 12px">
+          <details class="sort-details">
+            <summary>排序</summary>
+            <div class="sort-buttons">
             <n-space align="center">
               <n-button-group size="small">
                 <n-button
@@ -234,6 +140,7 @@
               </n-button-group>
             </n-space>
           </div>
+          </details>
 
           <n-space vertical>
             <n-checkbox
@@ -313,7 +220,7 @@
         </n-card>
 
         <!-- Batch Functions -->
-        <n-card title="批量功能列表" style="margin-top: 16px">
+        <n-card title="单项功能" class="batch-functions" style="margin-top: 16px">
           <n-tabs type="line" animated>
             <n-tab-pane name="daily" tab="日常">
               <n-space>
@@ -3296,6 +3203,28 @@ const shouldStop = ref(false);
 // Token分组管理状态
 // =====================
 const showGroupManageModal = ref(false);
+const configUpload = ref(null);
+const moreOptions = [
+  { label: "新增定时任务", key: "schedule-add" },
+  { label: "查看定时任务", key: "schedule-list" },
+  { label: "导出配置", key: "export" },
+  { label: "导入配置", key: "import" },
+  { label: "黑市采购清单", key: "black-market" },
+  { label: "任务模板", key: "templates" },
+  { label: "执行设置", key: "settings" },
+  { label: "管理分组", key: "groups" },
+];
+const handleMore = (key) => {
+  if (key === "schedule-add") openTaskModal();
+  else if (key === "schedule-list") showTasksModal.value = true;
+  else if (key === "export") exportConfig();
+  else if (key === "import")
+    configUpload.value?.$el?.querySelector("input[type=file]")?.click();
+  else if (key === "black-market") openBlackMarketPurchaseModal();
+  else if (key === "templates") openTemplateManagerModal();
+  else if (key === "settings") openBatchSettings();
+  else if (key === "groups") showGroupManageModal.value = true;
+};
 
 const selectedGroups = ref([]); // 选中的分组ID列表
 const newGroupName = ref("");
@@ -6356,6 +6285,7 @@ const stopBatch = () => {
   height: 100vh;
   box-sizing: border-box;
   overflow: hidden;
+  background: var(--bg-secondary, #f4f6fb);
 }
 
 .main-layout {
@@ -6382,9 +6312,60 @@ const stopBatch = () => {
 
 .page-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.page-title-row {
+  display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.page-title-row h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.page-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.primary-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.primary-actions :deep(.n-button) {
+  width: 100%;
+}
+
+.config-upload {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.sort-details {
+  margin-bottom: 12px;
+}
+
+.sort-details summary {
+  cursor: pointer;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.group-manage-row {
+  min-height: 0;
+  font-size: 12px;
+  color: #86909c;
 }
 
 .token-item {
@@ -6645,6 +6626,21 @@ const stopBatch = () => {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
+  }
+
+  .token-list-card :deep(.n-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .batch-functions :deep(.n-space) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .batch-functions :deep(.n-button),
+  .batch-functions :deep(.n-popselect) {
+    width: 100%;
   }
 
   .page-header .actions {
