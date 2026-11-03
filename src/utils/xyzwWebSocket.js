@@ -318,6 +318,7 @@ export function registerDefaultCommands(reg) {
     .register("artifact_load")
     .register("artifact_unload")
     .register("lordweapon_changedefaultweapon")
+    .register("pet_use", { petId: 0, petUId: "" })
     .register("pearl_replaceskill")
     .register("pearl_exchangeskill")
     .register("pearl_unloadskill")
@@ -1256,6 +1257,7 @@ export class XyzwWebSocketClient {
       pearl_replaceskillresp: "pearl_replaceskill",
       pearl_exchangeskillresp: "pearl_exchangeskill",
       pearl_unloadskillresp: "pearl_unloadskill",
+      pet_useresp: "pet_use",
       // 咸王宝库
       matchteam_getroleteaminforesp: "matchteam_getroleteaminfo",
       bosstower_getinforesp: "bosstower_getinfo",
@@ -1315,6 +1317,7 @@ export class XyzwWebSocketClient {
         "hero_gointobattle",
         "hero_gobackbattle",
         "lordweapon_changedefaultweapon",
+        "pet_use",
       ],
       syncrewardresp: [
         "activity_commonbuygoods",

@@ -24,6 +24,7 @@ declare module 'vue' {
     BoxHelperCard: typeof import('./src/components/cards/BoxHelperCard.vue')['default']
     CampChallenge: typeof import('./src/components/Club/CampChallenge.vue')['default']
     ChangelogCard: typeof import('./src/components/ChangelogCard.vue')['default']
+    CloudLineup: typeof import('./src/components/Lineup/CloudLineup.vue')['default']
     ClubBattleRecords: typeof import('./src/components/Club/ClubBattleRecords.vue')['default']
     ClubHistoryRecords: typeof import('./src/components/Club/ClubHistoryRecords.vue')['default']
     ClubInfo: typeof import('./src/components/Club/ClubInfo.vue')['default']

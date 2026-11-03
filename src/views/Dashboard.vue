@@ -10,6 +10,9 @@
     <div v-else-if="activeTab === 'pvp'" class="feature-page">
       <GameStatus section="fightPvp" />
     </div>
+    <div v-else-if="activeTab === 'lineup'" class="dashboard-page">
+      <CloudLineup />
+    </div>
     <div v-else class="dashboard-page">
       <div class="feature-list">
         <template v-for="item in visibleItems" :key="item.id">
@@ -94,6 +97,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
+import CloudLineup from "@/components/Lineup/CloudLineup.vue";
 import { findGameFeature, gameFeatures } from "@/utils/gameFeatureCatalog";
 
 const FeatureLoading = defineComponent({
@@ -250,6 +254,7 @@ const openGame = async () => {
 const tabs = [
   { id: "mine", title: "我的", icon: Person },
   { id: "events", title: "活动", icon: Trophy },
+  { id: "lineup", title: "云端阵容", icon: Cloud },
   { id: "pvp", title: "切磋", icon: GameController },
   { id: "more", title: "其他", icon: EllipsisHorizontal },
 ];
@@ -332,7 +337,7 @@ const tabItems = {
 const activeTab = computed(() => {
   const featureId = currentFeature.value?.id;
   if (featureId && featureTab[featureId]) return featureTab[featureId];
-  if (route.query.tab === "events" || route.query.tab === "more") {
+  if (["events", "more", "lineup"].includes(route.query.tab)) {
     return route.query.tab;
   }
   return "mine";
@@ -486,7 +491,7 @@ onMounted(async () => {
   left: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   height: calc(56px + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   border-top: 1px solid var(--border-light);
