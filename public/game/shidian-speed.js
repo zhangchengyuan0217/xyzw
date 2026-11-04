@@ -4,7 +4,7 @@
   if (window.__shidianSpeedHook) return;
   window.__shidianSpeedHook = true;
 
-  var SPEED = 2;
+  var SPEED = 3;
   var enabled = false;
   var activeBattle = null;
   var rememberedScale = 1;
