@@ -23,3 +23,20 @@ export function postShidianSpeed(targetWindow, enabled) {
     window.location.origin,
   );
 }
+
+export function injectShidianSpeed(frameWindow, onReady) {
+  const documentRef = frameWindow?.document;
+  if (!documentRef) return;
+  if (frameWindow.__shidianSpeedHook) {
+    onReady?.();
+    return;
+  }
+  if (documentRef.getElementById("shidian-speed-script")) return;
+
+  const script = documentRef.createElement("script");
+  script.id = "shidian-speed-script";
+  script.src = `${import.meta.env.BASE_URL}game/shidian-speed.js`;
+  script.charset = "utf-8";
+  script.onload = () => onReady?.();
+  documentRef.head.appendChild(script);
+}

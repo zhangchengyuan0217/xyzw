@@ -18,6 +18,7 @@
         :src="gameSrc"
         class="game-iframe"
         allow="fullscreen; autoplay"
+        @load="onFrameLoad"
       />
     </div>
   </div>
@@ -26,6 +27,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
 import {
+  injectShidianSpeed,
   isShidianSpeedReadyMessage,
   postShidianSpeed,
   readShidianSpeedEnabled,
@@ -38,6 +40,11 @@ const shidianSpeedEnabled = ref(readShidianSpeedEnabled());
 
 function sendShidianSpeed(targetWindow = gameFrame.value?.contentWindow) {
   postShidianSpeed(targetWindow, shidianSpeedEnabled.value);
+}
+
+function onFrameLoad() {
+  const frameWindow = gameFrame.value?.contentWindow;
+  injectShidianSpeed(frameWindow, () => sendShidianSpeed(frameWindow));
 }
 
 function toggleShidianSpeed() {

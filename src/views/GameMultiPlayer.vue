@@ -134,6 +134,7 @@
             :title="`${frame.name} 的游戏窗口`"
             class="game-frame"
             allow="fullscreen; autoplay"
+            @load="onFrameLoad(frame.scopeId)"
             @error="markFrameFatal(frame.scopeId)"
           />
           <div
@@ -180,6 +181,7 @@ import {
   resolveMultiGameFrameMessage,
 } from "@/utils/gameLauncher";
 import {
+  injectShidianSpeed,
   isShidianSpeedReadyMessage,
   postShidianSpeed,
   readShidianSpeedEnabled,
@@ -427,9 +429,18 @@ function closeFrame(frame) {
   }
 }
 
+function sendFrameSpeed(frameWindow) {
+  postShidianSpeed(frameWindow, shidianSpeedEnabled.value);
+}
+
+function onFrameLoad(scopeId) {
+  const frameWindow = frameElements.get(scopeId)?.contentWindow;
+  injectShidianSpeed(frameWindow, () => sendFrameSpeed(frameWindow));
+}
+
 function broadcastShidianSpeed() {
   for (const frame of frameElements.values()) {
-    postShidianSpeed(frame.contentWindow, shidianSpeedEnabled.value);
+    sendFrameSpeed(frame.contentWindow);
   }
 }
 
