@@ -231,14 +231,20 @@
     if (!window.__require.__shidianWrapped) {
       window.__require = wrapRequire(window.__require);
     }
-    if (modulesReady || !gameReady()) return;
+  }
+
+  // Requiring these modules before the home map finishes writes an empty
+  // slot into the Cocos module cache and leaves the loader on "正在加载地图".
+  // Only touch them after the player turns 十殿加速 on.
+  function ensurePatches() {
+    if (!enabled || modulesReady || !gameReady()) return;
     modulesReady = true;
     ["manager-factory", "NightmareBattlePanel", "UIManager", "UICompLordSkill"].forEach(
       function (name) {
         try {
           consider(window.__require(name));
         } catch (error) {
-          // Leave the module for the game to load and patch through the wrapped require.
+          modulesReady = false;
         }
       },
     );
@@ -251,14 +257,17 @@
     var next = !!data.enabled;
     if (!next && enabled) restoreBattle(activeBattle);
     enabled = next;
-    if (enabled) forceBattle(activeBattle);
     attachRequire();
+    if (!enabled) return;
+    ensurePatches();
+    forceBattle(activeBattle);
   });
 
   window.setInterval(function () {
     attachRequire();
-    var battle = battleFromPanel(nightmarePanel()) || activeBattle;
     if (!enabled) return;
+    ensurePatches();
+    var battle = battleFromPanel(nightmarePanel()) || activeBattle;
     if (battle) {
       activeBattle = battle;
       forceBattle(battle);
