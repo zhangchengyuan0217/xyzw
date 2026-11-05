@@ -210,7 +210,11 @@ import { ref } from "vue";
 
 import { useRouter } from "vue-router";
 import ThemeToggle from "@/components/Common/ThemeToggle.vue";
-import { selectedToken, useTokenStore } from "@/stores/tokenStore";
+import {
+  selectedToken,
+  selectedTokenId,
+  useTokenStore,
+} from "@/stores/tokenStore";
 import { isNowInLegionWarTime } from "@/utils/clubBattleUtils";
 
 const tokenStore = useTokenStore();
@@ -221,7 +225,7 @@ const isMobileMenuOpen = ref(false);
 
 const userMenuOptions = [
   {
-    label: "清除所有Token并退出",
+    label: "退出当前账号",
     key: "logout",
   },
 ];
@@ -229,11 +233,16 @@ const userMenuOptions = [
 // 方法
 const handleUserAction = async (key) => {
   switch (key) {
-    case "logout":
-      await tokenStore.clearAllTokens();
-      message.success("已清除所有Token");
+    case "logout": {
+      const current = selectedToken.value;
+      if (current) {
+        tokenStore.closeWebSocketConnection(current.id);
+      }
+      selectedTokenId.value = "";
+      message.success("已退出当前账号");
       router.push("/tokens");
       break;
+    }
   }
 };
 </script>

@@ -23,7 +23,10 @@
             v-else
             type="button"
             class="feature-row"
-            :class="{ 'is-pressed': pressedItemId === item.id }"
+            :class="{
+              'is-pressed': pressedItemId === item.id,
+              'is-danger': item.danger,
+            }"
             @click="openMenuItem(item)"
           >
             <span class="feature-icon">
@@ -82,10 +85,12 @@ import {
   EllipsisHorizontal,
   GameController,
   Person,
+  Trash,
+  TrashBin,
   Trophy,
 } from "@vicons/ionicons5";
 import lz4 from "lz4js";
-import { NSpin, useMessage } from "naive-ui";
+import { NSpin, useDialog, useMessage } from "naive-ui";
 import {
   computed,
   defineAsyncComponent,
@@ -95,10 +100,10 @@ import {
   ref,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import CloudLineup from "@/components/Lineup/CloudLineup.vue";
 import { useGameConnection } from "@/composables/useGameConnection";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
-import CloudLineup from "@/components/Lineup/CloudLineup.vue";
 import { findGameFeature, gameFeatures } from "@/utils/gameFeatureCatalog";
 
 const FeatureLoading = defineComponent({
@@ -120,6 +125,7 @@ const GameStatus = defineAsyncComponent({
 const router = useRouter();
 const route = useRoute();
 const message = useMessage();
+const dialog = useDialog();
 const tokenStore = useTokenStore();
 const { getArrayBuffer } = useIndexedDB();
 
@@ -333,6 +339,24 @@ const tabItems = {
       description: "测试账号连接状态",
       action: "websocket-test",
     },
+    // {
+    //   kind: "action",
+    //   id: "delete-current-token",
+    //   icon: Trash,
+    //   title: "删除当前账号",
+    //   description: "删除正在使用的这个账号",
+    //   action: "delete-current-token",
+    //   danger: true,
+    // },
+    // {
+    //   kind: "action",
+    //   id: "delete-all-tokens",
+    //   icon: TrashBin,
+    //   title: "删除所有账号",
+    //   description: "清除全部账号并退出",
+    //   action: "delete-all-tokens",
+    //   danger: true,
+    // },
   ],
 };
 
@@ -388,12 +412,64 @@ const openMenuItem = async (item) => {
     }
     if (item.action === "websocket-test") {
       await router.push("/websocket-test");
+      return;
+    }
+    if (item.action === "delete-current-token") {
+      pressedItemId.value = "";
+      confirmDeleteCurrentToken();
+      return;
+    }
+    if (item.action === "delete-all-tokens") {
+      pressedItemId.value = "";
+      confirmDeleteAllTokens();
     }
   } catch (error) {
     pressedItemId.value = "";
     message.error("页面打开失败，请再试一次");
     console.error("菜单跳转失败:", error);
   }
+};
+
+const confirmDeleteCurrentToken = () => {
+  const current = tokenStore.selectedToken;
+  if (!current) {
+    message.warning("当前没有可删除的账号");
+    return;
+  }
+  dialog.warning({
+    title: "删除当前账号",
+    content: `确定删除「${current.name}」吗？删除后无法恢复。`,
+    positiveText: "删除",
+    negativeText: "取消",
+    onPositiveClick: async () => {
+      await tokenStore.removeToken(current.id);
+      message.success("已删除当前账号");
+      const nextToken = tokenStore.gameTokens[0];
+      if (nextToken) {
+        tokenStore.selectToken(nextToken.id);
+      } else {
+        router.push("/tokens");
+      }
+    },
+  });
+};
+
+const confirmDeleteAllTokens = () => {
+  if (!tokenStore.hasTokens) {
+    message.warning("当前没有可删除的账号");
+    return;
+  }
+  dialog.error({
+    title: "删除所有账号",
+    content: "确定删除所有账号吗？此操作无法恢复。",
+    positiveText: "删除全部",
+    negativeText: "取消",
+    onPositiveClick: async () => {
+      await tokenStore.clearAllTokens();
+      message.success("已删除所有账号");
+      router.push("/tokens");
+    },
+  });
 };
 
 /*
@@ -582,6 +658,22 @@ onMounted(async () => {
     transform: scale(0.98);
     background: var(--primary-color-light);
     box-shadow: none;
+  }
+
+  &.is-danger {
+    .feature-icon {
+      background: #fff1f0;
+      color: #d03050;
+    }
+
+    .feature-title {
+      color: #d03050;
+    }
+
+    &:active,
+    &.is-pressed {
+      background: #fff1f0;
+    }
   }
 }
 
