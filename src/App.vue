@@ -56,7 +56,7 @@ onUnmounted(() => {
 <style>
 /* 主题变量 */
 :root {
-  --app-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --app-background: linear-gradient(180deg, #e7f1ff 0%, #ffffff 42%);
   --text-color: #333;
   --text-secondary: #666;
   --text-tertiary: #999;

@@ -330,7 +330,7 @@ onMounted(() => {
 
 .reset-filter-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
 }
 
 /* 订阅部分 */
@@ -339,13 +339,13 @@ onMounted(() => {
 }
 
 .subscribe-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
   border-radius: 12px;
   padding: 32px;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 24px rgba(22, 119, 255, 0.3);
 }
 
 .subscribe-icon {
@@ -372,7 +372,7 @@ onMounted(() => {
 .subscribe-btn {
   padding: 12px 32px;
   background: white;
-  color: #667eea;
+  color: #1677ff;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -409,7 +409,7 @@ onMounted(() => {
   --border-color: #e5e7eb;
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
-  --primary-color: #667eea;
+  --primary-color: #1677ff;
 }
 
 @media (prefers-color-scheme: dark) {

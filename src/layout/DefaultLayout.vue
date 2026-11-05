@@ -4,6 +4,7 @@
     <nav class="dashboard-nav">
       <div class="nav-container">
         <div class="nav-brand">
+          <router-link to="/tokens" class="switch-account">切换账号</router-link>
           <img src="/icons/xiaoyugan.png" alt="XYZW" class="brand-logo" />
           <!--
           <div class="brand-toggle" @click="isMobileMenuOpen = true">
@@ -259,8 +260,34 @@ const handleUserAction = async (key) => {
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   margin-right: var(--spacing-xl);
+}
+
+.switch-account {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--primary-color-light);
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+
+  &:hover {
+    background: #d6e8ff;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
 }
 
 .brand-logo {

@@ -685,7 +685,7 @@ watch(
 }
 
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
   padding: var(--spacing-xl) 0;
   color: white;
 }

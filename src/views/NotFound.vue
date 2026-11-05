@@ -37,7 +37,7 @@ const router = useRouter();
 <style scoped lang="scss">
 .not-found-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #e7f1ff 0%, #ffffff 48%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,8 +51,12 @@ const router = useRouter();
 
 .error-content {
   text-align: center;
-  color: white;
+  color: #123a6f;
   max-width: 600px;
+}
+
+[data-theme="dark"] .error-content {
+  color: #ffffff;
 }
 
 .error-visual {

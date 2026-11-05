@@ -86,7 +86,11 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #e7f1ff 0%, #ffffff 48%);
+}
+
+[data-theme="dark"] .home-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
 }
 
 .stage {
@@ -95,7 +99,11 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  color: #fff;
+  color: #123a6f;
+}
+
+[data-theme="dark"] .stage {
+  color: #ffffff;
 }
 
 .brand {

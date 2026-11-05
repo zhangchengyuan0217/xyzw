@@ -224,7 +224,7 @@ const handleRegister = async () => {
 <style scoped lang="scss">
 .register-page {
   min-height: 100dvh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #e7f1ff 0%, #ffffff 48%);
   display: flex;
   align-items: center;
   justify-content: center;

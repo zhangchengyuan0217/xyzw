@@ -264,7 +264,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .login-page {
   min-height: 100dvh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #e7f1ff 0%, #ffffff 48%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -388,8 +388,12 @@ onMounted(() => {
 
 // 功能展示区域
 .features-showcase {
-  color: white;
+  color: #123a6f;
   padding: var(--spacing-xl);
+}
+
+[data-theme="dark"] .features-showcase {
+  color: #ffffff;
 }
 
 .showcase-header {
@@ -419,22 +423,22 @@ onMounted(() => {
   display: flex;
   gap: var(--spacing-lg);
   padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.1);
+  background: #ffffff;
   border-radius: var(--border-radius-large);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #d6e8ff;
   transition: all var(--transition-normal);
 
   &:hover {
     transform: translateX(8px);
-    background: rgba(255, 255, 255, 0.15);
+    background: #f3f8ff;
   }
 }
 
 .feature-icon {
   width: 48px;
   height: 48px;
-  color: white;
+  color: #1677ff;
   flex-shrink: 0;
 
   :deep(svg) {
