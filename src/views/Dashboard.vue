@@ -293,7 +293,7 @@ const tabItems = {
       id: "open-game",
       icon: GameController,
       title: "打开游戏",
-      description: "使用当前Token直接进入游戏",
+      description: "使用当前账号进入游戏，内置十殿加速",
       action: "open-game",
     },
     { kind: "feature", icon: Cube, ...featureById.daily },
