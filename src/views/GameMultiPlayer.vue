@@ -8,10 +8,10 @@
         :class="{ 'is-on': shidianSpeedEnabled }"
         type="button"
         :aria-pressed="shidianSpeedEnabled"
-        title="只加快十殿战斗播放，固定 3 倍"
+        :title="`只加快十殿战斗播放，固定 ${SHIDIAN_SPEED_RATE} 倍`"
         @click="toggleShidianSpeed"
       >
-        {{ shidianSpeedEnabled ? "十殿加速 3倍" : "十殿加速" }}
+        {{ shidianSpeedEnabled ? `十殿加速 ${SHIDIAN_SPEED_RATE}倍` : "十殿加速" }}
       </button>
       <span class="toolbar-count">{{ frames.length }} 个窗口</span>
       <span
@@ -185,6 +185,7 @@ import {
   isShidianSpeedReadyMessage,
   postShidianSpeed,
   readShidianSpeedEnabled,
+  SHIDIAN_SPEED_RATE,
   writeShidianSpeedEnabled,
 } from "@/utils/shidianSpeed";
 

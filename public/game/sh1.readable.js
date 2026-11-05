@@ -680,8 +680,7 @@
         border-radius:50%!important; opacity:0.8!important; cursor:move;
         overflow:hidden!important;
       }
-      #binTool.minimized .title, #binTool.minimized .content,
-      #binTool.minimized .author-info { display:none!important; }
+      #binTool.minimized .title, #binTool.minimized .content { display:none!important; }
       #binTool.minimized::after {
         content:"\ud83d\udce6"; font-size:20px; display:flex; align-items:center;
         justify-content:center; width:100%; height:100%;
@@ -718,8 +717,6 @@
       #currentLoginInfo { margin-top:10px; padding:8px; background:#fafafa;
         border:1px solid #e8e8e8; border-radius:6px; font-size:12px; }
       #currentLoginInfo.empty { color:#bbb; text-align:center; }
-      .author-info { font-size:11px; color:#999; text-align:center;
-        margin-top:8px; padding-top:6px; border-top:1px solid #f0f0f0; }
       #refreshBtn, #minimizeBtn {
         background:#f5f5f5; border:1px solid #e0e0e0; color:#666;
         width:26px; height:26px; border-radius:4px; cursor:pointer;
@@ -745,7 +742,6 @@
         <div id="currentLoginInfo" class="empty">未选择登录BIN</div>
         <div id="binList"></div>
       </div>
-      <div class="author-info"></div>
     `;
     document.documentElement.appendChild(panel);
 

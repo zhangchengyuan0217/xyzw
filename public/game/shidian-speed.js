@@ -4,7 +4,8 @@
   if (window.__shidianSpeedHook) return;
   window.__shidianSpeedHook = true;
 
-  var SPEED = 3;
+  // Filled by the parent message. The only rate to edit is SHIDIAN_SPEED_RATE.
+  var SPEED = 1;
   var enabled = false;
   var activeBattle = null;
   var rememberedScale = 1;
@@ -254,6 +255,7 @@
     if (event.origin !== window.location.origin) return;
     var data = event.data;
     if (!data || data.type !== "shidian-speed") return;
+    if (typeof data.rate === "number" && data.rate > 0) SPEED = data.rate;
     var next = !!data.enabled;
     if (!next && enabled) restoreBattle(activeBattle);
     enabled = next;

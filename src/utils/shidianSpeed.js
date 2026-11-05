@@ -1,5 +1,6 @@
 export const SHIDIAN_SPEED_STORAGE_KEY = "shidianBattleSpeed";
-export const SHIDIAN_SPEED_RATE = 3;
+// 十殿战斗播放倍率。按钮文案和游戏内加速都读这个值。
+export const SHIDIAN_SPEED_RATE = 4;
 
 export function readShidianSpeedEnabled(storage = window.localStorage) {
   return storage.getItem(SHIDIAN_SPEED_STORAGE_KEY) === "1";
