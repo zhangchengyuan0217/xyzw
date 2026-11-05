@@ -745,7 +745,7 @@
         <div id="currentLoginInfo" class="empty">未选择登录BIN</div>
         <div id="binList"></div>
       </div>
-      <div class="author-info">免费脚本禁止售卖</div>
+      <div class="author-info"></div>
     `;
     document.documentElement.appendChild(panel);
 
