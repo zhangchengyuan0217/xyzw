@@ -14,22 +14,22 @@
     }"
   >
     <!-- 阵容（仅日常） -->
-    <TeamFormation v-show="activeSection === 'daily'" />
+    <TeamFormation v-if="activeSection === 'daily'" />
 
     <!-- 每日任务状态（仅日常） -->
-    <DailyTaskStatus v-show="activeSection === 'daily'" />
+    <DailyTaskStatus v-if="activeSection === 'daily'" />
 
     <!-- 咸将塔状态 -->
-    <TowerStatus v-show="activeSection === 'daily' && isShowTowerStatus" />
+    <TowerStatus v-if="activeSection === 'daily' && isShowTowerStatus" />
 
     <!-- 怪异塔状态 -->
-    <WeirdTowerStatus v-show="activeSection === 'daily'" />
+    <WeirdTowerStatus v-if="activeSection === 'daily'" />
 
     <!-- 盐罐机器人状态（提取组件） -->
-    <BottleHelperCard v-show="activeSection === 'daily'" />
+    <BottleHelperCard v-if="activeSection === 'daily'" />
 
     <!-- 挂机状态（提取组件） -->
-    <HangUpStatusCard v-show="activeSection === 'daily'" />
+    <HangUpStatusCard v-if="activeSection === 'daily'" />
 
     <!-- 俱乐部排位（暂时隐藏） -->
     <div
@@ -108,10 +108,10 @@
     <ClubInfo v-if="activeSection === 'club'" />
 
     <!-- 月度任务进度（提取组件） -->
-    <MonthlyTasksCard v-show="activeSection === 'activity'" />
+    <MonthlyTasksCard v-if="activeSection === 'activity'" />
 
     <!-- 咸鱼大冲关（提取组件） -->
-    <StudyChallengeCard v-show="activeSection === 'activity'" />
+    <StudyChallengeCard v-if="activeSection === 'activity'" />
 
     <!-- 营地挑战分组 -->
     <div
@@ -200,26 +200,70 @@
 
 <script setup>
 import { useMessage } from "naive-ui";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+const props = defineProps({
+  section: {
+    type: String,
+    required: true,
+  },
+  sub: {
+    type: String,
+    default: "",
+  },
+});
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 
-import BottleHelperCard from "./cards/BottleHelperCard.vue";
-import FightPvp from "./cards/FightPvp.vue";
-import HangUpStatusCard from "./cards/HangUpStatusCard.vue";
-import MonthlyTasksCard from "./cards/MonthlyTasksCard.vue";
-import StudyChallengeCard from "./cards/StudyChallengeCard.vue";
-import CampChallenge from "./Club/CampChallenge.vue";
-import ClubBattleRecords from "./Club/ClubBattleRecords.vue";
-import ClubMonthBattleRecords from "./Club/ClubMonthBattleRecords.vue";
-import ClubWarrank from "./Club/ClubWarrank.vue";
-import ClubWarrankV2 from "./Club/ClubWarrankV2.vue";
-import LegionWarMap from "./Club/LegionWarMap.vue";
-import LegionWarStatistics from "./Club/LegionWarStatistics.vue";
-import PeachBattleRecords from "./Club/PeachBattleRecords.vue";
-import PeachInfo from "./Club/PeachInfo.vue";
-import PeachInfoV2 from "./Club/PeachInfoV2.vue";
-import TowerStatus from "./Tower/TowerStatus.vue";
-import WeirdTowerStatus from "./Tower/WeirdTowerStatus.vue";
+// 懒加载。模板里的组件要包 defineAsyncComponent，效果和路由的 () => import() 一样。
+const TeamFormation = defineAsyncComponent(
+  () => import("./Team/TeamFormation.vue"),
+);
+const DailyTaskStatus = defineAsyncComponent(
+  () => import("./Daily/DailyTaskStatus.vue"),
+);
+const TowerStatus = defineAsyncComponent(
+  () => import("./Tower/TowerStatus.vue"),
+);
+const WeirdTowerStatus = defineAsyncComponent(
+  () => import("./Tower/WeirdTowerStatus.vue"),
+);
+const BottleHelperCard = defineAsyncComponent( () => import("./cards/StudyChallengeCard.vue"),
+);
+const CampChallenge = defineAsyncComponent(
+  () => import("./Club/CampChallenge.vue"),
+);
+const ClubBattleRecords = defineAsyncComponent(
+  () => import("./Club/ClubBattleRecords.vue"),
+);
+const ClubWarrank = defineAsyncComponent(
+  () => import("./Club/ClubWarrank.vue"),
+);
+const ClubWarrankV2 = defineAsyncComponent(
+  () => import("./Club/ClubWarrankV2.vue"),
+);
+const ClubMonthBattleRecords = defineAsyncComponent(
+  () => import("./Club/ClubMonthBattleRecords.vue"),
+);
+const LegionWarMap = defineAsyncComponent(
+  () => import("./Club/LegionWarMap.vue"),
+);
+const LegionWarStatistics = defineAsyncComponent(
+  () => import("./Club/LegionWarStatistics.vue"),
+);
+const PeachBattleRecords = defineAsyncComponent(
+  () => import("./Club/PeachBattleRecords.vue"),
+);
+const PeachInfo = defineAsyncComponent(() => import("./Club/PeachInfo.vue"));
+const PeachInfoV2 = defineAsyncComponent(
+  () => import("./Club/PeachInfoV2.vue"),
+);
+const FightPvp = defineAsyncComponent(() => import("./cards/FightPvp.vue"));
 
 const props = defineProps({
   section: {
