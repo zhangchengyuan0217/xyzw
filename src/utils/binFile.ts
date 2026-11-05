@@ -37,6 +37,29 @@ export function buildRoleBin(
   ) as ArrayBuffer;
 }
 
+/**
+ * Build a login BIN from a combUser without the embedded game crypto module.
+ * serverId stays null until a specific role is selected.
+ */
+export function buildLoginBin(
+  info: unknown,
+  serverId: string | number | null = null,
+): ArrayBuffer {
+  const normalizedServerId =
+    serverId == null || serverId === "" ? null : Number(serverId);
+  return g_utils.encode(
+    {
+      platform: "hortor",
+      platformExt: "mix",
+      info,
+      serverId: normalizedServerId,
+      scene: 0,
+      referrerInfo: "",
+    },
+    "lx",
+  ) as ArrayBuffer;
+}
+
 /** Re-encodes an existing BIN as the game-compatible LZ4 (`pl`) format. */
 export function normalizeBinForDownload(data: BinaryData): ArrayBuffer {
   const payload = getBinPayload(data);

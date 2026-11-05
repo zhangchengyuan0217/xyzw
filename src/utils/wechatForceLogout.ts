@@ -1,3 +1,4 @@
+import { buildLoginBin } from "@/utils/binFile";
 import { getServerList, transformToken } from "@/utils/token";
 
 export interface SavedCombUser {
@@ -13,14 +14,6 @@ export interface RoleMatchConfig {
   roleId?: string | number;
 }
 
-function getGameCrypto() {
-  const dm = (globalThis as any).__require?.("13");
-  if (!dm?.encMsg || !dm?.lz4XorEncode || !dm?.lz4XorDecode) {
-    throw new Error("游戏加密模块未加载，无法使用保存的 combUser 生成 bin");
-  }
-  return dm;
-}
-
 /** 使用服务端返回的 combUser 重新生成登录 bin。 */
 export function generateBinFromCombUser(
   combUser: SavedCombUser,
@@ -30,23 +23,7 @@ export function generateBinFromCombUser(
     throw new Error("保存的 combUser 数据不完整");
   }
 
-  const dm = getGameCrypto();
-  const encrypted = dm.encMsg(
-    {
-      platform: "hortor",
-      platformExt: "mix",
-      info: combUser,
-      serverId: serverId == null ? null : Number(serverId),
-      scene: 0,
-      referrerInfo: "",
-    },
-    { decrypt: dm.lz4XorDecode, encrypt: dm.lz4XorEncode },
-  );
-  const bytes = new Uint8Array(encrypted);
-  return bytes.buffer.slice(
-    bytes.byteOffset,
-    bytes.byteOffset + bytes.byteLength,
-  );
+  return buildLoginBin(combUser, serverId);
 }
 
 export function roleIndexFromServerId(serverId: unknown): number {

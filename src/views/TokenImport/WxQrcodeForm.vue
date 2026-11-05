@@ -96,6 +96,7 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
+  buildLoginBin,
   buildRoleBin,
   downloadBinFile,
   getRoleBinFileName,
@@ -478,7 +479,7 @@ const handleScanSuccess = async (code: string, nickname = "") => {
     // 获取加密数据
     const encrypted = await getEncryptedData(code);
     if (encrypted) {
-      await saveAccount(encrypted.buffer, nickname);
+      await saveAccount(encrypted, nickname);
     }
   } catch (err: any) {
     updateStatus(`处理失败：${err.message}`, "error");
@@ -554,26 +555,7 @@ const getEncryptedData = async (code) => {
     throw new Error("登录响应结构异常");
   }
   currentCombUser.value = combUser;
-
-  // 这里简化处理，实际应该调用游戏加密模块生成bin
-  // 由于是前端环境，我们模拟生成一个token
-  const dm = (window as any).__require?.("13");
-  if (!dm?.encMsg || !dm?.lz4XorEncode)
-    throw new Error("游戏加密模块未加载，不能生成 bin");
-
-  const encryptedBuffer = dm.encMsg(
-    {
-      platform: "hortor",
-      platformExt: "mix",
-      info: combUser,
-      serverId: null,
-      scene: 0,
-      referrerInfo: "",
-    },
-    { decrypt: dm.lz4XorDecode, encrypt: dm.lz4XorEncode },
-  );
-
-  return new Uint8Array(encryptedBuffer);
+  return buildLoginBin(combUser);
 };
 
 /**

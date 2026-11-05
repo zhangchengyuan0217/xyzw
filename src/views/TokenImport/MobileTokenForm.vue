@@ -112,6 +112,7 @@ import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import useIndexedDB from "@/hooks/useIndexedDB";
 import { useTokenStore } from "@/stores/tokenStore";
 import {
+  buildLoginBin,
   buildRoleBin,
   downloadBinFile,
   getRoleBinFileName,
@@ -308,26 +309,7 @@ const sendVerificationCode = async () => {
 };
 
 const createGameLoginBuffer = (combUser: unknown) => {
-  const encryptionModule = (window as any).__require?.("13");
-  if (!encryptionModule?.encMsg || !encryptionModule?.lz4XorEncode) {
-    throw new Error("游戏加密模块未加载，不能生成登录凭据");
-  }
-  return new Uint8Array(
-    encryptionModule.encMsg(
-      {
-        platform: "hortor",
-        platformExt: "mix",
-        info: combUser,
-        serverId: null,
-        scene: 0,
-        referrerInfo: "",
-      },
-      {
-        decrypt: encryptionModule.lz4XorDecode,
-        encrypt: encryptionModule.lz4XorEncode,
-      },
-    ),
-  );
+  return new Uint8Array(buildLoginBin(combUser));
 };
 
 const loginWithVerificationCode = async () => {
