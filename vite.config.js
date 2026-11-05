@@ -193,6 +193,9 @@ export default defineConfig(async ({ command }) => {
     build: {
       reportCompressedSize: true,
       rollupOptions: {
+        // Keep fewer files open at once. The production host rejects the
+        // default parallelism with EMFILE before the bundle can finish.
+        maxParallelFileOps: 16,
         output: {
           manualChunks(id) {
             const normalized = id.replaceAll("\\", "/");
