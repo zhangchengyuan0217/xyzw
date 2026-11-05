@@ -46,5 +46,8 @@ const applyTheme = () => {
 
 applyTheme();
 
+window.__setAppLoadProgress?.(100, "加载完成");
+window.__appLoadObserver?.disconnect();
+
 // 挂载应用
 app.mount("#app");

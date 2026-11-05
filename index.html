@@ -36,11 +36,38 @@
 
     .loading {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 18px;
       height: 100vh;
       color: #123a6f;
       font-size: 18px;
+    }
+
+    .loading-track {
+      width: min(320px, 72vw);
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #d6e8ff;
+    }
+
+    .loading-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #1677ff;
+      transition: width 0.25s ease;
+    }
+
+    .loading-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      width: min(320px, 72vw);
+      color: #4b6a90;
+      font-size: 13px;
     }
 
     html.loading-dark body {
@@ -49,6 +76,18 @@
 
     html.loading-dark .loading {
       color: #ffffff;
+    }
+
+    html.loading-dark .loading-track {
+      background: #1e293b;
+    }
+
+    html.loading-dark .loading-bar {
+      background: #4096ff;
+    }
+
+    html.loading-dark .loading-meta {
+      color: #cbd5e1;
     }
   </style>
   <script>
@@ -62,8 +101,92 @@
 
 <body>
   <div id="app">
-    <div class="loading">正在加载应用...</div>
+    <div class="loading">
+      <div>正在加载应用...</div>
+      <div
+        class="loading-track"
+        role="progressbar"
+        aria-label="应用加载进度"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div class="loading-bar" id="app-loading-bar"></div>
+      </div>
+      <div class="loading-meta">
+        <span id="app-loading-text">正在连接...</span>
+        <span id="app-loading-percent">0%</span>
+      </div>
+    </div>
   </div>
+  <script>
+    (function () {
+      var bar = document.getElementById("app-loading-bar");
+      var text = document.getElementById("app-loading-text");
+      var percent = document.getElementById("app-loading-percent");
+      var track = document.querySelector(".loading-track");
+      var value = 0;
+      var resources = 0;
+      var bytes = 0;
+      var done = false;
+
+      function formatSize(size) {
+        if (size < 1024) return size + " B";
+        if (size < 1024 * 1024) return (size / 1024).toFixed(size < 10240 ? 1 : 0) + " KB";
+        return (size / (1024 * 1024)).toFixed(1) + " MB";
+      }
+
+      function render(next, label) {
+        if (done) return;
+        value = Math.max(value, Math.min(99, next));
+        var shown = Math.round(value);
+        bar.style.width = shown + "%";
+        percent.textContent = shown + "%";
+        track.setAttribute("aria-valuenow", String(shown));
+        if (label) text.textContent = label;
+      }
+
+      function statusLabel() {
+        var label = "已加载 " + resources + " 个文件";
+        if (bytes > 0) label += " · " + formatSize(bytes);
+        return label;
+      }
+
+      window.__setAppLoadProgress = function (next, label) {
+        if (next >= 100) {
+          done = true;
+          bar.style.width = "100%";
+          percent.textContent = "100%";
+          text.textContent = label || "加载完成";
+          track.setAttribute("aria-valuenow", "100");
+          return;
+        }
+        render(next, label);
+      };
+
+      render(8, "正在连接...");
+
+      if (window.PerformanceObserver) {
+        try {
+          var observer = new PerformanceObserver(function (list) {
+            var entries = list.getEntries();
+            for (var i = 0; i < entries.length; i++) {
+              var entry = entries[i];
+              if (!entry.initiatorType || entry.initiatorType === "xmlhttprequest") continue;
+              resources += 1;
+              bytes += entry.transferSize || entry.decodedBodySize || 0;
+            }
+            if (!resources) return;
+            var byCount = 1 - Math.exp(-resources / 24);
+            var byBytes = 1 - Math.exp(-bytes / (1.5 * 1024 * 1024));
+            render(8 + Math.max(byCount, byBytes) * 84, statusLabel());
+          });
+          observer.observe({ type: "resource", buffered: true });
+          window.__appLoadObserver = observer;
+        } catch (e) {}
+      }
+    })();
+  </script>
   <script type="module" src="/src/main.js"></script>
 </body>
 
