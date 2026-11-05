@@ -12,6 +12,10 @@
       </button>
     </header>
 
+    <p class="storage-note">
+      当前是本机存储，切换设备后会失效，但不会上传至服务器，请放心使用。
+    </p>
+
     <div v-if="syncingId" class="progress-panel">
       <div class="progress-label">{{ progress.label }}</div>
       <n-progress
@@ -396,6 +400,21 @@ watch(
 .card-actions button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.storage-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--primary-color-light, #e6f4ff);
+  color: #4b6a90;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+:global(html[data-theme="dark"]) .storage-note {
+  background: #1e293b;
+  color: #cbd5e1 !important;
 }
 
 .progress-panel {
