@@ -315,7 +315,7 @@ import {
 import lz4 from "lz4js";
 import { NAlert, NIcon, useDialog, useMessage } from "naive-ui";
 import { computed, h, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import useIndexedDB from "@/hooks/useIndexedDB";
 
 import { $emit } from "@/stores/events/index.ts";
@@ -354,6 +354,7 @@ const props = defineProps({
   auto: Boolean,
 });
 const { getArrayBuffer, storeArrayBuffer, deleteArrayBuffer } = useIndexedDB();
+const route = useRoute();
 const router = useRouter();
 const message = useMessage();
 const dialog = useDialog();
@@ -1450,8 +1451,11 @@ onMounted(async () => {
   // 处理URL参数
   await handleUrlParams();
 
-  // 如果没有token且没有URL参数，显示导入表单
-  if (!tokenStore.hasTokens && !props.token && !props.api) {
+  // 从控制台「添加账号」进入，或还没有任何账号时，直接打开添加窗口
+  if (
+    route.query.import === "1" ||
+    (!tokenStore.hasTokens && !props.token && !props.api)
+  ) {
     showImportForm.value = true;
   }
 });

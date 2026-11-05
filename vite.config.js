@@ -19,7 +19,11 @@ async function safeImport(moduleName, humanName) {
   }
 }
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
+  // Declaration files are for the editor. Rewriting them during a production
+  // build opens the same file once per component and exhausts the file limit
+  // on hosts such as Cloudflare Pages (EMFILE).
+  const emitDeclarations = command !== "build";
   let basicSsl;
   try {
     ({ default: basicSsl } = await import("@vitejs/plugin-basic-ssl"));
@@ -65,17 +69,18 @@ export default defineConfig(async () => {
     logs: true,
     exclude: ["**/components/**", "**/test**.vue", "**/**Modal.vue"],
     importMode: "async",
-    dts: "src/typed-router.d.ts",
+    dts: emitDeclarations ? "src/typed-router.d.ts" : false,
   });
 
   const autoImportPlugin = autoImportModule?.default?.({
     imports: ["vue", "vue-router", "vue-i18n"],
-    dts: "src/auto-imports.d.ts",
+    dts: emitDeclarations ? "src/auto-imports.d.ts" : false,
   });
 
   const { ArcoResolver, NaiveUiResolver } = componentsResolversModule ?? {};
   const componentsPlugin = componentsModule?.default?.({
     dirs: ["src/components"],
+    dts: emitDeclarations ? "components.d.ts" : false,
     globsExclude: ["**/Private/**", "**/GameStatus.vue"],
     resolvers: [
       ArcoResolver

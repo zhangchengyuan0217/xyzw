@@ -23,6 +23,7 @@
             v-else
             type="button"
             class="feature-row"
+            :class="{ 'is-pressed': pressedItemId === item.id }"
             @click="openMenuItem(item)"
           >
             <span class="feature-icon">
@@ -127,6 +128,7 @@ const { reconnect } = useGameConnection(
   computed(() => Boolean(currentFeature.value)),
 );
 const reconnecting = ref(false);
+const pressedItemId = ref("");
 
 const wsStatus = computed(() => {
   const token = tokenStore.selectedToken;
@@ -365,30 +367,33 @@ const onFeatureBack = (event) => {
   backToTab();
 };
 
-const openMenuItem = (item) => {
-  if (item.kind === "feature") {
-    router.push(`/admin/dashboard/${item.id}`);
-    return;
+const openMenuItem = async (item) => {
+  pressedItemId.value = item.id;
+  try {
+    if (item.kind === "feature") {
+      await router.push(`/admin/dashboard/${item.id}`);
+      return;
+    }
+    if (item.action === "open-game") {
+      openGame();
+      return;
+    }
+    if (item.action === "add-token") {
+      await router.push({ path: "/tokens", query: { import: "1" } });
+      return;
+    }
+    if (item.action === "batch-daily-tasks") {
+      await router.push("/admin/batch-daily-tasks");
+      return;
+    }
+    if (item.action === "websocket-test") {
+      await router.push("/websocket-test");
+    }
+  } catch (error) {
+    pressedItemId.value = "";
+    message.error("页面打开失败，请再试一次");
+    console.error("菜单跳转失败:", error);
   }
-  if (item.action === "open-game") {
-    openGame();
-    return;
-  }
-  if (item.action === "add-token") {
-    handleManageTokens();
-    return;
-  }
-  if (item.action === "batch-daily-tasks") {
-    router.push("/admin/batch-daily-tasks");
-    return;
-  }
-  if (item.action === "websocket-test") {
-    router.push("/websocket-test");
-  }
-};
-
-const handleManageTokens = () => {
-  router.push("/tokens");
 };
 
 /*
@@ -510,6 +515,11 @@ onMounted(async () => {
   font-size: 11px;
   line-height: 1.2;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    background: var(--bg-tertiary);
+  }
 
   :deep(svg) {
     width: 22px;
@@ -557,6 +567,22 @@ onMounted(async () => {
   text-align: left;
   color: inherit;
   cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease,
+    box-shadow 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    background: var(--bg-tertiary);
+  }
+
+  &:active,
+  &.is-pressed {
+    transform: scale(0.98);
+    background: var(--primary-color-light);
+    box-shadow: none;
+  }
 }
 
 .feature-icon {
