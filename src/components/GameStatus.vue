@@ -203,6 +203,13 @@ import { useMessage } from "naive-ui";
 import {
   computed,
   defineAsyncComponent,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from "vue";
+import { useTokenStore } from "@/stores/tokenStore";
+
 const props = defineProps({
   section: {
     type: String,
@@ -213,13 +220,6 @@ const props = defineProps({
     default: "",
   },
 });
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from "vue";
-import { useTokenStore } from "@/stores/tokenStore";
-
 // 懒加载。模板里的组件要包 defineAsyncComponent，效果和路由的 () => import() 一样。
 const TeamFormation = defineAsyncComponent(
   () => import("./Team/TeamFormation.vue"),
@@ -233,7 +233,18 @@ const TowerStatus = defineAsyncComponent(
 const WeirdTowerStatus = defineAsyncComponent(
   () => import("./Tower/WeirdTowerStatus.vue"),
 );
-const BottleHelperCard = defineAsyncComponent( () => import("./cards/StudyChallengeCard.vue"),
+const BottleHelperCard = defineAsyncComponent(
+  () => import("./cards/BottleHelperCard.vue"),
+);
+const HangUpStatusCard = defineAsyncComponent(
+  () => import("./cards/HangUpStatusCard.vue"),
+);
+const ClubInfo = defineAsyncComponent(() => import("./Club/ClubInfo.vue"));
+const MonthlyTasksCard = defineAsyncComponent(
+  () => import("./cards/MonthlyTasksCard.vue"),
+);
+const StudyChallengeCard = defineAsyncComponent(
+  () => import("./cards/StudyChallengeCard.vue"),
 );
 const CampChallenge = defineAsyncComponent(
   () => import("./Club/CampChallenge.vue"),
@@ -264,17 +275,6 @@ const PeachInfoV2 = defineAsyncComponent(
   () => import("./Club/PeachInfoV2.vue"),
 );
 const FightPvp = defineAsyncComponent(() => import("./cards/FightPvp.vue"));
-
-const props = defineProps({
-  section: {
-    type: String,
-    required: true,
-  },
-  sub: {
-    type: String,
-    default: "",
-  },
-});
 
 const tokenStore = useTokenStore();
 useMessage();
