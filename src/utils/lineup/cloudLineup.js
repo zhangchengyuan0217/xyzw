@@ -101,7 +101,8 @@ export const buildCloudLineup = ({ role, preset, name }) => {
       return {
         slot,
         heroId,
-        level: Number(hero?.level || owned.level || 0),
+        // 预设阵容上的 level 是上次写入阵容时的快照，当前等级在角色武将数据里
+        level: Number(owned.level || hero?.level || 0),
         speed: Number(owned.speed || hero?.speed || 0),
         attachmentUid: owned.attachmentUid || hero?.attachmentUid || null,
         fishId: artifactId ? fishByArtifact[artifactId] || null : null,
