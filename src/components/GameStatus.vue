@@ -154,7 +154,7 @@
       </div>
 
       <div
-        class="warrank-full-container"
+        class="warrank-full-container war-map-page"
         v-if="saltFieldSubTab === 'legionWarMap'"
       >
         <LegionWarMap />
@@ -841,6 +841,47 @@ onUnmounted(() => {
   height: auto;
   min-height: 0;
   overflow: visible;
+}
+
+.warrank-full-container.war-map-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 128px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.game-status-container.full-page-mode .warrank-full-container.war-map-page {
+  :deep(.map-container),
+  :deep(.mapCanvas) {
+    width: 100%;
+    max-height: none;
+    height: 100%;
+  }
+
+  :deep(.side-info-panel) {
+    max-height: none;
+  }
+
+  :deep(.main-content-layout) {
+    flex: 1;
+    flex-direction: row;
+    height: auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .game-status-container.full-page-mode .warrank-full-container.war-map-page {
+    :deep(.main-content-layout) {
+      flex-direction: column;
+    }
+
+    :deep(.side-info-panel) {
+      width: 100%;
+      height: 168px;
+    }
+  }
 }
 
 .warrank-full-container {

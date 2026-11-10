@@ -202,6 +202,7 @@ const {
 const legionWarMapDom = ref(null);
 let ctx = null;
 let resizeHandler = null;
+let resizeObserver = null;
 
 // alias for compatibility if needed, but we use isEntireBattlefield in template
 
@@ -211,18 +212,40 @@ const exportImage = async () => {
   const element = document.querySelector(
     ".legion-war-map-card .main-content-layout",
   );
-  if (!element) {
+  const source = legionWarMapDom.value;
+  if (!element || !source) {
     message.error("未找到导出内容");
     return;
   }
 
   exporting.value = true;
+  const cssWidth = source.clientWidth;
+  const cssHeight = source.clientHeight;
+  // html2canvas 会把 canvas 的物理像素当成布局宽度，高分屏下地图右侧会被裁掉
+  const snapshot = document.createElement("canvas");
+  snapshot.width = cssWidth;
+  snapshot.height = cssHeight;
+  snapshot.getContext("2d").drawImage(source, 0, 0, cssWidth, cssHeight);
+
   try {
     const canvas = await html2canvas(element, {
       useCORS: true,
-      scale: 2, // Higher quality
+      scale: 2,
       backgroundColor: "#ffffff",
+      width: element.scrollWidth,
+      height: element.scrollHeight,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
       ignoreElements: (el) => el.classList.contains("no-export"),
+      onclone: (doc) => {
+        const cloned = doc.querySelector(".legion-war-map-card .mapCanvas");
+        if (!cloned) return;
+        cloned.width = cssWidth;
+        cloned.height = cssHeight;
+        cloned.style.width = `${cssWidth}px`;
+        cloned.style.height = `${cssHeight}px`;
+        cloned.getContext("2d").drawImage(snapshot, 0, 0);
+      },
     });
 
     const link = document.createElement("a");
@@ -349,6 +372,8 @@ let hexSize = 15.5;
 const gap = 3;
 let hexWidth = 2 * hexSize;
 let hexHeight = Math.sqrt(3) * hexSize;
+let mapOffsetX = 0;
+let mapOffsetY = 0;
 const arr = Array.from({ length: 41 }, () =>
   Array.from({ length: 41 }, () => 0),
 );
@@ -439,6 +464,68 @@ const drawText = (x, y, text, color = "#fff", fontSize = 10) => {
   ctx.fillText(text, x, y);
 };
 
+const mapBounds = (() => {
+  let minCol = Infinity;
+  let maxCol = -Infinity;
+  let minRow = Infinity;
+  let maxRow = -Infinity;
+  for (const item of roadPointList) {
+    const [col, row] = item.id.split("_").map(Number);
+    if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
+    minCol = Math.min(minCol, col);
+    maxCol = Math.max(maxCol, col);
+    minRow = Math.min(minRow, row);
+    maxRow = Math.max(maxRow, row);
+  }
+  return { minCol, maxCol, minRow, maxRow };
+})();
+
+const measureMapBox = (size) => {
+  const hexH = Math.sqrt(3) * size;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const item of roadPointList) {
+    const [col, row] = item.id.split("_").map(Number);
+    if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
+    const x = col * (size * 1.5 + gap) + size;
+    const y = row * (hexH + gap) + (col % 2 === 1 ? hexH / 2 : 0);
+    minX = Math.min(minX, x - size);
+    maxX = Math.max(maxX, x + size);
+    minY = Math.min(minY, y - hexH / 2);
+    maxY = Math.max(maxY, y + hexH / 2);
+  }
+  return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+};
+
+const fitMap = (width, height) => {
+  const sidePad = 108;
+  const topPad = 40;
+  const bottomPad = 16;
+  const maxW = Math.max(width - sidePad * 2, 40);
+  const maxH = Math.max(height - topPad - bottomPad, 40);
+  let low = 2;
+  let high = 36;
+  let best = 2;
+  for (let i = 0; i < 16; i += 1) {
+    const mid = (low + high) / 2;
+    const box = measureMapBox(mid);
+    if (box.width <= maxW && box.height <= maxH) {
+      best = mid;
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  const box = measureMapBox(best);
+  return {
+    size: best,
+    offsetX: (width - box.width) / 2 - box.minX,
+    offsetY: topPad + (height - topPad - bottomPad - box.height) / 2 - box.minY,
+  };
+};
+
 // 绘制地图内容
 const drawCanvasContent = () => {
   if (!ctx) return;
@@ -453,22 +540,14 @@ const drawCanvasContent = () => {
   const graph = HexGraph.getInstance();
   graph.removeAllNode();
 
-  // 计算需要绘制的行列数以铺满画布
-  const canvasWidth = ctx.canvas.width / dpr;
-  const canvasHeight = ctx.canvas.height / dpr;
-  const horizontalStep = hexWidth * 0.75 + gap;
-  const verticalStep = hexHeight + gap;
+  ctx.save();
+  ctx.translate(mapOffsetX, mapOffsetY);
 
-  const maxCols = Math.ceil(canvasWidth / horizontalStep) + 2;
-  const maxRows = Math.ceil(canvasHeight / verticalStep) + 2;
-
-  // 绘制背景网格
-  ctx.strokeStyle = "#e0e0e0"; // 浅灰色边框
+  // 背景网格跟有效区域对齐，避免画到画面外
+  ctx.strokeStyle = "#e0e0e0";
   ctx.lineWidth = 1;
-
-  for (let row = 0; row < maxRows; row++) {
-    for (let col = 0; col < maxCols; col++) {
-      // 背景网格从第0行开始绘制，铺满全屏
+  for (let row = mapBounds.minRow - 1; row <= mapBounds.maxRow + 1; row += 1) {
+    for (let col = mapBounds.minCol - 1; col <= mapBounds.maxCol + 1; col += 1) {
       const x = col * (hexWidth * 0.75) + hexSize + gap * col;
       const y =
         row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + gap * row;
@@ -482,16 +561,8 @@ const drawCanvasContent = () => {
       }
       ctx.closePath();
       ctx.stroke();
-
-      // 绘制坐标
-      //drawText(x, y, `${col},${row}`, "#e0e0e0", 8);
     }
   }
-
-  // 平移画布以居中显示有效区域
-  // 假设有效区域左上角偏移约为 (-2, -3) 个六边形
-  ctx.save();
-  ctx.translate(2 * (hexWidth * 0.75 + gap), -1 * (hexHeight + gap));
 
   // 使用静态数据作为基础，结合 validData 处理颜色和状态
   // 1. 准备数据
@@ -624,6 +695,7 @@ const drawCanvasContent = () => {
       }
     });
   }
+  ctx.restore();
 };
 const resizeAndRedraw = () => {
   if (!legionWarMapDom.value) return;
@@ -641,36 +713,17 @@ const resizeAndRedraw = () => {
   canvas.width = w * dpr;
   canvas.height = h * dpr;
 
-  // 根据容器大小动态计算合适的 hexSize
-  // 地图尺寸: 41列 * 41行
-  const cols = 41;
-  const rows = 41;
+  if (w <= 0 || h <= 0) return;
 
-  // 计算可用空间下最大的 hexSize
-  // 宽度公式: w = cols * (1.5 * s + gap) + 0.5 * s
-  // 高度公式: h = rows * (sqrt(3) * s + gap) + sqrt(3)/2 * s
-
-  // 简化计算 (减少边距以最大化显示)
-  const padding = 10;
-  const availableW = w - padding * 2;
-  const availableH = h - padding * 2;
-
-  const sizeW = (availableW - (cols - 1) * gap) / (cols * 1.5 + 0.5);
-  const sizeH =
-    (availableH - (rows - 1) * gap) / (rows * Math.sqrt(3) + Math.sqrt(3) / 2);
-
-  // 取较小值以确保完整显示
-  hexSize = Math.min(sizeW, sizeH);
-
-  // 限制最大最小尺寸，避免极端情况
-  hexSize = Math.max(12, Math.min(hexSize, 30));
-
-  // 更新依赖变量
+  const fitted = fitMap(w, h);
+  hexSize = fitted.size;
+  mapOffsetX = fitted.offsetX;
+  mapOffsetY = fitted.offsetY;
   hexWidth = 2 * hexSize;
   hexHeight = Math.sqrt(3) * hexSize;
 
   if (ctx) {
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawCanvasContent();
   }
 };
@@ -709,6 +762,10 @@ const initializeCanvas = async () => {
     resizeHandler = () => resizeAndRedraw();
     window.addEventListener("resize", resizeHandler);
   }
+  if (!resizeObserver && canvas.parentElement) {
+    resizeObserver = new ResizeObserver(() => resizeAndRedraw());
+    resizeObserver.observe(canvas.parentElement);
+  }
 
   resizeAndRedraw();
   return true;
@@ -736,15 +793,28 @@ onUnmounted(() => {
     window.removeEventListener("resize", resizeHandler);
     resizeHandler = null;
   }
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
   legionWarStore.disconnect();
 });
 </script>
 
 <style scoped lang="scss">
 .legion-war-map-container {
-  padding: 8px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
 
   .legion-war-map-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     background: #fff;
     border-radius: 8px;
     box-shadow:
@@ -771,6 +841,7 @@ onUnmounted(() => {
     }
 
     .header-section {
+      flex: none;
       padding: 16px;
       display: flex;
       justify-content: space-between;
@@ -823,14 +894,18 @@ onUnmounted(() => {
 
     .main-content-layout {
       position: relative;
-      width: 100%;
-      height: 960px;
       display: flex;
+      flex: 1;
+      width: 100%;
+      height: auto;
+      min-height: 0;
       overflow: hidden;
 
       .map-container-wrapper {
         flex: 1;
-        height: 100%;
+        height: auto;
+        min-width: 0;
+        min-height: 0;
         position: relative;
         background-color: #f5f5f5;
         overflow: hidden;
@@ -838,6 +913,7 @@ onUnmounted(() => {
         .map-container {
           width: 100%;
           height: 100%;
+          min-height: 0;
 
           .mapCanvas {
             width: 100%;
@@ -870,8 +946,9 @@ onUnmounted(() => {
       }
 
       .side-info-panel {
-        width: 300px;
+        width: 280px;
         height: 100%;
+        flex: none;
         background: #fff;
         border-left: 1px solid #eee;
         display: flex;
@@ -999,19 +1076,17 @@ onUnmounted(() => {
 }
 
 // 响应式调整
-@media (max-width: 768px) {
-  .header-section {
+@media (max-width: 900px) {
+  .legion-war-map-container .legion-war-map-card .main-content-layout {
     flex-direction: column;
-    align-items: flex-start;
-
-    .stats-section {
-      width: 100%;
-      justify-content: space-between;
-    }
   }
 
-  .map-container-wrapper {
-    height: 400px !important;
+  .legion-war-map-container .legion-war-map-card .side-info-panel {
+    width: 100%;
+    height: 168px;
+    border-left: 0;
+    border-top: 1px solid #eee;
+    box-shadow: none;
   }
 }
 </style>
