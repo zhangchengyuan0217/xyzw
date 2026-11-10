@@ -137,6 +137,16 @@
               }}</b>
             </div>
             <div class="member-stat">
+              <span>宠物等级</span>
+              <b>{{
+                player.detailReady
+                  ? player.pet?.level
+                    ? `Lv.${player.pet.level}`
+                    : "—"
+                  : "…"
+              }}</b>
+            </div>
+            <div class="member-stat">
               <span>红淬</span>
               <b class="red-quench">{{
                 player.detailReady ? player.redQuench : "…"
@@ -1961,7 +1971,7 @@ onMounted(() => {
 
 .member-stats {
   display: grid;
-  grid-template-columns: 64px 72px 48px;
+  grid-template-columns: 64px 72px 64px 48px;
   flex: 0 0 auto;
   gap: 6px;
 }
