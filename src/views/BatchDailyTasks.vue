@@ -27,6 +27,24 @@
               停止
             </n-button>
           </div>
+          <div v-if="showBatchProgress" class="batch-progress">
+            <div class="batch-progress-title">{{ batchProgressLabel }}</div>
+            <n-progress
+              type="line"
+              :percentage="batchProgressPercent"
+              :height="16"
+              indicator-placement="inside"
+              :processing="isRunning"
+            />
+            <div
+              v-for="item in activeProgressItems"
+              :key="item.id"
+              class="batch-progress-item"
+            >
+              <span class="name">{{ item.name }}</span>
+              <span class="step">{{ item.step }}</span>
+            </div>
+          </div>
           <n-dropdown :options="moreOptions" trigger="click" @select="handleMore">
             <n-button block quaternary>更多</n-button>
           </n-dropdown>
@@ -657,9 +675,9 @@
           </template>
           <n-progress
             type="line"
-            :percentage="currentProgress"
+            :percentage="batchProgressPercent"
             indicator-placement="inside"
-            processing
+            :processing="isRunning"
           />
           <div class="log-container" ref="logContainer">
             <div
@@ -5572,7 +5590,7 @@ const saveTaskTemplate = () => {
 };
 
 const currentRunningTokenId = ref(null);
-const currentProgress = ref(0);
+const tokenRunProgress = ref({});
 const logs = ref([]);
 const logContainer = ref(null);
 const autoScrollLog = ref(true);
@@ -5592,6 +5610,69 @@ const currentRunningTokenName = computed(() => {
   const t = tokens.value.find((x) => x.id === currentRunningTokenId.value);
   return t ? t.name : "";
 });
+
+const finishedTokenStatuses = ["completed", "failed", "pending", "stopped"];
+
+const batchProgressStats = computed(() => {
+  const ids = selectedTokens.value;
+  let finished = 0;
+  let queued = 0;
+  let active = 0;
+  for (const id of ids) {
+    const status = tokenStatus.value[id];
+    if (finishedTokenStatuses.includes(status)) finished += 1;
+    else if (status === "running") {
+      if (tokenRunProgress.value[id]?.active) active += 1;
+      else queued += 1;
+    }
+  }
+  return { total: ids.length, finished, queued, active };
+});
+
+const batchProgressPercent = computed(() => {
+  const { total, finished } = batchProgressStats.value;
+  return total ? Math.round((finished / total) * 100) : 0;
+});
+
+const showBatchProgress = computed(
+  () => isRunning.value || batchProgressStats.value.finished > 0,
+);
+
+const batchProgressLabel = computed(() => {
+  const { finished, total, queued, active } = batchProgressStats.value;
+  const head = isRunning.value
+    ? `进度 ${finished}/${total}`
+    : `本轮结束 ${finished}/${total}`;
+  const details = [];
+  if (active) details.push(`正在执行 ${active} 个`);
+  if (isRunning.value && queued) details.push(`排队 ${queued} 个`);
+  return details.length ? `${head} · ${details.join(" · ")}` : head;
+});
+
+const activeProgressItems = computed(() =>
+  selectedTokens.value
+    .filter(
+      (id) =>
+        tokenStatus.value[id] === "running" && tokenRunProgress.value[id]?.active,
+    )
+    .map((id) => {
+      const progress = tokenRunProgress.value[id] || {};
+      const percent =
+        progress.percent == null ? "" : `每日任务 ${progress.percent}%`;
+      return {
+        id,
+        name: tokens.value.find((token) => token.id === id)?.name || "账号",
+        step: [percent, progress.step].filter(Boolean).join(" · ") || "执行中",
+      };
+    }),
+);
+
+const setTokenRunProgress = (tokenId, patch) => {
+  tokenRunProgress.value = {
+    ...tokenRunProgress.value,
+    [tokenId]: { ...(tokenRunProgress.value[tokenId] || {}), ...patch },
+  };
+};
 
 // Selection logic
 const isAllSelected = computed(
@@ -6174,6 +6255,8 @@ const startBatch = async () => {
 
   isRunning.value = true;
   shouldStop.value = false;
+  tokenRunProgress.value = {};
+  currentRunningTokenId.value = null;
 
   // Reset status
   selectedTokens.value.forEach((id) => {
@@ -6185,6 +6268,7 @@ const startBatch = async () => {
     if (shouldStop.value) return;
 
     tokenStatus.value[tokenId] = "running";
+    setTokenRunProgress(tokenId, { step: "排队中", percent: null, active: false });
 
     const token = tokens.value.find((t) => t.id === tokenId);
     if (!token) {
@@ -6206,20 +6290,29 @@ const startBatch = async () => {
       await ensureConnection(tokenId, 2, (owned) => {
         ownsSlot = owned;
       });
+      currentRunningTokenId.value = tokenId;
+      setTokenRunProgress(tokenId, { step: "开始执行任务", active: true });
       const runner = new DailyTaskRunner(tokenStore, {
         commandDelay: batchSettings.commandDelay,
         taskDelay: batchSettings.taskDelay,
       });
       const result = await runner.run(tokenId, {
         shouldStop: () => shouldStop.value,
-        onLog: (log) =>
-          addLog({ ...log, message: `${token.name}: ${log.message}` }),
-        onProgress: (progress) =>
+        onLog: (log) => {
+          addLog({ ...log, message: `${token.name}: ${log.message}` });
+          if (log?.message) {
+            currentRunningTokenId.value = tokenId;
+            setTokenRunProgress(tokenId, { step: log.message, active: true });
+          }
+        },
+        onProgress: (progress) => {
+          setTokenRunProgress(tokenId, { percent: progress, active: true });
           addLog({
             time: new Date().toLocaleTimeString(),
             message: `${token.name}: 服务器每日任务完成并领奖 ${progress}%`,
             type: "info",
-          }),
+          });
+        },
       });
       tokenStatus.value[tokenId] = result.incomplete ? "pending" : "completed";
       addLog({
@@ -6343,6 +6436,48 @@ const stopBatch = () => {
 
 .primary-actions :deep(.n-button) {
   width: 100%;
+}
+
+.batch-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e6e9f5;
+}
+
+.batch-progress-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.batch-progress-item {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.batch-progress-item .name {
+  flex: 0 0 auto;
+  max-width: 40%;
+  overflow: hidden;
+  color: #5b6ee1;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-progress-item .step {
+  min-width: 0;
+  overflow: hidden;
+  color: #64748b;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .config-upload {
