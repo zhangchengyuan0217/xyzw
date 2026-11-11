@@ -13,6 +13,24 @@
       >
         {{ shidianSpeedEnabled ? `十殿加速 ${SHIDIAN_SPEED_RATE}倍` : "十殿加速" }}
       </button>
+      <button
+        class="speed-toggle capture-toggle"
+        :class="{ 'is-on': captureRecording }"
+        type="button"
+        :aria-pressed="captureRecording"
+        title="周日 18:00 到 20:30 打开记录，进入蟠桃园战场并停留一会儿，再手动点一次上船。这里只记录，不会自动上船。"
+        @click="toggleCapture"
+      >
+        {{ captureRecording ? `记录中 ${capturePending}` : "记录上船" }}
+      </button>
+      <button
+        class="speed-toggle"
+        type="button"
+        title="导出船列表、上船命令和战场推送，把文件发回来"
+        @click="exportCapture"
+      >
+        导出记录
+      </button>
       <span class="toolbar-count">{{ frames.length }} 个窗口</span>
       <span
         v-if="skippedSummary"
@@ -181,6 +199,16 @@ import {
   resolveMultiGameFrameMessage,
 } from "@/utils/gameLauncher";
 import {
+  acceptPeachCaptureEvent,
+  downloadPeachCapture,
+  injectPeachCapture,
+  isPeachCaptureEventMessage,
+  isPeachCaptureReadyMessage,
+  peachCapturePendingCount,
+  postPeachCapture,
+  setPeachCaptureRecording,
+} from "@/utils/peachBoardCapture";
+import {
   injectShidianSpeed,
   isShidianSpeedReadyMessage,
   postShidianSpeed,
@@ -192,6 +220,8 @@ import {
 const router = useRouter();
 const FRAME_LOAD_TIMEOUT_MS = 45_000;
 const shidianSpeedEnabled = ref(readShidianSpeedEnabled());
+const captureRecording = ref(false);
+const capturePending = ref(peachCapturePendingCount());
 const launch = ref(readLaunchSafely());
 const gameStrip = ref(null);
 const movingFrame = ref(false);
@@ -434,9 +464,14 @@ function sendFrameSpeed(frameWindow) {
   postShidianSpeed(frameWindow, shidianSpeedEnabled.value);
 }
 
+function sendFrameCapture(frameWindow) {
+  postPeachCapture(frameWindow, captureRecording.value);
+}
+
 function onFrameLoad(scopeId) {
   const frameWindow = frameElements.get(scopeId)?.contentWindow;
   injectShidianSpeed(frameWindow, () => sendFrameSpeed(frameWindow));
+  injectPeachCapture(frameWindow, () => sendFrameCapture(frameWindow));
 }
 
 function broadcastShidianSpeed() {
@@ -451,12 +486,45 @@ function toggleShidianSpeed() {
   broadcastShidianSpeed();
 }
 
+function broadcastCapture() {
+  for (const frame of frameElements.values()) {
+    sendFrameCapture(frame.contentWindow);
+  }
+}
+
+function toggleCapture() {
+  captureRecording.value = !captureRecording.value;
+  setPeachCaptureRecording(captureRecording.value);
+  broadcastCapture();
+}
+
+function exportCapture() {
+  const result = downloadPeachCapture();
+  capturePending.value = peachCapturePendingCount();
+  if (!result.ok) {
+    // eslint-disable-next-line no-alert -- Preserve the existing native notification or confirmation flow.
+    window.alert("还没有记录。先打开记录，再手动点一次上船。");
+  }
+}
+
+function isKnownFrame(source) {
+  for (const frame of frameElements.values()) {
+    if (frame.contentWindow === source) return true;
+  }
+  return false;
+}
+
 function handleMessage(event) {
-  if (
-    event.origin === window.location.origin &&
-    isShidianSpeedReadyMessage(event.data)
-  ) {
-    postShidianSpeed(event.source, shidianSpeedEnabled.value);
+  if (event.origin === window.location.origin && isKnownFrame(event.source)) {
+    if (isShidianSpeedReadyMessage(event.data)) {
+      postShidianSpeed(event.source, shidianSpeedEnabled.value);
+    }
+    if (isPeachCaptureReadyMessage(event.data)) {
+      postPeachCapture(event.source, captureRecording.value);
+    }
+    if (isPeachCaptureEventMessage(event.data)) {
+      capturePending.value = acceptPeachCaptureEvent(event.data.event);
+    }
   }
 
   const result = resolveMultiGameFrameMessage({
@@ -547,6 +615,13 @@ onUnmounted(() => {
 
 .speed-toggle.is-on:hover {
   background: #92400e;
+}
+
+.capture-toggle.is-on,
+.capture-toggle.is-on:hover {
+  border-color: #34d399;
+  color: #d1fae5;
+  background: #065f46;
 }
 
 .toolbar-button:hover,
