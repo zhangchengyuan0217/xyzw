@@ -325,6 +325,7 @@ export function registerDefaultCommands(reg) {
 
     // 武将升级相关
     .register("hero_heroupgradelevel") //武将升级
+    .register("hero_batchsetlevel") //武将等级一键调整
     .register("hero_heroupgradeorder") //武将进阶
     .register("hero_rebirth") //武将重新birth
 
@@ -1267,6 +1268,7 @@ export class XyzwWebSocketClient {
       // 升星相关响应映射
       hero_heroupgradestarresp: "hero_heroupgradestar",
       hero_heroupgradelevelresp: "hero_heroupgradelevel",
+      hero_batchsetlevelresp: "hero_batchsetlevel",
       hero_heroupgradeorderresp: "hero_heroupgradeorder",
       book_upgraderesp: "book_upgrade",
       book_claimpointrewardresp: "book_claimpointreward",
@@ -1333,6 +1335,7 @@ export class XyzwWebSocketClient {
         "artifact_exchange",
         "hero_exchange",
         "hero_rebirth",
+        "hero_batchsetlevel",
       ],
     };
 

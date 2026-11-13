@@ -235,7 +235,7 @@ const saveCurrent = async () => {
     lineup.roleId = roleId.value;
     lineups.value = [lineup, ...lineups.value];
     persist();
-    message.success("已保存当前阵容，可以再改名称");
+    message.success(`已保存第${lineup.teamId}阵容，可以再改名称`);
     rename(lineup);
   } catch (error) {
     message.error(`保存失败：${error?.message || "未知错误"}`);
@@ -313,7 +313,7 @@ const sync = async (lineup) => {
     if (errors.length) {
       message.warning(`同步结束，${errors.length} 步失败：${errors.slice(0, 3).join("；")}`);
     } else {
-      message.success(`「${lineup.name}」已同步到当前阵容`);
+      message.success(`「${lineup.name}」已同步到第${lineup.teamId}阵容`);
     }
   } catch (error) {
     message.error(`同步失败：${error?.message || "未知错误"}`);

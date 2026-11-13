@@ -8,30 +8,6 @@ import {
 
 const COMMAND_DELAY = 500;
 
-const LEVEL_ORDER_THRESHOLDS = [
-  { level: 100, order: 1 },
-  { level: 200, order: 2 },
-  { level: 300, order: 3 },
-  { level: 500, order: 4 },
-  { level: 700, order: 5 },
-  { level: 900, order: 6 },
-  { level: 1100, order: 7 },
-  { level: 1300, order: 8 },
-  { level: 1500, order: 9 },
-  { level: 1800, order: 10 },
-  { level: 2100, order: 11 },
-  { level: 2400, order: 12 },
-  { level: 2800, order: 13 },
-  { level: 3200, order: 14 },
-  { level: 3600, order: 15 },
-  { level: 4000, order: 16 },
-  { level: 4500, order: 17 },
-  { level: 5000, order: 18 },
-  { level: 5500, order: 19 },
-];
-
-const UPGRADE_OPTIONS = [50, 10, 5, 1];
-
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const storageKeyFor = (roleId) => `cloud_lineups_${roleId}`;
@@ -120,6 +96,7 @@ export const buildCloudLineup = ({ role, preset, name }) => {
     id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
     name,
     roleId: String(role?.roleId || role?.id || ""),
+    // 保存来源槽。同步时只改这一槽，不改其他槽。
     teamId: useTeamId || 1,
     savedAt: Date.now(),
     weaponId: team?.weapon?.weaponId ?? null,
@@ -142,22 +119,6 @@ export const lineupSlots = (heroes = []) => {
     label: labels[slot] || `位${slot}`,
     hero: bySlot.get(slot) || null,
   }));
-};
-
-const getOrder = (level) => {
-  let order = 0;
-  for (const threshold of LEVEL_ORDER_THRESHOLDS) {
-    if (level >= threshold.level) order = threshold.order;
-    else break;
-  }
-  return order;
-};
-
-const getNextOrderLevel = (currentLevel) => {
-  for (const threshold of LEVEL_ORDER_THRESHOLDS) {
-    if (currentLevel < threshold.level) return threshold.level;
-  }
-  return null;
 };
 
 const createReporter = (onProgress) => {
@@ -199,6 +160,49 @@ const sendCmd = async (tokenStore, tokenId, cmd, params, errors, label) => {
     await delay(COMMAND_DELAY);
     return null;
   }
+};
+
+const sendCmdRequired = async (tokenStore, tokenId, cmd, params, label) => {
+  try {
+    const result = await tokenStore.sendMessageWithPromise(
+      tokenId,
+      cmd,
+      params || {},
+      12000,
+    );
+    await delay(COMMAND_DELAY);
+    return result;
+  } catch (error) {
+    throw new Error(`${label}：${error?.message || "失败"}`);
+  }
+};
+
+const activeTeamIdOf = (preset) =>
+  Number(preset?.presetTeamInfo?.useTeamId ?? preset?.useTeamId ?? 0);
+
+// 上下阵只作用于当前正在使用的槽。先切到保存时的槽，改完再切回去。
+const activateLineupSlot = async (tokenStore, tokenId, lineup) => {
+  const preset = await sendCmdRequired(
+    tokenStore,
+    tokenId,
+    "presetteam_getinfo",
+    {},
+    "读取阵容",
+  );
+  const currentTeamId = activeTeamIdOf(preset) || 1;
+  const targetTeamId = Number(lineup.teamId);
+  if (!Number.isInteger(targetTeamId) || targetTeamId <= 0) {
+    throw new Error("这份阵容没有记录阵容槽，已停止同步");
+  }
+  if (currentTeamId === targetTeamId) return null;
+  await sendCmdRequired(
+    tokenStore,
+    tokenId,
+    "presetteam_saveteam",
+    { teamId: targetTeamId },
+    `切换到阵容${targetTeamId}`,
+  );
+  return currentTeamId;
 };
 
 const readRole = async (tokenStore, tokenId, errors) => {
@@ -326,92 +330,25 @@ const syncFormation = async (tokenStore, tokenId, lineup, errors, progress) => {
 const syncLevels = async (tokenStore, tokenId, lineup, errors, progress) => {
   const role = await readRole(tokenStore, tokenId, errors);
   const heroes = role.heroes || {};
+  const levelMap = new Map();
   for (const target of lineup.heroes || []) {
-    if (!target.level || target.level <= 0) continue;
+    const targetLevel = Number(target.level || 0);
+    if (targetLevel <= 0) continue;
     const owned = heroes[String(target.heroId)] || {};
-    let level = Number(owned.level || 1);
-    let order = Number(owned.order || 0);
-    if (level === target.level) continue;
-
-    if (level > target.level) {
-      await progress.run(`重生武将 ${target.heroId}`, async () => {
-        await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_gobackbattle",
-          { slot: target.slot },
-          errors,
-          "重生前下阵",
-        );
-        const result = await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_rebirth",
-          { heroId: target.heroId },
-          errors,
-          "重生",
-        );
-        const reborn = result?.role?.heroes?.[String(target.heroId)];
-        level = Number(reborn?.level ?? 1);
-        order = Number(reborn?.order ?? 0);
-        await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_gointobattle",
-          { heroId: target.heroId, slot: target.slot },
-          errors,
-          "重生后上阵",
-        );
-      });
-    }
-
-    const expectedOrder = getOrder(level);
-    if (order < expectedOrder) {
-      await progress.run(`武将进阶`, async () => {
-        const result = await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_heroupgradeorder",
-          { heroId: target.heroId },
-          errors,
-          "进阶",
-        );
-        order = Number(result?.role?.heroes?.[target.heroId]?.order ?? expectedOrder);
-      });
-    }
-
-    while (level < target.level) {
-      const nextOrderLevel = getNextOrderLevel(level);
-      const stepLimit = Math.min(
-        nextOrderLevel ? nextOrderLevel - level : target.level - level,
-        target.level - level,
-      );
-      const upgradeNum = UPGRADE_OPTIONS.find((num) => num <= stepLimit) || 1;
-      await progress.run(`升级到 ${level + upgradeNum}`, async () => {
-        const result = await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_heroupgradelevel",
-          { heroId: target.heroId, upgradeNum },
-          errors,
-          "升级",
-        );
-        if (result) level += upgradeNum;
-        else level = target.level;
-      });
-      if (!nextOrderLevel || level < nextOrderLevel) continue;
-      await progress.run(`武将进阶`, () =>
-        sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_heroupgradeorder",
-          { heroId: target.heroId },
-          errors,
-          "进阶",
-        ),
-      );
-    }
+    if (Number(owned.level || 0) === targetLevel) continue;
+    levelMap.set(Number(target.heroId), targetLevel);
   }
+  if (levelMap.size === 0) return;
+  await progress.run(`调整 ${levelMap.size} 名武将等级`, () =>
+    sendCmd(
+      tokenStore,
+      tokenId,
+      "hero_batchsetlevel",
+      { levelMap },
+      errors,
+      "调整武将等级",
+    ),
+  );
 };
 
 const syncFishAndPearls = async (tokenStore, tokenId, lineup, errors, progress) => {
@@ -639,13 +576,55 @@ const syncResearch = async (tokenStore, tokenId, lineup, errors, progress) => {
 export const applyCloudLineup = async (tokenStore, tokenId, lineup, onProgress) => {
   const errors = [];
   const progress = createReporter(onProgress);
-  await progress.run("读取当前阵容", () => readTeam(tokenStore, tokenId, errors));
-  await syncFormation(tokenStore, tokenId, lineup, errors, progress);
-  await syncLevels(tokenStore, tokenId, lineup, errors, progress);
-  await syncFishAndPearls(tokenStore, tokenId, lineup, errors, progress);
-  await syncPet(tokenStore, tokenId, lineup, errors, progress);
-  await syncWeapon(tokenStore, tokenId, lineup, errors, progress);
-  await syncResearch(tokenStore, tokenId, lineup, errors, progress);
+  let restoreTeamId = null;
+  let failure = null;
+  try {
+    await progress.run(`切换到第${lineup.teamId || "?"}阵容`, async () => {
+      restoreTeamId = await activateLineupSlot(tokenStore, tokenId, lineup);
+      if (!restoreTeamId) return;
+      const confirmed = await sendCmdRequired(
+        tokenStore,
+        tokenId,
+        "presetteam_getinfo",
+        {},
+        "确认阵容槽",
+      );
+      const activeTeamId = activeTeamIdOf(confirmed);
+      if (activeTeamId !== Number(lineup.teamId)) {
+        throw new Error(
+          `当前仍是阵容${activeTeamId || "未知"}，没有切到阵容${lineup.teamId}`,
+        );
+      }
+    });
+    await syncFormation(tokenStore, tokenId, lineup, errors, progress);
+    await syncLevels(tokenStore, tokenId, lineup, errors, progress);
+    await syncFishAndPearls(tokenStore, tokenId, lineup, errors, progress);
+    await syncPet(tokenStore, tokenId, lineup, errors, progress);
+    await syncWeapon(tokenStore, tokenId, lineup, errors, progress);
+    await syncResearch(tokenStore, tokenId, lineup, errors, progress);
+  } catch (error) {
+    failure = error;
+  } finally {
+    if (restoreTeamId) {
+      try {
+        await sendCmdRequired(
+          tokenStore,
+          tokenId,
+          "presetteam_saveteam",
+          { teamId: restoreTeamId },
+          `切回阵容${restoreTeamId}`,
+        );
+      } catch (error) {
+        const restoreError = error?.message || `切回阵容${restoreTeamId}失败`;
+        if (failure) {
+          failure = new Error(`${failure.message}；${restoreError}`);
+        } else {
+          errors.push(restoreError);
+        }
+      }
+    }
+  }
+  if (failure) throw failure;
   progress.done(errors.length ? "同步结束，有部分步骤失败" : "同步完成");
   return errors;
 };
