@@ -1,185 +1,167 @@
 <template>
-  <div class="status-card tower-status weird-tower">
-    <div class="card-header">
-      <img
-        src="/icons/1733492491706152.png"
-        alt="怪异塔图标"
-        class="status-icon"
-      />
-      <div class="status-info">
+  <div class="weird-tower-page">
+    <section class="panel">
+      <div class="panel-head">
+        <img
+          src="/icons/1733492491706152.png"
+          alt="怪异塔图标"
+          class="status-icon"
+        />
         <h3>怪异塔</h3>
-        <p>一个不小心就过了</p>
+        <span class="status-badge" :class="{ ready: statusReady }">{{
+          statusText
+        }}</span>
       </div>
-      <div class="energy-display">
-        <img src="/icons/xiaoyugan.png" alt="小鱼干" class="energy-icon" />
-        <span class="energy-count">{{ towerEnergy }}</span>
-        <button
-          class="buy-energy-button"
-          :class="{
-            disabled: isBuying || isClimbing || isUsingItems || isMerging,
-          }"
-          :disabled="isBuying || isClimbing || isUsingItems || isMerging"
-          @click="openBuyEnergyDialog"
-        >
-          购买
-        </button>
-      </div>
-    </div>
 
-    <!-- 购买小鱼干弹窗：Teleport 到 body，脱离 n-tabs animated 的 transform 包含块，
-         否则 position: fixed 会失效导致弹窗跟随鼠标移动 -->
-    <Teleport to="body">
-      <div
-        v-if="showBuyEnergyDialog"
-        class="buy-energy-mask"
-        @click.self="closeBuyEnergyDialog"
-      >
-        <div class="buy-energy-dialog" @click.stop>
-          <div class="dialog-header">
-            <h3>购买小鱼干</h3>
-            <button class="dialog-close" @click="closeBuyEnergyDialog">
-              ×
-            </button>
-          </div>
-          <div class="dialog-body">
-            <div class="dialog-row">
-              <span class="row-label">购买数量</span>
-              <div class="num-selector">
-                <button class="num-btn" @click="changeBuyNum(-1)">-</button>
-                <input
-                  v-model.number="buyEnergyNum"
-                  type="number"
-                  min="1"
-                  max="100"
-                  class="num-input"
-                  @blur="clampBuyNum"
-                />
-                <button class="num-btn" @click="changeBuyNum(1)">+</button>
-              </div>
-            </div>
-            <div class="dialog-row">
-              <span class="row-label">快捷选择</span>
-              <div class="quick-btns">
-                <button
-                  v-for="n in [1, 10, 50, 100]"
-                  :key="n"
-                  class="quick-btn"
-                  @click="buyEnergyNum = n"
-                >
-                  {{ n }}
-                </button>
-              </div>
-            </div>
-            <div class="dialog-hint">
-              消耗
-              <svg class="gold-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <defs>
-                  <linearGradient id="goldFace" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#FFE082" />
-                    <stop offset="55%" stop-color="#FFC107" />
-                    <stop offset="100%" stop-color="#E6A117" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 1.6 22 6.2 12 10.8 2 6.2Z"
-                  fill="url(#goldFace)"
-                  stroke="#B07600"
-                  stroke-width="1.1"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M2 6.2V17.8L12 22.4V10.8Z"
-                  fill="#F9A825"
-                  stroke="#B07600"
-                  stroke-width="1.1"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M22 6.2V17.8L12 22.4V10.8Z"
-                  fill="#EFB218"
-                  stroke="#B07600"
-                  stroke-width="1.1"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              金砖，每次购买 1-100 份小鱼干
-            </div>
-          </div>
-          <div class="dialog-footer">
-            <button class="btn-cancel" @click="closeBuyEnergyDialog">
-              取消
-            </button>
-            <button
-              class="btn-confirm"
-              :class="{ disabled: buyEnergyNum < 1 || buyEnergyNum > 100 }"
-              :disabled="buyEnergyNum < 1 || buyEnergyNum > 100"
-              @click="confirmBuyEnergy"
-            >
-              确认购买
-            </button>
-          </div>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">小鱼干</span>
+          <span class="stat-value">{{ towerEnergy }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">当前层数</span>
+          <span class="stat-value">{{ displayFloor }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">胜/败</span>
+          <span class="stat-value">{{ winCount }}/{{ loseCount }}</span>
         </div>
       </div>
-    </Teleport>
 
-    <div class="card-content">
-      <div class="tower-floor">
-        <span class="label">当前层数</span>
-        <span class="floor-number">{{ displayFloor }}</span>
+      <div class="action-row">
+        <button
+          class="primary-button"
+          :disabled="!canClimb"
+          @click="startTowerClimb"
+        >
+          {{ isClimbing ? "爬塔中..." : "开始爬塔" }}
+        </button>
+        <button
+          class="ghost-button"
+          :disabled="refreshing || isClimbing"
+          @click="refreshTower"
+        >
+          刷新
+        </button>
       </div>
-    </div>
-
-    <div class="card-actions">
-      <div class="climb-action-row">
+      <div class="climb-limit">
+        <span>本次最多</span>
         <input
           v-model.number="maxClimbInput"
-          class="climb-limit-input"
           type="number"
           min="1"
           step="1"
           aria-label="怪异塔爬塔次数"
           :disabled="isClimbing || isUsingItems || isMerging"
         />
-        <span class="climb-limit-unit">次</span>
-        <button
-          class="climb-button"
-          :class="[
-            {
-              active: canClimb,
-              disabled: !canClimb,
-            },
-          ]"
-          :disabled="!canClimb"
-          @click="startTowerClimb"
-        >
-          {{ isClimbing ? "爬塔中..." : "开始爬塔" }}
-        </button>
+        <span>次</span>
       </div>
-
-      <!-- 停止批量爬塔按钮，仅批量时显示 -->
       <button v-if="isClimbing" class="stop-button" @click="stopClimbing">
         停止爬塔
       </button>
+    </section>
 
-      <button
-        v-if="!isClimbing && !isUsingItems && !isMerging"
-        class="climb-button active"
-        @click="startUseItems"
-      >
-        一键使用道具
-      </button>
-      <button v-if="isUsingItems" class="stop-button" @click="stopUsingItems">
-        停止使用
-      </button>
+    <section class="panel">
+      <h3 class="section-title">购买小鱼干</h3>
+      <div class="preset-row">
+        <button
+          v-for="n in buyPresets"
+          :key="n"
+          type="button"
+          class="preset-button"
+          :class="{ active: buyEnergyNum === n }"
+          :disabled="buyLocked"
+          @click="buyEnergyNum = n"
+        >
+          {{ n }}个
+        </button>
+      </div>
+      <div class="buy-row">
+        <input
+          v-model.number="buyEnergyNum"
+          class="qty-input"
+          type="number"
+          min="1"
+          max="100"
+          aria-label="购买数量"
+          :disabled="buyLocked"
+          @blur="clampBuyNum"
+        />
+        <button
+          class="buy-button"
+          :disabled="buyLocked || buyEnergyNum < 1 || buyEnergyNum > 100"
+          @click="confirmBuyEnergy"
+        >
+          {{ isBuying ? "购买中" : "购买" }}
+        </button>
+      </div>
+    </section>
 
-      <button
-        v-if="!isClimbing && !isUsingItems && !isMerging"
-        class="climb-button active"
-        @click="autoMergeItems"
-      >
-        {{ isMerging ? "合成中..." : "一键合成" }}
-      </button>
-    </div>
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h3 class="section-title">阵容切换</h3>
+          <p class="section-sub">当前阵容：阵容{{ currentTeam }}</p>
+        </div>
+        <button
+          class="ghost-button small"
+          :disabled="teamLoading || switchingTeam"
+          @click="loadTeams(true)"
+        >
+          获取阵容
+        </button>
+      </div>
+      <div class="team-row">
+        <button
+          v-for="team in teamCards"
+          :key="team.id"
+          type="button"
+          class="team-card"
+          :class="{ active: team.active }"
+          :disabled="switchingTeam || teamLoading || isClimbing"
+          @click="selectTeam(team.id)"
+        >
+          <span class="team-name">阵容{{ team.id }}</span>
+          <span class="team-state">
+            {{ team.active ? `使用中 · 第${team.id}阵容` : `第${team.id}阵容` }}
+          </span>
+          <span class="team-heroes">
+            <img
+              v-for="hero in team.heroes"
+              v-show="hero.avatar"
+              :key="hero.id"
+              :src="hero.avatar"
+              :alt="hero.name"
+              :title="hero.name"
+            />
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3 class="section-title">道具</h3>
+      <div class="action-row">
+        <button
+          v-if="!isUsingItems"
+          class="ghost-button"
+          :disabled="isClimbing || isMerging"
+          @click="startUseItems"
+        >
+          一键使用道具
+        </button>
+        <button v-else class="stop-button inline" @click="stopUsingItems">
+          停止使用
+        </button>
+        <button
+          class="ghost-button"
+          :disabled="isClimbing || isUsingItems || isMerging"
+          @click="autoMergeItems"
+        >
+          {{ isMerging ? "合成中..." : "一键合成" }}
+        </button>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -190,6 +172,7 @@ import { useMessage } from "naive-ui";
 import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { isSameGameValue } from "@/utils/gameValue.js";
+import { HERO_DICT } from "@/utils/HeroList.js";
 import {
   DEFAULT_WEIRD_TOWER_MAX_CLIMB,
   normalizeWeirdTowerMaxClimb,
@@ -227,8 +210,15 @@ const isClimbing = ref(false);
 const isUsingItems = ref(false);
 const isMerging = ref(false);
 const isBuying = ref(false); // 购买小鱼干状态
-const showBuyEnergyDialog = ref(false); // 购买弹窗显示
 const buyEnergyNum = ref(1); // 购买数量（1-100）
+const buyPresets = [1, 10, 100];
+const refreshing = ref(false);
+const winCount = ref(0);
+const loseCount = ref(0);
+const teamLoading = ref(false);
+const switchingTeam = ref(false);
+const currentTeam = ref(1);
+const availableTeams = ref([1, 2, 3]);
 const maxClimbInput = ref(DEFAULT_WEIRD_TOWER_MAX_CLIMB);
 const climbTimeout = ref(null); // 用于超时重置状态
 const itemTimeout = ref(null); // 用于道具使用超时
@@ -289,38 +279,16 @@ const canClimb = computed(() => {
   return hasEnergy && notClimbing && notUsingItems && notMerging;
 });
 
+const buyLocked = computed(
+  () =>
+    isBuying.value || isClimbing.value || isUsingItems.value || isMerging.value,
+);
+
 // ==================== 购买小鱼干 ====================
 // 接口来源：逆向 game bundle (game/index.140bc.jsc) 解密后源码
 //   EvoTowerService.buyEnergy({ energy: N })
 // 对应 WebSocket 命令：evotower_buyenergy（命名规律 getInfo→evotower_getinfo）
 // 价格：ConstantConf.config.evoTowerEnergyPrice，支付货币：金砖
-
-const openBuyEnergyDialog = () => {
-  if (!tokenStore.selectedToken) {
-    message.warning("请先选择Token");
-    return;
-  }
-  if (
-    isClimbing.value ||
-    isUsingItems.value ||
-    isMerging.value ||
-    isBuying.value
-  ) {
-    message.warning("正在执行其他操作，请稍候");
-    return;
-  }
-  buyEnergyNum.value = 1;
-  showBuyEnergyDialog.value = true;
-};
-
-const closeBuyEnergyDialog = () => {
-  if (isBuying.value) return;
-  showBuyEnergyDialog.value = false;
-};
-
-const changeBuyNum = (delta) => {
-  buyEnergyNum.value = Math.max(1, Math.min(100, buyEnergyNum.value + delta));
-};
 
 const clampBuyNum = () => {
   if (!buyEnergyNum.value || buyEnergyNum.value < 1) buyEnergyNum.value = 1;
@@ -343,7 +311,6 @@ const confirmBuyEnergy = async () => {
   const beforeEnergy = towerEnergy.value;
 
   isBuying.value = true;
-  showBuyEnergyDialog.value = false;
   try {
     const res = await tokenStore.sendMessageWithPromise(
       tokenId,
@@ -742,6 +709,8 @@ const startTowerClimb = async () => {
       const currentEnergy = towerEnergy.value;
       if (currentEnergy <= 0) break;
 
+      const floorBefore = currentTowerId.value;
+
       // 准备战斗
       await tokenStore.sendMessageWithPromise(
         tokenId,
@@ -764,8 +733,13 @@ const startTowerClimb = async () => {
       climbCount++;
       message.success(`第${climbCount}次爬塔命令已发送`);
 
-      // 更新爬塔信息
+      // 更新爬塔信息，层数前进记胜，否则记败
       await getTowerInfo();
+      if (currentTowerId.value > floorBefore) {
+        winCount.value += 1;
+      } else {
+        loseCount.value += 1;
+      }
 
       // 检查并领取每日任务奖励
       const towerData = evoTowerInfo.value?.evoTower;
@@ -844,6 +818,140 @@ const startTowerClimb = async () => {
   isClimbing.value = false;
 };
 
+const refreshTower = async () => {
+  if (!tokenStore.selectedToken) {
+    message.warning("请先选择Token");
+    return;
+  }
+  refreshing.value = true;
+  try {
+    await getTowerInfo();
+    message.success("已刷新怪异塔");
+  } finally {
+    refreshing.value = false;
+  }
+};
+
+const presetTeamRaw = computed(() => tokenStore.gameData?.presetTeam ?? null);
+
+function normalizePresetTeam(raw) {
+  if (!raw) return { useTeamId: 1, teams: {} };
+  const root = raw.presetTeamInfo ?? raw;
+  const useTeamId = root.useTeamId ?? root.presetTeamInfo?.useTeamId ?? 1;
+  const dict = root.presetTeamInfo ?? root;
+  const teams = {};
+  const teamIds = Object.keys(dict || {}).filter((key) => /^\d+$/.test(key));
+  for (const idStr of teamIds) {
+    const node = dict[idStr];
+    if (node?.teamInfo) {
+      teams[Number(idStr)] = { teamInfo: node.teamInfo };
+    } else if (node && typeof node === "object") {
+      teams[Number(idStr)] = { teamInfo: node };
+    } else {
+      teams[Number(idStr)] = { teamInfo: {} };
+    }
+  }
+  return { useTeamId: Number(useTeamId) || 1, teams };
+}
+
+const presetTeam = computed(() => normalizePresetTeam(presetTeamRaw.value));
+
+function heroesOf(teamId) {
+  const team = presetTeam.value.teams[teamId]?.teamInfo;
+  if (!team) return [];
+  return Object.entries(team)
+    .map(([pos, hero]) => {
+      const hid = hero?.heroId ?? hero?.id;
+      if (!hid) return null;
+      const meta = HERO_DICT[Number(hid)];
+      const avatarPath = meta?.avatar;
+      return {
+        id: Number(hid),
+        name: meta?.name ?? `英雄${hid}`,
+        position: Number(pos),
+        avatar: avatarPath
+          ? import.meta.env.BASE_URL + String(avatarPath).replace(/^\//, "")
+          : "",
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.position - b.position);
+}
+
+const teamCards = computed(() =>
+  availableTeams.value.map((id) => ({
+    id,
+    active: currentTeam.value === id,
+    heroes: heroesOf(id),
+  })),
+);
+
+const syncTeams = () => {
+  const ids = Object.keys(presetTeam.value.teams)
+    .map(Number)
+    .filter((id) => !Number.isNaN(id))
+    .sort((a, b) => a - b);
+  availableTeams.value = ids.length ? ids : [1, 2, 3];
+  currentTeam.value = presetTeam.value.useTeamId || 1;
+};
+
+const loadTeams = async (force = false, quiet = false) => {
+  if (!tokenStore.selectedToken) {
+    message.warning("请先选择Token");
+    return;
+  }
+  if (!force && presetTeamRaw.value) {
+    syncTeams();
+    return;
+  }
+  teamLoading.value = true;
+  try {
+    const result = await tokenStore.sendMessageWithPromise(
+      tokenStore.selectedToken.id,
+      "presetteam_getinfo",
+      {},
+      8000,
+    );
+    tokenStore.$patch((state) => {
+      state.gameData = { ...(state.gameData ?? {}), presetTeam: result };
+    });
+    syncTeams();
+    if (force && !quiet) message.success("已获取阵容");
+  } catch (error) {
+    message.error(`获取阵容失败：${error?.message || error}`);
+  } finally {
+    teamLoading.value = false;
+  }
+};
+
+const selectTeam = async (teamId) => {
+  if (switchingTeam.value || teamLoading.value || currentTeam.value === teamId) {
+    return;
+  }
+  if (!tokenStore.selectedToken) {
+    message.warning("请先选择Token");
+    return;
+  }
+  const previous = currentTeam.value;
+  switchingTeam.value = true;
+  try {
+    await tokenStore.sendMessageWithPromise(
+      tokenStore.selectedToken.id,
+      "presetteam_saveteam",
+      { teamId },
+      8000,
+    );
+    currentTeam.value = teamId;
+    message.success(`已切换到阵容${teamId}`);
+    await loadTeams(true, true);
+  } catch (error) {
+    currentTeam.value = previous;
+    message.error(`切换阵容失败：${error?.message || error}`);
+  } finally {
+    switchingTeam.value = false;
+  }
+};
+
 const getTowerInfo = async () => {
   if (!tokenStore.selectedToken) {
     return;
@@ -919,12 +1027,25 @@ const wsStatus = computed(() => {
   return tokenStore.getWebSocketStatus(tokenStore.selectedToken.id);
 });
 
+const statusText = computed(() => {
+  if (!tokenStore.selectedToken || wsStatus.value !== "connected") return "未连接";
+  if (isClimbing.value) return "爬塔中";
+  if (isUsingItems.value) return "使用道具";
+  if (isMerging.value) return "合成中";
+  if (isBuying.value) return "购买中";
+  if (!isWeirdTowerActivityOpen.value) return "未开放";
+  return "就绪";
+});
+
+const statusReady = computed(() => statusText.value === "就绪");
+
 // 监听WebSocket连接状态，连接成功后自动获取塔信息
 watch(wsStatus, (newStatus, oldStatus) => {
   if (newStatus === "connected" && oldStatus !== "connected") {
     // 延迟一点时间让WebSocket完全就绪
     setTimeout(() => {
       getTowerInfo();
+      loadTeams(false);
     }, 1000);
   }
 });
@@ -938,6 +1059,7 @@ watch(
       const status = tokenStore.getWebSocketStatus(newToken.id);
       if (status === "connected") {
         getTowerInfo();
+        loadTeams(false);
       }
     }
   },
@@ -953,11 +1075,260 @@ onMounted(() => {
   // 组件挂载时获取塔信息
   if (tokenStore.selectedToken && wsStatus.value === "connected") {
     getTowerInfo();
+    loadTeams(false);
   }
 });
+
+watch(presetTeamRaw, syncTeams, { deep: true });
 </script>
 
 <style scoped lang="scss">
+.weird-tower-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.panel {
+  padding: 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-light);
+}
+
+.panel-head,
+.section-head,
+.action-row,
+.buy-row,
+.climb-limit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-head h3,
+.section-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.section-head {
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.section-sub {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.status-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.status-badge {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status-badge.ready {
+  color: #d48806;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 16px 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--border-light);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.action-row {
+  margin-top: 14px;
+}
+
+.primary-button,
+.ghost-button,
+.buy-button,
+.preset-button,
+.stop-button {
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  flex: 1.4;
+  border: 0;
+  background: #f5a623;
+  color: #fff;
+}
+
+.ghost-button,
+.preset-button,
+.buy-button {
+  flex: 1;
+  border: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.ghost-button.small {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.preset-button.active,
+.team-card.active {
+  border-color: #f5a623;
+  background: rgba(245, 166, 35, 0.12);
+  color: #d48806;
+}
+
+.primary-button:disabled,
+.ghost-button:disabled,
+.buy-button:disabled,
+.preset-button:disabled,
+.team-card:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.climb-limit {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.climb-limit input,
+.qty-input {
+  width: 72px;
+  height: 36px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 16px;
+}
+
+.qty-input {
+  flex: 1;
+  width: auto;
+}
+
+.preset-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.buy-row {
+  margin-top: 0;
+}
+
+.team-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(132px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 108px;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.team-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.team-state {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.team-heroes {
+  display: flex;
+  gap: 4px;
+  min-height: 28px;
+  margin-top: auto;
+}
+
+.team-heroes img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bg-primary);
+}
+
+.stop-button {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid #fecdd3;
+  background: #fff;
+  color: #e11d48;
+}
+
+.stop-button.inline {
+  width: auto;
+  margin-top: 0;
+}
+
 .stop-button {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);

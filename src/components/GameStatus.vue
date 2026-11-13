@@ -9,6 +9,7 @@
         activeSection === 'peachGroup',
       'club-mode': activeSection === 'club',
       'activity-mode': activeSection === 'activity',
+      'weird-tower-mode': activeSection === 'weirdTower',
       'camp-mode': activeSection === 'campChallengeGroup',
       'pvp-mode': activeSection === 'fightPvp',
     }"
@@ -22,8 +23,8 @@
     <!-- 咸将塔状态 -->
     <TowerStatus v-if="activeSection === 'daily' && isShowTowerStatus" />
 
-    <!-- 怪异塔状态 -->
-    <WeirdTowerStatus v-if="activeSection === 'daily'" />
+    <!-- 怪异塔单独成页 -->
+    <WeirdTowerStatus v-if="activeSection === 'weirdTower'" />
 
     <!-- 盐罐机器人状态（提取组件） -->
     <BottleHelperCard v-if="activeSection === 'daily'" />
@@ -794,7 +795,8 @@ onUnmounted(() => {
   padding: 12px;
 }
 
-.game-status-container.activity-mode {
+.game-status-container.activity-mode,
+.game-status-container.weird-tower-mode {
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 12px;

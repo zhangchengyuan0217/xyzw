@@ -271,6 +271,7 @@ const featureTab = {
   daily: "mine",
   club: "mine",
   activity: "mine",
+  "weird-tower": "mine",
   camp: "events",
   warrank: "events",
   "week-battle": "events",
@@ -299,6 +300,7 @@ const tabItems = {
     { kind: "feature", icon: Cube, ...featureById.daily },
     { kind: "feature", icon: Cube, ...featureById.club },
     { kind: "feature", icon: Cube, ...featureById.activity },
+    { kind: "feature", icon: Cube, ...featureById["weird-tower"] },
   ],
   events: [
     { kind: "label", id: "label-camp", title: "营地" },

@@ -18,6 +18,12 @@ export const gameFeatures = [
     section: "activity",
   },
   {
+    id: "weird-tower",
+    title: "怪异塔",
+    description: "爬塔、购买小鱼干和阵容切换",
+    section: "weirdTower",
+  },
+  {
     id: "camp",
     title: "营地挑战",
     description: "营地挑战",
