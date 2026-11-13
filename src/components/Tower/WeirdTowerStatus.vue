@@ -44,18 +44,6 @@
           刷新
         </button>
       </div>
-      <div class="climb-limit">
-        <span>本次最多</span>
-        <input
-          v-model.number="maxClimbInput"
-          type="number"
-          min="1"
-          step="1"
-          aria-label="怪异塔爬塔次数"
-          :disabled="isClimbing || isUsingItems || isMerging"
-        />
-        <span>次</span>
-      </div>
       <button v-if="isClimbing" class="stop-button" @click="stopClimbing">
         停止爬塔
       </button>
@@ -173,10 +161,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useTokenStore } from "@/stores/tokenStore";
 import { isSameGameValue } from "@/utils/gameValue.js";
 import { HERO_DICT } from "@/utils/HeroList.js";
-import {
-  DEFAULT_WEIRD_TOWER_MAX_CLIMB,
-  normalizeWeirdTowerMaxClimb,
-} from "@/utils/towerClimbLimit.js";
 
 let stopFlag = false;
 let stopItemFlag = false;
@@ -184,12 +168,7 @@ let stopMergeFlag = false;
 
 const stopClimbing = () => {
   stopFlag = true;
-  if (climbTimeout.value) {
-    clearTimeout(climbTimeout.value);
-    climbTimeout.value = null;
-  }
-  isClimbing.value = false;
-  message.info("已手动停止批量爬塔");
+  message.info("当前这一层结束后停止爬塔");
 };
 
 const stopUsingItems = () => {
@@ -219,8 +198,6 @@ const teamLoading = ref(false);
 const switchingTeam = ref(false);
 const currentTeam = ref(1);
 const availableTeams = ref([1, 2, 3]);
-const maxClimbInput = ref(DEFAULT_WEIRD_TOWER_MAX_CLIMB);
-const climbTimeout = ref(null); // 用于超时重置状态
 const itemTimeout = ref(null); // 用于道具使用超时
 const mergeTimeout = ref(null); // 用于合成超时
 // 最后一次爬塔结果
@@ -677,37 +654,22 @@ const startTowerClimb = async () => {
     return;
   }
 
-  // 清除之前的超时
-  if (climbTimeout.value) {
-    clearTimeout(climbTimeout.value);
-    climbTimeout.value = null;
-  }
-
   isClimbing.value = true;
   stopFlag = false;
   let climbCount = 0;
-  const maxClimb = normalizeWeirdTowerMaxClimb(maxClimbInput.value);
-  maxClimbInput.value = maxClimb;
-  // 设置超时保护，60秒后自动重置状态
-  climbTimeout.value = setTimeout(() => {
-    isClimbing.value = false;
-    climbTimeout.value = null;
-    stopFlag = true;
-    message.info("批量爬塔已超时自动停止");
-  }, 60000);
+  let finishedBecause = "energy";
 
   try {
     const tokenId = tokenStore.selectedToken.id;
     // 爬塔前先补领未领取的章节奖励，否则 evotower_readyfight 会被拒绝（12200020）
     await claimPendingChapterRewards(tokenId);
 
-    for (let i = 0; i < maxClimb; i++) {
-      if (stopFlag) break;
-
+    // eslint-disable-next-line no-unmodified-loop-condition -- 停止按钮会在等待请求时改这个标记
+    while (!stopFlag) {
       // 检查当前能量
       await getTowerInfo();
-      const currentEnergy = towerEnergy.value;
-      if (currentEnergy <= 0) break;
+      const energyBefore = towerEnergy.value;
+      if (energyBefore <= 0) break;
 
       const floorBefore = currentTowerId.value;
 
@@ -739,6 +701,14 @@ const startTowerClimb = async () => {
         winCount.value += 1;
       } else {
         loseCount.value += 1;
+      }
+      if (
+        towerEnergy.value >= energyBefore &&
+        currentTowerId.value === floorBefore
+      ) {
+        message.warning("这一层没有消耗小鱼干，已停止");
+        finishedBecause = "stuck";
+        break;
       }
 
       // 检查并领取每日任务奖励
@@ -805,16 +775,18 @@ const startTowerClimb = async () => {
       );
     }
     await new Promise((res) => setTimeout(res, 500));
-    message.success(`已自动爬塔${climbCount}次，体力已耗尽或达到上限。`);
+    if (stopFlag) finishedBecause = "manual";
+    if (finishedBecause !== "stuck") {
+      message.success(
+        finishedBecause === "manual"
+          ? `已停止，本次爬塔 ${climbCount} 次`
+          : `小鱼干已用完，本次爬塔 ${climbCount} 次`,
+      );
+    }
   } catch (error) {
     message.error(`批量爬塔失败: ${error.message || "未知错误"}`);
   }
 
-  // 清除超时并重置状态
-  if (climbTimeout.value) {
-    clearTimeout(climbTimeout.value);
-    climbTimeout.value = null;
-  }
   isClimbing.value = false;
 };
 
