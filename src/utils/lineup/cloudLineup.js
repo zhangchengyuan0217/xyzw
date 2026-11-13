@@ -145,7 +145,15 @@ const createReporter = (onProgress) => {
   };
 };
 
-const sendCmd = async (tokenStore, tokenId, cmd, params, errors, label) => {
+const sendCmd = async (
+  tokenStore,
+  tokenId,
+  cmd,
+  params,
+  errors,
+  label,
+  waitMs = COMMAND_DELAY,
+) => {
   try {
     const result = await tokenStore.sendMessageWithPromise(
       tokenId,
@@ -153,11 +161,11 @@ const sendCmd = async (tokenStore, tokenId, cmd, params, errors, label) => {
       params || {},
       12000,
     );
-    await delay(COMMAND_DELAY);
+    if (waitMs > 0) await delay(waitMs);
     return result;
   } catch (error) {
     errors.push(`${label}：${error?.message || "失败"}`);
-    await delay(COMMAND_DELAY);
+    if (waitMs > 0) await delay(waitMs);
     return null;
   }
 };
@@ -506,27 +514,33 @@ const syncWeapon = async (tokenStore, tokenId, lineup, errors, progress) => {
   );
 };
 
+const resetTypeForTech = (techId) => {
+  for (const [type, ids] of Object.entries(LEGION_TECH_RESET_TYPE_MAP)) {
+    if (ids.includes(Number(techId))) return Number(type);
+  }
+  return null;
+};
+
 const syncResearch = async (tokenStore, tokenId, lineup, errors, progress) => {
   const targetResearch = lineup.legionResearch || {};
   if (Object.keys(targetResearch).length === 0) return;
   const role = await readRole(tokenStore, tokenId, errors);
-  const currentResearch = role.legionResearch || {};
-  const typesToReset = new Set();
-  const typesToRebuild = new Set();
+  const currentResearch = { ...(role.legionResearch || {}) };
+  const resetTypes = new Set();
 
-  for (const type of [1, 2, 3, 4, 5, 6]) {
-    const changed = (ids) =>
-      ids.some((techId) => {
-        const currentLevel = currentResearch[techId] || 0;
-        const targetLevel = targetResearch[techId] || 0;
-        return currentLevel !== targetLevel && (currentLevel > 0 || targetLevel > 0);
-      });
-    if (changed(LEGION_TECH_RESET_TYPE_MAP[type] || [])) typesToReset.add(type);
-    if (changed(LEGION_TECH_TYPE_MAP[type] || [])) typesToRebuild.add(type);
+  for (const ids of Object.values(LEGION_TECH_RESET_TYPE_MAP)) {
+    const overTarget = ids.some((techId) => {
+      const currentLevel = Number(currentResearch[techId] || 0);
+      const targetLevel = Number(targetResearch[techId] || 0);
+      return currentLevel > targetLevel;
+    });
+    if (!overTarget) continue;
+    const resetType = resetTypeForTech(ids[0]);
+    if (resetType) resetTypes.add(resetType);
   }
 
-  for (const type of typesToReset) {
-    await progress.run(`重置科技类型 ${type}`, () =>
+  for (const type of [...resetTypes].sort((a, b) => a - b)) {
+    const result = await progress.run(`重置科技类型 ${type}`, () =>
       sendCmd(
         tokenStore,
         tokenId,
@@ -534,41 +548,48 @@ const syncResearch = async (tokenStore, tokenId, lineup, errors, progress) => {
         { advanced: false, type },
         errors,
         "重置科技",
+        0,
       ),
     );
+    if (!result) continue;
+    for (const techId of LEGION_TECH_RESET_TYPE_MAP[type] || []) {
+      currentResearch[techId] = 0;
+    }
   }
 
-  for (const type of [...typesToRebuild].sort((a, b) => a - b)) {
+  for (const type of [1, 2, 3, 4, 5, 6]) {
     for (const techId of LEGION_TECH_TYPE_MAP[type] || []) {
-      const targetLevel = targetResearch[techId] || 0;
-      if (targetLevel <= 0) continue;
+      const targetLevel = Number(targetResearch[techId] || 0);
+      const currentLevel = Number(currentResearch[techId] || 0);
+      if (targetLevel <= currentLevel) continue;
       const techName = LEGION_TECH_NAME[techId] || `科技${techId}`;
       const maxLevel = LEGION_TECH_MAX_LEVEL[techId];
-      if (targetLevel >= maxLevel) {
-        await progress.run(`点满 ${techName}`, () =>
-          sendCmd(
+      await progress.run(`${techName} ${currentLevel}→${targetLevel}`, async () => {
+        if (targetLevel >= maxLevel) {
+          await sendCmd(
             tokenStore,
             tokenId,
             "legion_research",
             { isMax: true, researchId: techId },
             errors,
             techName,
-          ),
-        );
-        continue;
-      }
-      for (let level = 1; level <= targetLevel; level += 1) {
-        await progress.run(`${techName} ${level}/${targetLevel}`, () =>
-          sendCmd(
+            0,
+          );
+          return;
+        }
+        for (let level = currentLevel; level < targetLevel; level += 1) {
+          const result = await sendCmd(
             tokenStore,
             tokenId,
             "legion_research",
             { isMax: false, researchId: techId },
             errors,
             techName,
-          ),
-        );
-      }
+            0,
+          );
+          if (!result) break;
+        }
+      });
     }
   }
 };
