@@ -345,7 +345,7 @@ const startTowerClimb = async () => {
         10000,
       );
       climbCount++;
-      message.success(`第${climbCount}次爬塔命令已发送`);
+      // message.success(`第${climbCount}次爬塔命令已发送`);
       await new Promise((res) => setTimeout(res, 2000)); // 每次间隔2秒
     }
     message.success(`已自动爬塔${climbCount}次，体力已耗尽或达到上限。`);

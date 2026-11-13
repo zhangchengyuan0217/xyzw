@@ -731,7 +731,7 @@ const startTowerClimb = async () => {
       );
 
       climbCount++;
-      message.success(`第${climbCount}次爬塔命令已发送`);
+      // message.success(`第${climbCount}次爬塔命令已发送`);
 
       // 更新爬塔信息，层数前进记胜，否则记败
       await getTowerInfo();
@@ -925,7 +925,11 @@ const loadTeams = async (force = false, quiet = false) => {
 };
 
 const selectTeam = async (teamId) => {
-  if (switchingTeam.value || teamLoading.value || currentTeam.value === teamId) {
+  if (
+    switchingTeam.value ||
+    teamLoading.value ||
+    currentTeam.value === teamId
+  ) {
     return;
   }
   if (!tokenStore.selectedToken) {
@@ -1028,7 +1032,8 @@ const wsStatus = computed(() => {
 });
 
 const statusText = computed(() => {
-  if (!tokenStore.selectedToken || wsStatus.value !== "connected") return "未连接";
+  if (!tokenStore.selectedToken || wsStatus.value !== "connected")
+    return "未连接";
   if (isClimbing.value) return "爬塔中";
   if (isUsingItems.value) return "使用道具";
   if (isMerging.value) return "合成中";
