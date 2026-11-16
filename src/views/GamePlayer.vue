@@ -10,17 +10,29 @@
         :title="`只加快十殿战斗播放，固定 ${SHIDIAN_SPEED_RATE} 倍`"
         @click="toggleShidianSpeed"
       >
-        {{ shidianSpeedEnabled ? `十殿加速 ${SHIDIAN_SPEED_RATE}倍` : "十殿加速" }}
+        {{
+          shidianSpeedEnabled ? `十殿加速 ${SHIDIAN_SPEED_RATE}倍` : "十殿加速"
+        }}
       </button>
       <button
         class="capture-btn"
         :class="{ 'is-on': captureRecording }"
         type="button"
         :aria-pressed="captureRecording"
-        title="周日 18:00 到 20:30 打开记录，进入蟠桃园战场并停留一会儿，再手动点一次上船。这里只记录，不会自动上船。"
+        title="每月前三个周日 20:00 到 20:30 打开记录，进入蟠桃园战场并停留一会儿，再手动点一次上船。这里只记录，不会自动上船。"
         @click="toggleCapture"
       >
         {{ captureRecording ? `记录中 ${capturePending}` : "记录上船" }}
+      </button>
+      <button
+        class="board-btn"
+        :class="{ 'is-on': boardRunning }"
+        type="button"
+        :aria-pressed="boardRunning"
+        title="在蟠桃园战场页自动上第一艘船。船上路后如果船没了，会换下一艘。每月前三个周日 20:00 到 20:30 才会出发。"
+        @click="toggleBoard"
+      >
+        {{ boardLabel }}
       </button>
       <button
         class="export-btn"
@@ -57,6 +69,12 @@ import {
   setPeachCaptureRecording,
 } from "@/utils/peachBoardCapture";
 import {
+  injectPeachBoard,
+  isPeachBoardReadyMessage,
+  isPeachBoardStatusMessage,
+  postPeachBoard,
+} from "@/utils/peachBoard";
+import {
   injectShidianSpeed,
   isShidianSpeedReadyMessage,
   postShidianSpeed,
@@ -71,6 +89,8 @@ const shidianSpeedEnabled = ref(readShidianSpeedEnabled());
 const captureRecording = ref(false);
 const capturePending = ref(peachCapturePendingCount());
 const exportLabel = ref("导出记录");
+const boardRunning = ref(false);
+const boardLabel = ref("一键上船");
 
 function sendShidianSpeed(targetWindow = gameFrame.value?.contentWindow) {
   postShidianSpeed(targetWindow, shidianSpeedEnabled.value);
@@ -80,10 +100,15 @@ function sendCapture(targetWindow = gameFrame.value?.contentWindow) {
   postPeachCapture(targetWindow, captureRecording.value);
 }
 
+function sendBoard(targetWindow = gameFrame.value?.contentWindow) {
+  postPeachBoard(targetWindow, boardRunning.value);
+}
+
 function onFrameLoad() {
   const frameWindow = gameFrame.value?.contentWindow;
   injectShidianSpeed(frameWindow, () => sendShidianSpeed(frameWindow));
   injectPeachCapture(frameWindow, () => sendCapture(frameWindow));
+  injectPeachBoard(frameWindow, () => sendBoard(frameWindow));
 }
 
 function toggleCapture() {
@@ -91,6 +116,12 @@ function toggleCapture() {
   setPeachCaptureRecording(captureRecording.value);
   exportLabel.value = captureRecording.value ? "导出记录" : exportLabel.value;
   sendCapture();
+}
+
+function toggleBoard() {
+  boardRunning.value = !boardRunning.value;
+  if (!boardRunning.value) boardLabel.value = "一键上船";
+  sendBoard();
 }
 
 function exportCapture() {
@@ -110,6 +141,11 @@ function handleFrameMessage(event) {
   if (event.source !== gameFrame.value?.contentWindow) return;
   if (isShidianSpeedReadyMessage(event.data)) sendShidianSpeed(event.source);
   if (isPeachCaptureReadyMessage(event.data)) sendCapture(event.source);
+  if (isPeachBoardReadyMessage(event.data)) sendBoard(event.source);
+  if (isPeachBoardStatusMessage(event.data)) {
+    boardLabel.value = event.data.text;
+    boardRunning.value = !!event.data.running;
+  }
   if (!isPeachCaptureEventMessage(event.data)) return;
   capturePending.value = acceptPeachCaptureEvent(event.data.event);
 }
@@ -167,7 +203,8 @@ onUnmounted(() => window.removeEventListener("message", handleFrameMessage));
 
 .speed-btn,
 .capture-btn,
-.export-btn {
+.export-btn,
+.board-btn {
   position: static;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(0, 0, 0, 0.5);
@@ -175,6 +212,17 @@ onUnmounted(() => window.removeEventListener("message", handleFrameMessage));
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
+}
+
+.board-btn.is-on {
+  border-color: #38bdf8;
+  background: rgba(12, 74, 110, 0.92);
+  color: #e0f2fe;
+}
+
+.capture-btn,
+.export-btn {
+  display: none;
 }
 
 .capture-btn.is-on {

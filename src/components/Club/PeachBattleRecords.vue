@@ -1285,30 +1285,22 @@ import { isSameGameValue } from "@/utils/gameValue.js";
 
 import { downloadCanvasAsImage } from "@/utils/imageExport";
 
-// 获取最近的周日日期
-// 如果今天是周日，返回今天的日期；否则返回上周日的日期
+// 最近一场蟠桃园战场：每月前三个周日，当天 20:00 之前仍算上一场
+const isPeachBattleSunday = (date) => date.getDay() === 0 && date.getDate() <= 21;
+
 const getLastSunday = () => {
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=周日, 1=周一, ..., 6=周六
-  const hour = today.getHours();
-
-  let daysToSubtract = 0;
-  if (dayOfWeek === 0) {
-    // 今天是周日
-    if (hour < 18) {
-      // 18:00 之前，返回上周日
-      daysToSubtract = 7;
-    } else {
-      // 18:00 之后，返回今天
-      daysToSubtract = 0;
-    }
-  } else {
-    // 周一到周六，计算距离上周日的天数
-    daysToSubtract = dayOfWeek;
-  }
-
   const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() - daysToSubtract);
+  targetDate.setHours(0, 0, 0, 0);
+  if (targetDate.getDay() === 0) {
+    const minutes = today.getHours() * 60 + today.getMinutes();
+    if (minutes < 20 * 60) targetDate.setDate(targetDate.getDate() - 7);
+  } else {
+    targetDate.setDate(targetDate.getDate() - targetDate.getDay());
+  }
+  while (!isPeachBattleSunday(targetDate)) {
+    targetDate.setDate(targetDate.getDate() - 7);
+  }
 
   const targetYear = targetDate.getFullYear();
   const targetMonth = String(targetDate.getMonth() + 1).padStart(2, "0");

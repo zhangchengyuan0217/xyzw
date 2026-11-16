@@ -663,28 +663,21 @@ const info = computed(() => tokenStore.gameData?.legionInfo || null);
 const club = computed(() => info.value?.info || null);
 const exportDom = ref(null);
 
+const isPeachBattleSunday = (date) => date.getDay() === 0 && date.getDate() <= 21;
+
 const getLastSunday = () => {
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=周日, 1=周一, ..., 6=周六
-  const hour = today.getHours();
-
-  let daysToSubtract = 0;
-  if (dayOfWeek === 0) {
-    // 今天是周日
-    if (hour < 18) {
-      // 18:00 之前，返回上周日
-      daysToSubtract = 7;
-    } else {
-      // 18:00 之后，返回今天
-      daysToSubtract = 0;
-    }
-  } else {
-    // 周一到周六，计算距离上周日的天数
-    daysToSubtract = dayOfWeek;
-  }
-
   const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() - daysToSubtract);
+  targetDate.setHours(0, 0, 0, 0);
+  if (targetDate.getDay() === 0) {
+    const minutes = today.getHours() * 60 + today.getMinutes();
+    if (minutes < 20 * 60) targetDate.setDate(targetDate.getDate() - 7);
+  } else {
+    targetDate.setDate(targetDate.getDate() - targetDate.getDay());
+  }
+  while (!isPeachBattleSunday(targetDate)) {
+    targetDate.setDate(targetDate.getDate() - 7);
+  }
 
   const targetYear = targetDate.getFullYear();
   const targetMonth = String(targetDate.getMonth() + 1).padStart(2, "0");
@@ -724,15 +717,12 @@ const formatDateToShort = (dateStr) => {
   return year.slice(2) + month + day;
 };
 
-// Helper: Check if Sunday 18:00 - 20:30
+// 每月前三个周日 20:00-20:30
 const isSundayBattleTime = () => {
   const now = new Date();
-  const day = now.getDay();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  return (
-    day === 0 && ((hour >= 18 && hour < 20) || (hour === 20 && minute <= 30))
-  );
+  if (!isPeachBattleSunday(now)) return false;
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return minutes >= 20 * 60 && minutes <= 20 * 60 + 30;
 };
 
 // Helper: Check if date string is today
@@ -1269,7 +1259,7 @@ const fetchBattleInfo = async () => {
     // Time-based Logic
     // If selected date is today AND it is currently battle time, fetch live data
     if (queryDate.value === getLastSunday() && isSundayBattleTime()) {
-      // Sunday 18:00-20:30: Use legion_getpayloadbf
+      // 每月前三个周日 20:00-20:30: Use legion_getpayloadbf
       const res = await tokenStore.sendMessageWithPromise(
         tokenId,
         "legion_getpayloadbf",

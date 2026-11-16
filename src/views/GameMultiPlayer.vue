@@ -18,10 +18,20 @@
         :class="{ 'is-on': captureRecording }"
         type="button"
         :aria-pressed="captureRecording"
-        title="周日 18:00 到 20:30 打开记录，进入蟠桃园战场并停留一会儿，再手动点一次上船。这里只记录，不会自动上船。"
+        title="每月前三个周日 20:00 到 20:30 打开记录，进入蟠桃园战场并停留一会儿，再手动点一次上船。这里只记录，不会自动上船。"
         @click="toggleCapture"
       >
         {{ captureRecording ? `记录中 ${capturePending}` : "记录上船" }}
+      </button>
+      <button
+        class="speed-toggle board-toggle"
+        :class="{ 'is-on': boardRunning }"
+        type="button"
+        :aria-pressed="boardRunning"
+        title="在蟠桃园战场页自动上第一艘船。船上路后如果船没了，会换下一艘。每月前三个周日 20:00 到 20:30 才会出发。"
+        @click="toggleBoard"
+      >
+        {{ boardLabel }}
       </button>
       <button
         class="speed-toggle"
@@ -209,6 +219,12 @@ import {
   setPeachCaptureRecording,
 } from "@/utils/peachBoardCapture";
 import {
+  injectPeachBoard,
+  isPeachBoardReadyMessage,
+  isPeachBoardStatusMessage,
+  postPeachBoard,
+} from "@/utils/peachBoard";
+import {
   injectShidianSpeed,
   isShidianSpeedReadyMessage,
   postShidianSpeed,
@@ -222,6 +238,8 @@ const FRAME_LOAD_TIMEOUT_MS = 45_000;
 const shidianSpeedEnabled = ref(readShidianSpeedEnabled());
 const captureRecording = ref(false);
 const capturePending = ref(peachCapturePendingCount());
+const boardRunning = ref(false);
+const boardLabel = ref("一键上船");
 const launch = ref(readLaunchSafely());
 const gameStrip = ref(null);
 const movingFrame = ref(false);
@@ -468,10 +486,15 @@ function sendFrameCapture(frameWindow) {
   postPeachCapture(frameWindow, captureRecording.value);
 }
 
+function sendFrameBoard(frameWindow) {
+  postPeachBoard(frameWindow, boardRunning.value);
+}
+
 function onFrameLoad(scopeId) {
   const frameWindow = frameElements.get(scopeId)?.contentWindow;
   injectShidianSpeed(frameWindow, () => sendFrameSpeed(frameWindow));
   injectPeachCapture(frameWindow, () => sendFrameCapture(frameWindow));
+  injectPeachBoard(frameWindow, () => sendFrameBoard(frameWindow));
 }
 
 function broadcastShidianSpeed() {
@@ -498,6 +521,18 @@ function toggleCapture() {
   broadcastCapture();
 }
 
+function broadcastBoard() {
+  for (const frame of frameElements.values()) {
+    sendFrameBoard(frame.contentWindow);
+  }
+}
+
+function toggleBoard() {
+  boardRunning.value = !boardRunning.value;
+  if (!boardRunning.value) boardLabel.value = "一键上船";
+  broadcastBoard();
+}
+
 function exportCapture() {
   const result = downloadPeachCapture();
   capturePending.value = peachCapturePendingCount();
@@ -521,6 +556,13 @@ function handleMessage(event) {
     }
     if (isPeachCaptureReadyMessage(event.data)) {
       postPeachCapture(event.source, captureRecording.value);
+    }
+    if (isPeachBoardReadyMessage(event.data)) {
+      postPeachBoard(event.source, boardRunning.value);
+    }
+    if (isPeachBoardStatusMessage(event.data)) {
+      boardLabel.value = event.data.text;
+      boardRunning.value = !!event.data.running;
     }
     if (isPeachCaptureEventMessage(event.data)) {
       capturePending.value = acceptPeachCaptureEvent(event.data.event);
@@ -622,6 +664,13 @@ onUnmounted(() => {
   border-color: #34d399;
   color: #d1fae5;
   background: #065f46;
+}
+
+.board-toggle.is-on,
+.board-toggle.is-on:hover {
+  border-color: #38bdf8;
+  color: #e0f2fe;
+  background: #0c4a6e;
 }
 
 .toolbar-button:hover,

@@ -1,0 +1,7181 @@
+{
+  "version": 2,
+  "exportedAt": "2026-11-15T12:09:43.182Z",
+  "doc": "docs/peach-board.md",
+  "note": "蟠桃园上船记录。请把这个文件发回来。",
+  "needed": [
+    "查询船列表的命令，以及每艘船的编号",
+    "上船命令，和参数里的船编号",
+    "哪个字段表示自己已经在船上",
+    "船已经消失时，服务器返回的结果"
+  ],
+  "sends": [
+    {
+      "id": 13,
+      "at": 1794744207522,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 45,
+        "seq": 4,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "at": 1794744207538,
+      "kind": "ws-send",
+      "byteLength": 1,
+      "skipped": false,
+      "packet": null,
+      "base64": "AA=="
+    },
+    {
+      "id": 22,
+      "at": 1794744208192,
+      "kind": "ws-send",
+      "byteLength": 1,
+      "skipped": false,
+      "packet": null,
+      "base64": "AA=="
+    },
+    {
+      "id": 39,
+      "at": 1794744209809,
+      "kind": "ws-send",
+      "byteLength": 178,
+      "skipped": false,
+      "packet": {
+        "cmd": "hero_calcpowerbyteam",
+        "ack": 0,
+        "seq": 64,
+        "code": 0,
+        "body": {
+          "battleTeam": {
+            "0": 116,
+            "1": 107,
+            "2": 106,
+            "3": 118,
+            "4": 102
+          },
+          "lordWeaponId": 9,
+          "petUId": "232-jRR"
+        }
+      }
+    },
+    {
+      "id": 62,
+      "at": 1794744210373,
+      "kind": "ws-send",
+      "byteLength": 219,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_setbattleteam",
+        "ack": 54,
+        "seq": 5,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773",
+          "battleTeam": {
+            "0": 116,
+            "1": 107,
+            "2": 106,
+            "3": 118,
+            "4": 102
+          },
+          "lordWeaponId": 9,
+          "petUId": "232-jRR"
+        }
+      }
+    },
+    {
+      "id": 179,
+      "at": 1794744236492,
+      "kind": "ws-send",
+      "byteLength": 113,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_enterbf",
+        "ack": 0,
+        "seq": 1,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 485,
+      "at": 1794744254880,
+      "kind": "ws-send",
+      "byteLength": 363,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_startmarch",
+        "ack": 37,
+        "seq": 3,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773",
+          "carId": 3,
+          "path": [
+            {
+              "x": 24,
+              "y": 17
+            },
+            {
+              "x": 23,
+              "y": 16
+            },
+            {
+              "x": 22,
+              "y": 16
+            },
+            {
+              "x": 21,
+              "y": 15
+            },
+            {
+              "x": 20,
+              "y": 15
+            },
+            {
+              "x": 19,
+              "y": 14
+            },
+            {
+              "x": 18,
+              "y": 14
+            },
+            {
+              "x": 17,
+              "y": 13
+            },
+            {
+              "x": 16,
+              "y": 13
+            },
+            {
+              "x": 15,
+              "y": 12
+            },
+            {
+              "x": 14,
+              "y": 12
+            },
+            {
+              "x": 13,
+              "y": 11
+            },
+            {
+              "x": 13,
+              "y": 10
+            },
+            {
+              "x": 13,
+              "y": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 577,
+      "at": 1794744257596,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 43,
+        "seq": 4,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 906,
+      "at": 1794744277581,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 97,
+        "seq": 5,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1167,
+      "at": 1794744297599,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 185,
+        "seq": 6,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1279,
+      "at": 1794744318835,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 0,
+        "seq": 7,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1328,
+      "at": 1794744342697,
+      "kind": "ws-send",
+      "byteLength": 113,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_enterbf",
+        "ack": 0,
+        "seq": 1,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1373,
+      "at": 1794744542403,
+      "kind": "ws-send",
+      "byteLength": 113,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_enterbf",
+        "ack": 0,
+        "seq": 1,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1599,
+      "at": 1794744562499,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 40,
+        "seq": 2,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    },
+    {
+      "id": 1616,
+      "at": 1794744563954,
+      "kind": "ws-send",
+      "byteLength": 235,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_startmarch",
+        "ack": 41,
+        "seq": 3,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773",
+          "carId": 7,
+          "path": [
+            {
+              "x": 15,
+              "y": 17
+            },
+            {
+              "x": 16,
+              "y": 17
+            },
+            {
+              "x": 17,
+              "y": 16
+            },
+            {
+              "x": 18,
+              "y": 16
+            },
+            {
+              "x": 19,
+              "y": 15
+            },
+            {
+              "x": 20,
+              "y": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 1891,
+      "at": 1794744582490,
+      "kind": "ws-send",
+      "byteLength": 110,
+      "skipped": false,
+      "packet": {
+        "cmd": "payload_ping",
+        "ack": 0,
+        "seq": 4,
+        "code": 0,
+        "body": {
+          "bfId": "261115:10773"
+        }
+      }
+    }
+  ],
+  "receives": [
+    {
+      "cmd": "(undecoded)",
+      "count": 80,
+      "gapsMs": [
+        2377,
+        2742,
+        187777,
+        117,
+        2,
+        713,
+        426,
+        314,
+        459,
+        763,
+        507,
+        208,
+        11,
+        516,
+        3267,
+        315,
+        433,
+        1223,
+        301,
+        148,
+        41,
+        305,
+        1558,
+        12,
+        30,
+        453,
+        1156,
+        501,
+        288,
+        709,
+        524,
+        623,
+        135,
+        1391,
+        633,
+        0,
+        204,
+        1451,
+        15,
+        30,
+        291,
+        1184,
+        26,
+        24,
+        260,
+        509,
+        1303,
+        5,
+        1,
+        188,
+        35,
+        1182,
+        273,
+        614,
+        2,
+        8,
+        97,
+        611,
+        1947,
+        7,
+        2,
+        36,
+        648,
+        30,
+        591,
+        140,
+        634,
+        780,
+        192,
+        633,
+        1928,
+        1,
+        11,
+        75,
+        756,
+        1932,
+        1790,
+        758,
+        523
+      ],
+      "first": {
+        "id": 3,
+        "at": 1794744205535,
+        "kind": "ws-recv",
+        "byteLength": 122,
+        "skipped": false,
+        "packet": null,
+        "base64": "cHj22QgFBQNzZXEBKAAAAAUDYWNrAQAAAAAFBHRpbWUC+UAX36EBAAAFA2NtZAUWUGF5bG9hZF9FbmRNYXJjaE5vdGlmeQUEYm9keQcsCAIFBGJmSWQFDDI2MTExNToxMDc3MwULbWFyY2hSb2xlSWQCjYlkHQAAAAA="
+      },
+      "last": {
+        "id": 1892,
+        "at": 1794744582522,
+        "kind": "ws-recv",
+        "byteLength": 1,
+        "skipped": false,
+        "packet": null,
+        "base64": "AA=="
+      }
+    }
+  ],
+  "ui": [
+    {
+      "id": 1753,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 247.1590909090909,
+            "y": 920.4545454545455,
+            "z": 0
+          },
+          "touchId": 1666314613
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569320
+    },
+    {
+      "id": 1754,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 242.04545454545453,
+            "y": 920.4545454545455,
+            "z": 0
+          },
+          "touchId": 1666314613
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569345
+    },
+    {
+      "id": 1755,
+      "kind": "pointer",
+      "at": 1794744569356
+    },
+    {
+      "id": 1756,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 242.04545454545453,
+            "y": 920.4545454545455,
+            "z": 0
+          },
+          "touchId": 1666314613
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569357
+    },
+    {
+      "id": 1757,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchBegin",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 496.02272727272725,
+            "y": 804.5454545454545,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569659
+    },
+    {
+      "id": 1758,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 473.8636363636364,
+            "y": 811.3636363636365,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569688
+    },
+    {
+      "id": 1759,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 470.45454545454544,
+            "y": 813.0681818181819,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569705
+    },
+    {
+      "id": 1760,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 458.52272727272725,
+            "y": 821.5909090909091,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569707
+    },
+    {
+      "id": 1761,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 441.47727272727275,
+            "y": 833.5227272727273,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569723
+    },
+    {
+      "id": 1762,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 421.02272727272725,
+            "y": 847.159090909091,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569754
+    },
+    {
+      "id": 1763,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 398.8636363636364,
+            "y": 862.5,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569764
+    },
+    {
+      "id": 1764,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 373.29545454545456,
+            "y": 879.5454545454545,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569782
+    },
+    {
+      "id": 1765,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 340.90909090909093,
+            "y": 898.2954545454545,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569786
+    },
+    {
+      "id": 1766,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 308.52272727272725,
+            "y": 917.0454545454545,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569804
+    },
+    {
+      "id": 1767,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 277.84090909090907,
+            "y": 932.3863636363637,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569846
+    },
+    {
+      "id": 1768,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 240.3409090909091,
+            "y": 952.8409090909091,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569858
+    },
+    {
+      "id": 1769,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 236.9318181818182,
+            "y": 956.25,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569870
+    },
+    {
+      "id": 1770,
+      "kind": "pointer",
+      "at": 1794744569870
+    },
+    {
+      "id": 1771,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 236.9318181818182,
+            "y": 956.25,
+            "z": 0
+          },
+          "touchId": 1666314614
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744569876
+    },
+    {
+      "id": 1772,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchBegin",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 501.1363636363636,
+            "y": 900,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570510
+    },
+    {
+      "id": 1773,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 478.97727272727275,
+            "y": 903.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570533
+    },
+    {
+      "id": 1774,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 475.5681818181818,
+            "y": 903.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570537
+    },
+    {
+      "id": 1775,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 463.6363636363636,
+            "y": 903.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570537
+    },
+    {
+      "id": 1776,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 446.59090909090907,
+            "y": 903.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570554
+    },
+    {
+      "id": 1777,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 431.25,
+            "y": 905.1136363636365,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570570
+    },
+    {
+      "id": 1778,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 414.20454545454544,
+            "y": 906.8181818181819,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570587
+    },
+    {
+      "id": 1779,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 398.8636363636364,
+            "y": 910.2272727272727,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570604
+    },
+    {
+      "id": 1780,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 381.8181818181818,
+            "y": 911.9318181818182,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570642
+    },
+    {
+      "id": 1781,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 366.47727272727275,
+            "y": 913.6363636363637,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570651
+    },
+    {
+      "id": 1782,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 351.1363636363636,
+            "y": 917.0454545454545,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570653
+    },
+    {
+      "id": 1783,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 339.20454545454544,
+            "y": 918.75,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570670
+    },
+    {
+      "id": 1784,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 332.3863636363636,
+            "y": 918.75,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570686
+    },
+    {
+      "id": 1785,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 330.6818181818182,
+            "y": 918.75,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570711
+    },
+    {
+      "id": 1786,
+      "kind": "pointer",
+      "at": 1794744570719
+    },
+    {
+      "id": 1787,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 330.6818181818182,
+            "y": 918.75,
+            "z": 0
+          },
+          "touchId": 1666314615
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744570720
+    },
+    {
+      "id": 1788,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571054
+    },
+    {
+      "id": 1790,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571062
+    },
+    {
+      "id": 1792,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571064
+    },
+    {
+      "id": 1794,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571070
+    },
+    {
+      "id": 1795,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 12,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2790,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744571076
+    },
+    {
+      "id": 1796,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744571076
+    },
+    {
+      "id": 1797,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744571076
+    },
+    {
+      "id": 1798,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 16,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 3060,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744571076
+    },
+    {
+      "id": 1799,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571097
+    },
+    {
+      "id": 1801,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchBegin",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 346.02272727272725,
+            "y": 964.7727272727273,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571105
+    },
+    {
+      "id": 1802,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 357.95454545454544,
+            "y": 951.1363636363637,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571154
+    },
+    {
+      "id": 1803,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 373.29545454545456,
+            "y": 942.6136363636365,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571170
+    },
+    {
+      "id": 1804,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 392.04545454545456,
+            "y": 928.9772727272727,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571187
+    },
+    {
+      "id": 1805,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 412.5,
+            "y": 915.3409090909091,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571204
+    },
+    {
+      "id": 1806,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 434.65909090909093,
+            "y": 900,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571235
+    },
+    {
+      "id": 1807,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 455.1136363636364,
+            "y": 882.9545454545455,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571243
+    },
+    {
+      "id": 1808,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 477.27272727272725,
+            "y": 867.6136363636365,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571253
+    },
+    {
+      "id": 1809,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 494.3181818181818,
+            "y": 852.2727272727273,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571270
+    },
+    {
+      "id": 1810,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 513.0681818181819,
+            "y": 840.3409090909091,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571287
+    },
+    {
+      "id": 1811,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 528.4090909090909,
+            "y": 828.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571323
+    },
+    {
+      "id": 1812,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 542.0454545454545,
+            "y": 818.1818181818182,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571333
+    },
+    {
+      "id": 1813,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 555.6818181818181,
+            "y": 809.659090909091,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571340
+    },
+    {
+      "id": 1814,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 565.9090909090909,
+            "y": 802.8409090909091,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571353
+    },
+    {
+      "id": 1815,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 569.3181818181819,
+            "y": 799.4318181818182,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571370
+    },
+    {
+      "id": 1816,
+      "kind": "pointer",
+      "at": 1794744571370
+    },
+    {
+      "id": 1817,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 569.3181818181819,
+            "y": 799.4318181818182,
+            "z": 0
+          },
+          "touchId": 1666314616
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571371
+    },
+    {
+      "id": 1818,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571747
+    },
+    {
+      "id": 1820,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744571778
+    },
+    {
+      "id": 1822,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchBegin",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 490.90909090909093,
+            "y": 840.3409090909091,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571861
+    },
+    {
+      "id": 1823,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 470.45454545454544,
+            "y": 848.8636363636365,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571891
+    },
+    {
+      "id": 1824,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 467.04545454545456,
+            "y": 850.5681818181819,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571905
+    },
+    {
+      "id": 1825,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 458.52272727272725,
+            "y": 852.2727272727273,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571908
+    },
+    {
+      "id": 1826,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 444.8863636363636,
+            "y": 860.7954545454545,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571921
+    },
+    {
+      "id": 1827,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 427.84090909090907,
+            "y": 871.0227272727273,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571938
+    },
+    {
+      "id": 1828,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 410.79545454545456,
+            "y": 882.9545454545455,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571967
+    },
+    {
+      "id": 1829,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 392.04545454545456,
+            "y": 894.8863636363637,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571976
+    },
+    {
+      "id": 1830,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 375,
+            "y": 906.8181818181819,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744571987
+    },
+    {
+      "id": 1831,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 361.3636363636364,
+            "y": 917.0454545454545,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744572004
+    },
+    {
+      "id": 1832,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 352.84090909090907,
+            "y": 923.8636363636365,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744572021
+    },
+    {
+      "id": 1833,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 349.4318181818182,
+            "y": 925.5681818181819,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744572054
+    },
+    {
+      "id": 1834,
+      "kind": "pointer",
+      "at": 1794744572064
+    },
+    {
+      "id": 1835,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 349.4318181818182,
+            "y": 925.5681818181819,
+            "z": 0
+          },
+          "touchId": 1666314617
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744572065
+    },
+    {
+      "id": 1836,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744572361
+    },
+    {
+      "id": 1838,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 12,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2790,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744572373
+    },
+    {
+      "id": 1839,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744572373
+    },
+    {
+      "id": 1840,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744572374
+    },
+    {
+      "id": 1841,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 17,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 3060,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744572374
+    },
+    {
+      "id": 1843,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744573139
+    },
+    {
+      "id": 1845,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744573919
+    },
+    {
+      "id": 1847,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744574110
+    },
+    {
+      "id": 1849,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 12,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2790,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744574122
+    },
+    {
+      "id": 1850,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 0,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 2080,
+        "z": 0
+      },
+      "at": 1794744574122
+    },
+    {
+      "id": 1851,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 12,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2790,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744574122
+    },
+    {
+      "id": 1852,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744574123
+    },
+    {
+      "id": 1853,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 3,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 1950,
+        "z": 0
+      },
+      "at": 1794744574123
+    },
+    {
+      "id": 1854,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 18,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 3060,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744574123
+    },
+    {
+      "id": 1855,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744574748
+    },
+    {
+      "id": 1857,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744576676
+    },
+    {
+      "id": 1859,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744576677
+    },
+    {
+      "id": 1861,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744576684
+    },
+    {
+      "id": 1863,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 34,
+          "guideNum": 0,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 2925,
+        "y": 2080,
+        "z": 0
+      },
+      "at": 1794744576698
+    },
+    {
+      "id": 1864,
+      "kind": "call",
+      "target": "x",
+      "name": "_getTileCenterPos",
+      "args": [
+        {
+          "__type": "_",
+          "gid": 44,
+          "guideNum": 19,
+          "curGuideNum": 0,
+          "gridType": 2,
+          "airshipAnim": "",
+          "airshipSkin": ""
+        }
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "result": {
+        "__type": "l",
+        "mag": "[fn Function]",
+        "magSqr": "[fn Function]",
+        "subSelf": "[fn Function]",
+        "mulSelf": "[fn Function]",
+        "divSelf": "[fn Function]",
+        "scaleSelf": "[fn Function]",
+        "negSelf": "[fn Function]",
+        "x": 3060,
+        "y": 2015,
+        "z": 0
+      },
+      "at": 1794744576698
+    },
+    {
+      "id": 1865,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744576763
+    },
+    {
+      "id": 1868,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744579451
+    },
+    {
+      "id": 1870,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744581241
+    },
+    {
+      "id": 1872,
+      "kind": "ui",
+      "target": "UIManager",
+      "name": "GET_PROXY",
+      "args": [
+        "[fn l]"
+      ],
+      "result": null,
+      "at": 1794744581993
+    },
+    {
+      "id": 1874,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchBegin",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 525,
+            "y": 199.43181818181824,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582179
+    },
+    {
+      "id": 1875,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 501.1363636363636,
+            "y": 201.13636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582229
+    },
+    {
+      "id": 1876,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 497.72727272727275,
+            "y": 201.13636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582242
+    },
+    {
+      "id": 1877,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 490.90909090909093,
+            "y": 201.13636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582245
+    },
+    {
+      "id": 1878,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 478.97727272727275,
+            "y": 201.13636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582259
+    },
+    {
+      "id": 1879,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 465.34090909090907,
+            "y": 204.5454545454545,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582274
+    },
+    {
+      "id": 1880,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 453.40909090909093,
+            "y": 209.659090909091,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582290
+    },
+    {
+      "id": 1881,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 439.77272727272725,
+            "y": 214.77272727272725,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582308
+    },
+    {
+      "id": 1882,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 427.84090909090907,
+            "y": 218.18181818181824,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582325
+    },
+    {
+      "id": 1883,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 417.6136363636364,
+            "y": 219.88636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582341
+    },
+    {
+      "id": 1884,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 407.3863636363636,
+            "y": 221.59090909090924,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582364
+    },
+    {
+      "id": 1885,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 397.15909090909093,
+            "y": 225,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582378
+    },
+    {
+      "id": 1886,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 386.9318181818182,
+            "y": 228.409090909091,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582391
+    },
+    {
+      "id": 1887,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 378.40909090909093,
+            "y": 231.81818181818176,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582408
+    },
+    {
+      "id": 1888,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 371.59090909090907,
+            "y": 235.22727272727275,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582424
+    },
+    {
+      "id": 1889,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 366.47727272727275,
+            "y": 238.63636363636374,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582457
+    },
+    {
+      "id": 1890,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchMove",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 364.77272727272725,
+            "y": 240.34090909090924,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582470
+    },
+    {
+      "id": 1893,
+      "kind": "pointer",
+      "at": 1794744582540
+    },
+    {
+      "id": 1894,
+      "kind": "call",
+      "target": "x",
+      "name": "_onTouchEnd",
+      "args": [
+        {
+          "__type": "f",
+          "pos": {
+            "__type": "l",
+            "mag": "[fn Function]",
+            "magSqr": "[fn Function]",
+            "subSelf": "[fn Function]",
+            "mulSelf": "[fn Function]",
+            "divSelf": "[fn Function]",
+            "scaleSelf": "[fn Function]",
+            "negSelf": "[fn Function]",
+            "x": 364.77272727272725,
+            "y": 240.34090909090924,
+            "z": 0
+          },
+          "touchId": 1666314619
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "self": {
+        "__type": "x",
+        "instanceId": 14275,
+        "localId": "",
+        "states": 0,
+        "hideOption": null,
+        "autoDispose": true,
+        "autoDisposeTime": 10000,
+        "_uiState": 60,
+        "_hideTrans": {
+          "__type": "y",
+          "name": "hide"
+        },
+        "_idleTrans": null,
+        "_skinHideTrans": null,
+        "_skinIdleTrans": null,
+        "_hideSignal": {
+          "__type": "O",
+          "instanceId": 14277,
+          "_dispatchIndex": 2
+        },
+        "_hidePromise": null,
+        "_carAnimationManager": {
+          "__type": "o",
+          "result": 0,
+          "_animationConfigs": {
+            "__type": "Map"
+          },
+          "_engine": {
+            "__type": "o",
+            "_animations": "[depth]",
+            "_isUpdating": "[depth]",
+            "_forceDisabled": "[depth]"
+          }
+        },
+        "_selectedCarId": -1,
+        "_flagName": "c_flag"
+      },
+      "at": 1794744582541
+    }
+  ]
+}
