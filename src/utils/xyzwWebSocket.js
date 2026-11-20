@@ -402,6 +402,7 @@ export function registerDefaultCommands(reg) {
       slot: 0,
       isLocked: false,
     })
+    .register("equipment_exchange", { heroId: 0, targetHeroId: 0 })
 
     // 咸王宝库
     .register("matchteam_getroleteaminfo")
@@ -1335,6 +1336,7 @@ export class XyzwWebSocketClient {
         "artifact_exchange",
         "hero_exchange",
         "hero_rebirth",
+        "equipment_exchange",
         "hero_batchsetlevel",
       ],
     };

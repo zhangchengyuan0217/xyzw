@@ -5,6 +5,12 @@ import {
   LEGION_TECH_TYPE_MAP,
   PearlMap,
 } from "@/utils/HeroList.js";
+import {
+  countQuench,
+  findQuenchDonor,
+  planFormationMoves,
+  quenchParts,
+} from "./quenchSync.js";
 
 const COMMAND_DELAY = 500;
 
@@ -26,19 +32,6 @@ export const loadCloudLineups = (roleId) => {
 export const saveCloudLineups = (roleId, lineups) => {
   if (!roleId) return;
   localStorage.setItem(storageKeyFor(roleId), JSON.stringify(lineups));
-};
-
-const countQuench = (hero) => {
-  let red = 0;
-  let orange = 0;
-  for (const part of Object.values(hero?.equipment || {})) {
-    for (const item of Object.values(part?.quenches || {})) {
-      const colorId = Number(item?.colorId);
-      if (colorId === 6) red += 1;
-      else if (colorId === 5) orange += 1;
-    }
-  }
-  return { red, orange };
 };
 
 const teamNode = (preset, teamId) => {
@@ -87,6 +80,7 @@ export const buildCloudLineup = ({ role, preset, name }) => {
         skillName: PearlMap[pearl?.skillId]?.name || "",
         redQuench: quench.red,
         orangeQuench: quench.orange,
+        quenches: quenchParts(owned),
       };
     })
     .filter(Boolean)
@@ -281,57 +275,67 @@ const syncFormation = async (tokenStore, tokenId, lineup, errors, progress) => {
     );
   }
   await refresh();
+  await syncQuench(tokenStore, tokenId, lineup, role, deployed, errors, progress);
+  await refresh();
 
-  const targetIds = new Set(targetHeroes.map((hero) => hero.heroId));
-  for (const hero of [...deployed]) {
-    if (targetIds.has(hero.heroId)) continue;
-    await progress.run(`下阵站位 ${hero.slot}`, () =>
+  const moves = planFormationMoves(deployed, targetHeroes);
+  for (const slot of moves.bench) {
+    await progress.run(`下阵站位 ${slot}`, () =>
       sendCmd(
         tokenStore,
         tokenId,
         "hero_gobackbattle",
-        { slot: hero.slot },
+        { slot },
         errors,
         "下阵",
       ),
     );
   }
-  await refresh();
+  if (moves.bench.length) await refresh();
 
-  for (const target of targetHeroes) {
-    const currentHero = deployed.find((hero) => hero.heroId === target.heroId);
-    if (!currentHero) {
-      await progress.run(`上阵到站位 ${target.slot}`, () =>
-        sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_gointobattle",
-          { heroId: target.heroId, slot: target.slot },
-          errors,
-          "上阵",
-        ),
-      );
-    } else if (currentHero.slot !== target.slot) {
-      await progress.run(`调整站位 ${currentHero.slot} → ${target.slot}`, async () => {
-        await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_gobackbattle",
-          { slot: currentHero.slot },
-          errors,
-          "调整站位",
-        );
-        await sendCmd(
-          tokenStore,
-          tokenId,
-          "hero_gointobattle",
-          { heroId: target.heroId, slot: target.slot },
-          errors,
-          "调整站位",
-        );
-      });
-    }
-    await refresh();
+  for (const target of moves.deploy) {
+    await progress.run(`上阵到站位 ${target.slot}`, () =>
+      sendCmd(
+        tokenStore,
+        tokenId,
+        "hero_gointobattle",
+        { heroId: target.heroId, slot: target.slot },
+        errors,
+        "上阵",
+      ),
+    );
+  }
+};
+
+const syncQuench = async (
+  tokenStore,
+  tokenId,
+  lineup,
+  role,
+  deployed,
+  errors,
+  progress,
+) => {
+  let heroes = role?.heroes || {};
+  for (const target of lineup.heroes || []) {
+    const slotHeroId = deployed.find(
+      (hero) => hero.slot === Number(target.slot),
+    )?.heroId;
+    const donorId = findQuenchDonor(target, heroes, slotHeroId);
+    if (!donorId) continue;
+    const result = await progress.run("交回洗练", () =>
+      sendCmd(
+        tokenStore,
+        tokenId,
+        "equipment_exchange",
+        { heroId: donorId, targetHeroId: Number(target.heroId) },
+        errors,
+        "交换洗练",
+      ),
+    );
+    if (!result) continue;
+    const latest = await readRole(tokenStore, tokenId, errors);
+    heroes = latest.heroes || {};
   }
 };
 
