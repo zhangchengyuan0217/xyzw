@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  liveDeployedHeroes,
+  liveHeroRecord,
+} from "../src/utils/lineup/liveLineup.js";
+import {
   findQuenchDonor,
   planFormationMoves,
   quenchKey,
@@ -96,4 +100,40 @@ test("formation clears the switched hero before putting the saved hero back", ()
   );
   assert.deepEqual(plan.bench, [0]);
   assert.deepEqual(plan.deploy, [{ heroId: 1, slot: 0 }]);
+});
+
+test("saving uses the live battle team instead of the preset snapshot", () => {
+  const role = {
+    lordWeaponId: 7,
+    battleTeam: { 0: 2 },
+    heroes: {
+      2: {
+        level: 6000,
+        speed: 100,
+        pearlId: 8,
+        artifactId: 3,
+        attachmentUid: 4,
+        equipment: holes(6, 11).equipment,
+      },
+      9: { level: 1, pearlId: 99 },
+    },
+    pearlMap: { 8: { skillId: 5 } },
+    artifactBooks: { 12: { artifactId: 3 } },
+  };
+  const deployed = liveDeployedHeroes(role);
+  assert.deepEqual(deployed, [{ slot: 0, heroId: 2 }]);
+  const record = liveHeroRecord({
+    role,
+    deployed: deployed[0],
+    pearlMap: role.pearlMap,
+    fishByArtifact: { 3: 12 },
+    pearlNames: { 5: { name: "怒涛" } },
+  });
+  assert.equal(record.heroId, 2);
+  assert.equal(record.level, 6000);
+  assert.equal(record.pearlId, 8);
+  assert.equal(record.skillName, "怒涛");
+  assert.equal(record.fishId, 12);
+  assert.equal(record.attachmentUid, 4);
+  assert.equal(record.redQuench, 1);
 });

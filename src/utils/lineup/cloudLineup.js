@@ -5,11 +5,10 @@ import {
   LEGION_TECH_TYPE_MAP,
   PearlMap,
 } from "@/utils/HeroList.js";
+import { liveDeployedHeroes, liveHeroRecord } from "./liveLineup.js";
 import {
-  countQuench,
   findQuenchDonor,
   planFormationMoves,
-  quenchParts,
 } from "./quenchSync.js";
 
 const COMMAND_DELAY = 500;
@@ -44,8 +43,6 @@ export const buildCloudLineup = ({ role, preset, name }) => {
   const useTeamId = Number(
     preset?.presetTeamInfo?.useTeamId ?? preset?.useTeamId ?? 1,
   );
-  const team = teamNode(preset, useTeamId);
-  const heroesMap = role?.heroes || {};
   const pearlMap = role?.pearlMap || {};
   const fishByArtifact = {};
   for (const [fishId, book] of Object.entries(role?.artifactBooks || {})) {
@@ -54,36 +51,16 @@ export const buildCloudLineup = ({ role, preset, name }) => {
     }
   }
 
-  const heroes = Object.entries(team.teamInfo || {})
-    .map(([key, hero]) => {
-      const heroId = Number(hero?.heroId || hero?.id || 0);
-      if (!heroId) return null;
-      const slot = Number(hero?.battleTeamSlot ?? key);
-      const owned = heroesMap[String(heroId)] || {};
-      const artifactId =
-        owned.artifactId && owned.artifactId !== -1
-          ? owned.artifactId
-          : hero?.artifactId || null;
-      const pearlId = hero?.pearlId || owned.pearlId || null;
-      const pearl = pearlId ? pearlMap[pearlId] || pearlMap[String(pearlId)] : null;
-      const quench = countQuench(owned);
-      return {
-        slot,
-        heroId,
-        // 预设阵容上的 level 是上次写入阵容时的快照，当前等级在角色武将数据里
-        level: Number(owned.level || hero?.level || 0),
-        speed: Number(owned.speed || hero?.speed || 0),
-        attachmentUid: owned.attachmentUid || hero?.attachmentUid || null,
-        fishId: artifactId ? fishByArtifact[artifactId] || null : null,
-        pearlId: pearlId ? Number(pearlId) : null,
-        skillId: pearl?.skillId || null,
-        skillName: PearlMap[pearl?.skillId]?.name || "",
-        redQuench: quench.red,
-        orangeQuench: quench.orange,
-        quenches: quenchParts(owned),
-      };
-    })
-    .filter(Boolean)
+  const heroes = liveDeployedHeroes(role)
+    .map((deployed) =>
+      liveHeroRecord({
+        role,
+        deployed,
+        pearlMap,
+        fishByArtifact,
+        pearlNames: PearlMap,
+      }),
+    )
     .sort((a, b) => a.slot - b.slot);
 
   return {
@@ -93,7 +70,8 @@ export const buildCloudLineup = ({ role, preset, name }) => {
     // 保存来源槽。同步时只改这一槽，不改其他槽。
     teamId: useTeamId || 1,
     savedAt: Date.now(),
-    weaponId: team?.weapon?.weaponId ?? null,
+    // 预设槽上的武器是上次写入时的快照，当前武器在角色身上。
+    weaponId: Number(role?.lordWeaponId || role?.weaponId || 0) || null,
     petId: Number(role?.pet?.petId || role?.showPet?.petId || 0) || null,
     petUId: role?.pet?.petUId || role?.pet?.petUid || null,
     legionResearch: { ...(role?.legionResearch || {}) },

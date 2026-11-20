@@ -208,11 +208,23 @@ const ensureConnected = () => {
 };
 
 const readCurrent = async (tokenId) => {
-  const preset = await tokenStore.sendMessageWithPromise(tokenId, "presetteam_getinfo", {}, 10000);
-  const roleInfo = await tokenStore.sendMessageWithPromise(tokenId, "role_getroleinfo", {}, 10000);
+  const preset = await tokenStore.sendMessageWithPromise(
+    tokenId,
+    "presetteam_getinfo",
+    {},
+    10000,
+  );
+  const roleInfo = await tokenStore.sendMessageWithPromise(
+    tokenId,
+    "role_getroleinfo",
+    {},
+    10000,
+  );
   const raw = roleInfo?.role || roleInfo || {};
   const role = {
     ...raw,
+    battleTeam: raw.battleTeam || roleInfo?.battleTeam || null,
+    lordWeaponId: raw.lordWeaponId ?? roleInfo?.lordWeaponId,
     pet: raw.pet || roleInfo?.showPet || null,
     showPet: roleInfo?.showPet || raw.showPet || null,
   };
