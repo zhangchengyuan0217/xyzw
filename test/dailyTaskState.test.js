@@ -133,6 +133,27 @@ test("config version is verified each run while immutable configuration requests
   assert.equal(versions, 2);
 });
 
+test("a server bundle hash falls back to the published data directory", async () => {
+  const store = {
+    async sendMessageWithPromise() {
+      return { dataBundleVer: "78fbc" };
+    },
+  };
+  const urls = [];
+  const fetchConfig = async (url) => {
+    urls.push(url);
+    if (url.endsWith("/data/version.json"))
+      return { ok: true, json: async () => ({ version: "published-data" }) };
+    if (url.includes("/data/published-data/config.json"))
+      return { ok: true, json: async () => officialConfig() };
+    return { ok: false, status: 404 };
+  };
+  const config = await loadDailyTaskConfig(store, "fallback", fetchConfig);
+  assert.equal(config.tasks.length, 3);
+  assert.ok(urls.some((url) => url.includes("/data/78fbc/config.json")));
+  assert.ok(urls.some((url) => url.endsWith("/data/version.json")));
+});
+
 test("failed config reads can be retried and unsafe versions are rejected", async () => {
   let attempt = 0;
   const store = {
@@ -140,10 +161,18 @@ test("failed config reads can be retried and unsafe versions are rejected", asyn
       return { dataBundleVer: "test-config-retry" };
     },
   };
-  const fetchConfig = async () => ({
-    ok: ++attempt > 1,
-    json: async () => officialConfig(),
-  });
+  const fetchConfig = async (url) => {
+    if (
+      !url.startsWith(
+        "https://xxz-xyzw-res.hortorgames.com/data/test-config-retry/config.json",
+      )
+    )
+      return { ok: false };
+    return {
+      ok: ++attempt > 1,
+      json: async () => officialConfig(),
+    };
+  };
   await assert.rejects(
     loadDailyTaskConfig(store, "a", fetchConfig),
     /读取失败/,

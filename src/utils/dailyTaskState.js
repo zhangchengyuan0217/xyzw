@@ -149,6 +149,47 @@ export async function fillHangUpTime({
   return { sent: before.remaining, ...after };
 }
 
+const DAILY_TASK_CDNS = [
+  "https://xxz-xyzw-res.hortorgames.com",
+  "https://xxz-xyzw-alires.hortorgames.com",
+];
+
+/**
+ * Read one published config file. A missing version is recoverable; transport
+ * failures still reject so an in-flight request can be retired safely.
+ * @param {Function} fetchConfig Fetch implementation for the official CDN.
+ * @param {string} version Data-directory version.
+ * @returns {Promise<object | null>} Validated config, or null when every CDN misses it.
+ */
+async function readDailyTaskConfig(fetchConfig, version) {
+  for (const host of DAILY_TASK_CDNS) {
+    const response = await fetchConfig(`${host}/data/${version}/config.json`, {
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!response?.ok) continue;
+    return validateDailyTaskConfig(await response.json());
+  }
+  return null;
+}
+
+/**
+ * The game server can return the asset-bundle hash instead of the data
+ * directory. The directory currently published by the CDN is version.json.
+ * @param {Function} fetchConfig Fetch implementation for the official CDN.
+ * @returns {Promise<string | null>} Published data version.
+ */
+async function readPublishedDataVersion(fetchConfig) {
+  for (const host of DAILY_TASK_CDNS) {
+    const response = await fetchConfig(`${host}/data/version.json`, {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response?.ok) continue;
+    const version = (await response.json())?.version;
+    if (typeof version === "string" && /^[\w-]+$/.test(version)) return version;
+  }
+  return null;
+}
+
 /**
  * Load task targets from the official data version returned by the game server.
  * Only immutable configuration is cached; role progress is never cached here.
@@ -173,13 +214,15 @@ export async function loadDailyTaskConfig(
     throw new Error("服务器未提供有效的任务配置版本");
   if (!configsByVersion.has(version)) {
     const loading = (async () => {
-      const response = await fetchConfig(
-        `https://xxz-xyzw-res.hortorgames.com/data/${version}/config.json`,
-        { signal: AbortSignal.timeout(30000) },
-      );
-      if (!response.ok) throw new Error("官方任务配置读取失败");
-      const config = await response.json();
-      return validateDailyTaskConfig(config);
+      const direct = await readDailyTaskConfig(fetchConfig, version);
+      if (direct) return direct;
+      const published = await readPublishedDataVersion(fetchConfig);
+      const fallback =
+        published && published !== version
+          ? await readDailyTaskConfig(fetchConfig, published)
+          : null;
+      if (fallback) return fallback;
+      throw new Error(`官方任务配置读取失败（版本 ${version}）`);
     })();
     configsByVersion.set(version, loading);
     loading.catch(() => {
