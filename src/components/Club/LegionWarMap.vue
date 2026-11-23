@@ -150,7 +150,9 @@
                         {{ legion.name }}
                       </div>
                       <div class="legion-stats">
-                        <span class="stat-red">红: {{ legion.redCount }}</span>
+                        <span class="stat-red"
+                          >红粹: {{ legion.redCount }}</span
+                        >
                       </div>
                     </div>
                   </div>
@@ -176,11 +178,10 @@ import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useLegionWarStore } from "@/stores/legionWarStore";
 import { useTokenStore } from "@/stores/tokenStore";
-import { captureElement as html2canvas } from "@/utils/captureElement";
 import { isLegionWarAccessible } from "@/utils/clubBattleUtils";
 import { allianceincludes } from "@/utils/clubWarrankUtils";
 import { getCurrentTimeByFormat } from "@/utils/DateTimeUtils";
-import { HexGraph, roadPointList } from "@/utils/legionWar";
+import { formatPower, HexGraph, roadPointList } from "@/utils/legionWar";
 
 const message = useMessage();
 useTokenStore();
@@ -196,6 +197,7 @@ const {
   battlefieldId,
   legionDetails,
   isJoined: isEntireBattlefield,
+  lastUpdateTime,
 } = storeToRefs(legionWarStore);
 
 // 本地状态
@@ -209,44 +211,24 @@ let resizeObserver = null;
 const exporting = ref(false);
 
 const exportImage = async () => {
-  const element = document.querySelector(
-    ".legion-war-map-card .main-content-layout",
-  );
-  const source = legionWarMapDom.value;
-  if (!element || !source) {
-    message.error("未找到导出内容");
+  if (!validData.value) {
+    message.error("暂无地图数据");
     return;
   }
 
   exporting.value = true;
-  const cssWidth = source.clientWidth;
-  const cssHeight = source.clientHeight;
-  // html2canvas 会把 canvas 的物理像素当成布局宽度，高分屏下地图右侧会被裁掉
-  const snapshot = document.createElement("canvas");
-  snapshot.width = cssWidth;
-  snapshot.height = cssHeight;
-  snapshot.getContext("2d").drawImage(source, 0, 0, cssWidth, cssHeight);
-
+  const prevCtx = ctx;
   try {
-    const canvas = await html2canvas(element, {
-      useCORS: true,
-      scale: 2,
-      backgroundColor: "#ffffff",
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-      ignoreElements: (el) => el.classList.contains("no-export"),
-      onclone: (doc) => {
-        const cloned = doc.querySelector(".legion-war-map-card .mapCanvas");
-        if (!cloned) return;
-        cloned.width = cssWidth;
-        cloned.height = cssHeight;
-        cloned.style.width = `${cssWidth}px`;
-        cloned.style.height = `${cssHeight}px`;
-        cloned.getContext("2d").drawImage(snapshot, 0, 0);
-      },
-    });
+    const exportWidth = 1800;
+    const exportHeight = 1200;
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = exportWidth * scale;
+    canvas.height = exportHeight * scale;
+    const exportCtx = canvas.getContext("2d");
+    exportCtx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx = exportCtx;
+    drawCanvasContent(exportWidth, exportHeight);
 
     const link = document.createElement("a");
     link.download = `盐场地图_${getCurrentTimeByFormat("yyyyMMdd_HHmmss")}.png`;
@@ -257,7 +239,9 @@ const exportImage = async () => {
     console.error("导出失败:", error);
     message.error("导出失败");
   } finally {
+    ctx = prevCtx;
     exporting.value = false;
+    resizeAndRedraw();
   }
 };
 
@@ -368,120 +352,98 @@ const allianceGroups = computed(() => {
 
 // Canvas 相关配置
 const dpr = window.devicePixelRatio || 1;
+const HEX_GAP = 1.6;
+const HONEYCOMB = "#E4E5EA";
+const TILE_COLORS = {
+  1: "#2EC8D6",
+  2: "#3CB878",
+  3: "#F5B400",
+  4: "#F6A21A",
+  5: "#8B5CF6",
+  6: "#6D28D9",
+};
+const TILE_LABELS = {
+  1: "小",
+  2: "中",
+  3: "大",
+  5: "城",
+  6: "核",
+};
+const CORE_AROUND = new Set([
+  "19_16",
+  "19_17",
+  "20_16",
+  "20_18",
+  "21_16",
+  "21_17",
+]);
 let hexSize = 15.5;
-const gap = 3;
-let hexWidth = 2 * hexSize;
-let hexHeight = Math.sqrt(3) * hexSize;
 let mapOffsetX = 0;
 let mapOffsetY = 0;
-const arr = Array.from({ length: 41 }, () =>
-  Array.from({ length: 41 }, () => 0),
-);
-const leftMaxPoint = [0, 0];
 
-// 颜色映射
-const typeBg = (type) => {
-  switch (type) {
-    case 1:
-      return "#4477CE"; // 30分 - 小 - 蓝色
-    case 2:
-      return "#D835D8"; // 50分 - 中 - 粉紫色
-    case 3:
-      return "#F9B500"; // 80分 - 大 - 金色
-    case 4:
-      return "#D21E1E"; // 大本营 - 本 - 红色
-    case 5:
-      return "#2B2B2B"; // 100分 - 城 - 深灰色
-    case 6:
-      return "#000000"; // 核心 - 黑
-    case 9:
-      return "#4477CE"; // 道路 - 蓝色
-    default:
-      return "#cccccc";
-  }
+const allianceColors = {
+  大联盟: "#F5A000",
+  梦盟: "#2E9E57",
+  正义联盟: "#2F80ED",
+  龙盟: "#7B4FD6",
+  曦盟: "#9B4DCA",
+  未知联盟: "#8D96A3",
 };
 
-// 标签映射
-const typeLabel = (type) => {
-  switch (type) {
-    case 1:
-      return "小";
-    case 2:
-      return "中";
-    case 3:
-      return "大";
-    case 4:
-      return "本";
-    case 5:
-      return "城";
-    case 6:
-      return "核";
-    default:
-      return "";
-  }
+const allianceTitle = (alliance) => (alliance === "龙盟" ? "龍盟" : alliance);
+
+const layoutHex = (col, row, size) => {
+  const colStep = size * 1.5 + HEX_GAP;
+  const rowStep = Math.sqrt(3) * size + HEX_GAP;
+  return {
+    x: col * colStep + size,
+    y: row * rowStep + (col % 2 === 1 ? rowStep / 2 : 0),
+  };
 };
 
-// 绘制六边形
-const drawHexagon = (x, y, color) => {
+const traceHex = (x, y, size) => {
   ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = ((2 * Math.PI) / 6) * i;
-    const px = x + hexSize * Math.cos(angle);
-    const py = y + hexSize * Math.sin(angle);
-    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-
-    if (px >= leftMaxPoint[0]) leftMaxPoint[0] = px;
-    if (py >= leftMaxPoint[1]) leftMaxPoint[1] = py;
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI / 3) * i;
+    const px = x + size * Math.cos(angle);
+    const py = y + size * Math.sin(angle);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
   }
   ctx.closePath();
-
-  // 填充背景
-  ctx.fillStyle = color;
-  ctx.fill();
-
-  // 描边
-  ctx.strokeStyle = "#ffffff"; // 白色边框
-  ctx.lineWidth = 1;
-  ctx.stroke();
 };
 
-// 联盟颜色映射
-const allianceColors = {
-  大联盟: "#667eea", // var(--primary-color)
-  梦盟: "#18a058", // var(--success-color)
-  正义联盟: "#2080f0", // var(--info-color)
-  龙盟: "#d03050", // var(--error-color)
-  曦盟: "#9c27b0", // 紫色
-  未知联盟: "#f5a623", // var(--warning-color)
+const roundRect = (x, y, w, h, r) => {
+  const radius = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
 };
 
-// 绘制文字
-const drawText = (x, y, text, color = "#fff", fontSize = 10) => {
+const drawText = (x, y, text, color, font) => {
   ctx.fillStyle = color;
-  ctx.font = `bold ${fontSize}px Microsoft Yahei`;
+  ctx.font = font;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(text, x, y);
 };
 
-const mapBounds = (() => {
-  let minCol = Infinity;
-  let maxCol = -Infinity;
-  let minRow = Infinity;
-  let maxRow = -Infinity;
-  for (const item of roadPointList) {
-    const [col, row] = item.id.split("_").map(Number);
-    if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
-    minCol = Math.min(minCol, col);
-    maxCol = Math.max(maxCol, col);
-    minRow = Math.min(minRow, row);
-    maxRow = Math.max(maxRow, row);
+const fitText = (text, maxWidth, font) => {
+  ctx.font = font;
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let value = text;
+  while (value.length > 1 && ctx.measureText(`${value}…`).width > maxWidth) {
+    value = value.slice(0, -1);
   }
-  return { minCol, maxCol, minRow, maxRow };
-})();
+  return `${value}…`;
+};
 
 const measureMapBox = (size) => {
-  const hexH = Math.sqrt(3) * size;
+  const vert = (Math.sqrt(3) / 2) * size;
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -489,26 +451,25 @@ const measureMapBox = (size) => {
   for (const item of roadPointList) {
     const [col, row] = item.id.split("_").map(Number);
     if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
-    const x = col * (size * 1.5 + gap) + size;
-    const y = row * (hexH + gap) + (col % 2 === 1 ? hexH / 2 : 0);
+    const { x, y } = layoutHex(col, row, size);
     minX = Math.min(minX, x - size);
     maxX = Math.max(maxX, x + size);
-    minY = Math.min(minY, y - hexH / 2);
-    maxY = Math.max(maxY, y + hexH / 2);
+    minY = Math.min(minY, y - vert);
+    maxY = Math.max(maxY, y + vert);
   }
   return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
 };
 
 const fitMap = (width, height) => {
-  const sidePad = 108;
-  const topPad = 40;
-  const bottomPad = 16;
+  const sidePad = 156;
+  const topPad = 118;
+  const bottomPad = 36;
   const maxW = Math.max(width - sidePad * 2, 40);
   const maxH = Math.max(height - topPad - bottomPad, 40);
   let low = 2;
-  let high = 36;
+  let high = 48;
   let best = 2;
-  for (let i = 0; i < 16; i += 1) {
+  for (let i = 0; i < 18; i += 1) {
     const mid = (low + high) / 2;
     const box = measureMapBox(mid);
     if (box.width <= maxW && box.height <= maxH) {
@@ -527,53 +488,158 @@ const fitMap = (width, height) => {
 };
 
 // 绘制地图内容
-const drawCanvasContent = () => {
-  if (!ctx) return;
+const drawHoneycomb = (width, height) => {
+  const size = hexSize;
+  const colStep = size * 1.5 + HEX_GAP;
+  const rowStep = Math.sqrt(3) * size + HEX_GAP;
+  const minCol = Math.floor((-mapOffsetX - size) / colStep) - 1;
+  const maxCol = Math.ceil((width - mapOffsetX + size) / colStep) + 1;
+  const minRow = Math.floor((-mapOffsetY - rowStep) / rowStep) - 2;
+  const maxRow = Math.ceil((height - mapOffsetY + rowStep) / rowStep) + 2;
 
-  // 清空画布
-  ctx.clearRect(0, 0, ctx.canvas.width / dpr, ctx.canvas.height / dpr);
-
-  // 重置 arr 数组
-  arr.forEach((row) => row.fill(0));
-
-  // 获取图结构实例
-  const graph = HexGraph.getInstance();
-  graph.removeAllNode();
-
-  ctx.save();
-  ctx.translate(mapOffsetX, mapOffsetY);
-
-  // 背景网格跟有效区域对齐，避免画到画面外
-  ctx.strokeStyle = "#e0e0e0";
-  ctx.lineWidth = 1;
-  for (let row = mapBounds.minRow - 1; row <= mapBounds.maxRow + 1; row += 1) {
-    for (let col = mapBounds.minCol - 1; col <= mapBounds.maxCol + 1; col += 1) {
-      const x = col * (hexWidth * 0.75) + hexSize + gap * col;
-      const y =
-        row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + gap * row;
-
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const angle = ((2 * Math.PI) / 6) * i;
-        const px = x + hexSize * Math.cos(angle);
-        const py = y + hexSize * Math.sin(angle);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.closePath();
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 1.25;
+  for (let col = minCol; col <= maxCol; col += 1) {
+    for (let row = minRow; row <= maxRow; row += 1) {
+      const { x, y } = layoutHex(col, row, size);
+      traceHex(x, y, size);
+      ctx.fillStyle = HONEYCOMB;
+      ctx.fill();
+      ctx.strokeStyle = "#F7F8FA";
       ctx.stroke();
     }
   }
+};
 
-  // 使用静态数据作为基础，结合 validData 处理颜色和状态
-  // 1. 准备数据
-  // 注意：即使 validData 为 null，也应该填充 graph，以显示基础地图
+const drawBaseIcon = (x, y, size) => {
+  const petal = Math.max(2.2, size * 0.22);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = "#E53935";
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI / 3) * i - Math.PI / 2;
+    ctx.beginPath();
+    ctx.ellipse(
+      Math.cos(angle) * petal * 0.7,
+      Math.sin(angle) * petal * 0.7,
+      petal * 0.62,
+      petal * 0.34,
+      angle,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.max(1.3, size * 0.09), 0, Math.PI * 2);
+  ctx.fillStyle = "#C62828";
+  ctx.fill();
+  ctx.restore();
+};
+
+const drawLegionCard = (x, y, legion) => {
+  const detail = legionDetails.value[legion.id] || {};
+  const alliance = detail.announcement
+    ? allianceincludes(detail.announcement)
+    : "未知联盟";
+  const headerColor = allianceColors[alliance] || allianceColors["未知联盟"];
+  const header = allianceTitle(alliance);
+  const server =
+    legion.serverId == null
+      ? ""
+      : `S${String(legion.serverId).replace(/^S/i, "")}`;
+  const headerFont = "700 12px 'Microsoft YaHei', sans-serif";
+  const titleFont = "600 13px 'Microsoft YaHei', sans-serif";
+  const subFont = "500 12px 'Microsoft YaHei', sans-serif";
+  const maxInner = 188;
+  const title = fitText(
+    server ? `${legion.name || ""} ${server}` : legion.name || "",
+    maxInner,
+    titleFont,
+  );
+  const red =
+    detail.quenchNum !== undefined ? detail.quenchNum : legion.redCount || 0;
+  const sub = `${formatPower(legion.power)} | 红粹:${red}`;
+
+  ctx.font = titleFont;
+  const titleW = ctx.measureText(title).width;
+  ctx.font = subFont;
+  const subW = ctx.measureText(sub).width;
+  ctx.font = headerFont;
+  const headerW = ctx.measureText(header).width;
+  const cardW = Math.max(titleW, subW, headerW + 28, 132) + 20;
+  const headerH = 24;
+  const bodyH = 42;
+  const cardH = headerH + bodyH;
+  const vert = (Math.sqrt(3) / 2) * hexSize;
+  const cardX = x - cardW / 2;
+  let cardY = y - vert - cardH - 6;
+  if (cardY + mapOffsetY < 40) cardY = y + vert + 8;
+
+  const radius = 7;
+  ctx.save();
+  ctx.shadowColor = "rgba(20, 24, 40, 0.16)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 3;
+  roundRect(cardX, cardY, cardW, cardH, radius);
+  ctx.fillStyle = headerColor;
+  ctx.fill();
+  ctx.restore();
+
+  const bodyTop = cardY + headerH;
+  ctx.beginPath();
+  ctx.moveTo(cardX, bodyTop);
+  ctx.lineTo(cardX + cardW, bodyTop);
+  ctx.lineTo(cardX + cardW, cardY + cardH - radius);
+  ctx.arcTo(cardX + cardW, cardY + cardH, cardX, cardY + cardH, radius);
+  ctx.arcTo(cardX, cardY + cardH, cardX, bodyTop, radius);
+  ctx.closePath();
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+
+  drawText(x, cardY + headerH / 2, header, "#ffffff", headerFont);
+  drawText(x, cardY + headerH + 14, title, "#2b2b2b", titleFont);
+  drawText(x, cardY + headerH + 31, sub, "#8b919a", subFont);
+};
+
+const drawUpdateLabel = () => {
+  if (!validData.value) return;
+  const clock = lastUpdateTime.value || getCurrentTimeByFormat("HH:mm:ss");
+  const text = `数据更新时间：${getCurrentTimeByFormat("yyyy-MM-dd")} ${clock}`;
+  const font = "13px 'Microsoft YaHei', sans-serif";
+  ctx.save();
+  ctx.shadowColor = "transparent";
+  ctx.font = font;
+  const textW = ctx.measureText(text).width;
+  roundRect(12, 10, textW + 16, 26, 6);
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fill();
+  ctx.fillStyle = "#8b919a";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 20, 23);
+  ctx.restore();
+};
+
+const drawCanvasContent = (width, height) => {
+  if (!ctx || width <= 0 || height <= 0) return;
+
+  const fitted = fitMap(width, height);
+  hexSize = fitted.size;
+  mapOffsetX = fitted.offsetX;
+  mapOffsetY = fitted.offsetY;
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  const graph = HexGraph.getInstance();
+  graph.removeAllNode();
   graph.addNodeList(
     roadPointList.map((item) => {
       const realTimeNode = validData.value?.buildingData?.[item.id];
-      // 优先使用实时数据中的 type，如果没有则使用静态 type
       const type = realTimeNode?.type || item.type;
       const belongsLegionId = realTimeNode ? realTimeNode.belongsLegionId : -1;
-
       return {
         id: item.id,
         type,
@@ -586,146 +652,81 @@ const drawCanvasContent = () => {
     }),
   );
 
-  // 2. 绘制所有网格节点
-  // 使用 graph.getAllNodes() 获取 graph 中的节点，如果为空则使用 roadPointList
-  const graphNodes = graph.getAllNodes();
-  const nodesToDraw =
-    graphNodes.length > 0
-      ? graphNodes
-      : roadPointList.map((item) => {
-          // 确保静态数据也有正确的属性结构
-          return {
-            ...item,
-            // 如果是静态数据，确保这些字段存在
-            type: item.type,
-            belongsLegionId: -1,
-          };
-        });
+  ctx.save();
+  ctx.translate(mapOffsetX, mapOffsetY);
+  drawHoneycomb(width, height);
 
-  nodesToDraw.forEach((node) => {
-    const [colStr, rowStr] = node.id.split("_");
-    const col = Number.parseInt(colStr);
-    const row = Number.parseInt(rowStr);
+  const labelFont = `700 ${Math.max(11, Math.round(hexSize * 0.62))}px 'Microsoft YaHei', sans-serif`;
+  graph.getAllNodes().forEach((node) => {
+    const [col, row] = node.id
+      .split("_")
+      .map((part) => Number.parseInt(part, 10));
+    if (!Number.isFinite(col) || !Number.isFinite(row)) return;
+    if (node.type !== 6 && CORE_AROUND.has(node.id)) return;
 
-    if (!Number.isNaN(+col) && !Number.isNaN(+row)) {
-      const x = col * (hexWidth * 0.75) + hexSize + gap * col;
-      const y =
-        row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + gap * row;
+    const color = TILE_COLORS[node.type];
+    if (!color) return;
 
-      // 决定背景色：始终使用类型颜色，不依赖归属情况
-      let bgColor = typeBg(node.type);
+    const { x, y } = layoutHex(col, row, hexSize);
+    traceHex(x, y, hexSize);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
 
-      // 核心周围特殊处理
-      const coreSurroundingPoints = [
-        "19_16",
-        "19_17",
-        "20_16",
-        "20_18",
-        "21_16",
-        "21_17",
-      ];
-      if (coreSurroundingPoints.includes(node.id)) {
-        bgColor = "#cccccc";
-      }
-
-      // 核心始终显示黑色 (根据类型6判断，不依赖归属)
-      if (node.type === 6) {
-        bgColor = "#000000";
-      }
-
-      drawHexagon(x, y, bgColor, node.type);
-
-      // 绘制标签
-      if (node.type !== 9) {
-        const label = typeLabel(node.type);
-        drawText(x, y, label, "#fff", 12);
-      }
+    if (node.type === 4) {
+      drawBaseIcon(x, y, hexSize);
+      return;
+    }
+    const label = TILE_LABELS[node.type];
+    if (label) {
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+      ctx.shadowBlur = 2;
+      drawText(x, y, label, "#ffffff", labelFont);
+      ctx.restore();
     }
   });
 
-  // 绘制俱乐部名称 (独立逻辑)
-  if (validData.value && validData.value.legionInfo) {
-    Object.values(validData.value.legionInfo).forEach((legion) => {
-      // 必须有大本营坐标
-      if (legion.strongholdId) {
-        const [colStr, rowStr] = legion.strongholdId.split("_");
-        const col = Number.parseInt(colStr);
-        const row = Number.parseInt(rowStr);
-
-        if (!Number.isNaN(+col) && !Number.isNaN(+row)) {
-          const x = col * (hexWidth * 0.75) + hexSize + gap * col;
-          const y =
-            row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + gap * row;
-
-          // 格式：【区服】名称，使用 legionInfo 中的 legionID
-          const sidStr = `【${legion.serverId}】`;
-          const nameStr = `${sidStr}${legion.name}`;
-
-          // 获取联盟信息
-          const detail = legionDetails.value[legion.id] || {};
-          const alliance = detail.announcement
-            ? allianceincludes(detail.announcement)
-            : "未知联盟";
-          const allianceColor =
-            allianceColors[alliance] || allianceColors["未知联盟"];
-
-          // 绘制背景和文字
-          ctx.font = "bold 12px Microsoft Yahei";
-          const textWidth = ctx.measureText(nameStr).width;
-          const padding = 10;
-          const height = 24;
-          const bgX = x - textWidth / 2 - padding / 2;
-          const bgY = y - 32;
-          const bgWidth = textWidth + padding;
-
-          ctx.fillStyle = allianceColor;
-
-          const r = 4;
-          ctx.beginPath();
-          ctx.moveTo(bgX + r, bgY);
-          ctx.arcTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + height, r);
-          ctx.arcTo(bgX + bgWidth, bgY + height, bgX, bgY + height, r);
-          ctx.arcTo(bgX, bgY + height, bgX, bgY, r);
-          ctx.arcTo(bgX, bgY, bgX + bgWidth, bgY, r);
-          ctx.closePath();
-          ctx.fill();
-
-          drawText(x, bgY + height / 2, nameStr, "#fff", 12);
-        }
-      }
-    });
+  if (validData.value?.legionInfo) {
+    Object.values(validData.value.legionInfo)
+      .filter((legion) => legion.strongholdId)
+      .sort((a, b) => {
+        const rowA = Number(a.strongholdId.split("_")[1]) || 0;
+        const rowB = Number(b.strongholdId.split("_")[1]) || 0;
+        return rowA - rowB;
+      })
+      .forEach((legion) => {
+        const [col, row] = legion.strongholdId
+          .split("_")
+          .map((part) => Number.parseInt(part, 10));
+        if (!Number.isFinite(col) || !Number.isFinite(row)) return;
+        const { x, y } = layoutHex(col, row, hexSize);
+        drawLegionCard(x, y, legion);
+      });
   }
   ctx.restore();
+  drawUpdateLabel();
 };
+
 const resizeAndRedraw = () => {
-  if (!legionWarMapDom.value) return;
+  if (!legionWarMapDom.value || !ctx) return;
   const canvas = legionWarMapDom.value;
   const container = canvas.parentElement;
+  if (!container) return;
 
-  // 移除之前添加的 style 尺寸设置
   canvas.style.width = "100%";
   canvas.style.height = "100%";
 
   const w = container.clientWidth;
   const h = container.clientHeight;
-
-  // 设置 Canvas 物理像素大小
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-
+  canvas.width = Math.max(1, Math.floor(w * dpr));
+  canvas.height = Math.max(1, Math.floor(h * dpr));
   if (w <= 0 || h <= 0) return;
 
-  const fitted = fitMap(w, h);
-  hexSize = fitted.size;
-  mapOffsetX = fitted.offsetX;
-  mapOffsetY = fitted.offsetY;
-  hexWidth = 2 * hexSize;
-  hexHeight = Math.sqrt(3) * hexSize;
-
-  if (ctx) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawCanvasContent();
-  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawCanvasContent(w, h);
 };
 
 const toggleBattlefieldEntry = async () => {
@@ -907,7 +908,7 @@ onUnmounted(() => {
         min-width: 0;
         min-height: 0;
         position: relative;
-        background-color: #f5f5f5;
+        background-color: #fff;
         overflow: hidden;
 
         .map-container {
